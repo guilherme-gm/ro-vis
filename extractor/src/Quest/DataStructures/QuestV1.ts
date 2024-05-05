@@ -1,7 +1,7 @@
 import { RecordObject } from "../../Database/RecordObject.js";
 
 // questid2display.txt ; Since a long time ago (2008?)
-export class QuestV0 implements RecordObject {
+export class QuestV1 implements RecordObject {
 	public readonly _FileVersion: number = 1;
 
 	public Id: number = 0;
@@ -29,7 +29,7 @@ export class QuestV0 implements RecordObject {
 			return true;
 		}
 
-		if (!(other instanceof QuestV0)) {
+		if (!(other instanceof QuestV1)) {
 			throw new Error('Invalid type');
 		}
 

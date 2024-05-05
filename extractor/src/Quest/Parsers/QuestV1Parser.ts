@@ -1,20 +1,20 @@
 import iconv from 'iconv-lite';
 import * as fs from 'fs/promises';
 import { TokenTextTableParser } from "../../CommonParser/TokenTextTableParser.js";
-import { QuestV0 } from "../DataStructures/QuestV0.js";
+import { QuestV1 } from "../DataStructures/QuestV1.js";
 
-export class QuestV0Parser extends TokenTextTableParser {
-	public static async fromFile(filePath: string): Promise<QuestV0Parser> {
+export class QuestV1Parser extends TokenTextTableParser {
+	public static async fromFile(filePath: string): Promise<QuestV1Parser> {
 		const rawContent = await fs.readFile(filePath);
 		const content = iconv.decode(rawContent, 'euc-kr').toString();
-		return new QuestV0Parser(content);
+		return new QuestV1Parser(content);
 	}
 
-	public parse(): QuestV0[] {
-		const quests: QuestV0[] = [];
+	public parse(): QuestV1[] {
+		const quests: QuestV1[] = [];
 
 		while (!this.isEndOfFile()) {
-			const quest = new QuestV0();
+			const quest = new QuestV1();
 			quest.Id = this.readIntCell().unwrap();
 			quest.Title = this.readCell().unwrap();
 			quest.OldIcon = this.readCell().unwrap();

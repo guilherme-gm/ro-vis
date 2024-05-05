@@ -1,6 +1,6 @@
 import { LogRecord } from "../Database/LogRecord.js";
-import { QuestV0 } from "./DataStructures/QuestV0.js";
-import { QuestV0Parser } from "./Parsers/QuestV0Parser.js";
+import { QuestV1 } from "./DataStructures/QuestV1.js";
+import { QuestV1Parser } from "./Parsers/QuestV1Parser.js";
 import { QuestDb } from "./QuestDb.js";
 import { IDataLoader } from "../IDataLoader.js";
 import { PatchRecord } from "../Patches/PatchRecord.js";
@@ -52,11 +52,11 @@ export class LoadQuests implements IDataLoader {
 		return true;
 	}
 
-	private async getQuestList(patchFolder: string): Promise<QuestV0[]> {
-		const parser = await QuestV0Parser.fromFile(path.join(patchFolder, 'data', 'questid2display.txt'));
+	private async getQuestList(patchFolder: string): Promise<QuestV1[]> {
+		const parser = await QuestV1Parser.fromFile(path.join(patchFolder, 'data', 'questid2display.txt'));
 		const rawQuests = parser.parse();
 
-		const questMap = new Map<string, QuestV0>();
+		const questMap = new Map<string, QuestV1>();
 		rawQuests.forEach((quest) => {
 			questMap.set(quest.getId(), quest);
 		});
@@ -80,16 +80,16 @@ export class LoadQuests implements IDataLoader {
 				memo.set(record._id, record);
 				return memo;
 			},
-			new Map<string, LogRecord<QuestV0>>()
+			new Map<string, LogRecord<QuestV1>>()
 		);
 
-		const newRecords: Map<string, LogRecord<QuestV0>> = new Map<string, LogRecord<QuestV0>>();
-		const updatedRecords: LogRecord<QuestV0>[] = [];
+		const newRecords: Map<string, LogRecord<QuestV1>> = new Map<string, LogRecord<QuestV1>>();
+		const updatedRecords: LogRecord<QuestV1>[] = [];
 
 		for (const quest of quests) {
 			const record = existingRecords.get(quest.getId());
 			if (!record) {
-				newRecords.set(quest.getId(), new LogRecord<QuestV0>(patch._id, quest));
+				newRecords.set(quest.getId(), new LogRecord<QuestV1>(patch._id, quest));
 			} else {
 				if (record.current.value.hasChange(quest)) {
 					record.addChange(patch._id, quest);
