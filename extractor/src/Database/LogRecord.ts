@@ -37,6 +37,10 @@ export class LogRecord<T extends RecordObject> {
 			throw new Error(`ID Mismatch (${this._id} vs ${value.getId()})`);
 		}
 
+		if (this.current.patch === patch) {
+			throw new Error(`${this._id} already has a change for patch "${patch}.`);
+		}
+
 		this.previous.push(this.current);
 		this.current = {
 			patch,
