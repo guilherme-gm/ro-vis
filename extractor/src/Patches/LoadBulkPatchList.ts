@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { PatchRecord } from "./PatchRecord.js";
 // import { Db } from "./Database/Db.js";
 
 type PatchEntry = {
@@ -9,13 +10,6 @@ type PatchEntry = {
 
 type PatchList = {
 	[key: string]: PatchEntry[];
-}
-
-type PatchRecord = {
-	_id: string;
-	order: number;
-	files: string[];
-	tags: string[];
 }
 
 /**
