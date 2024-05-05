@@ -53,17 +53,31 @@ export class Db<T> {
 	}
 
 	public async getAll(): Promise<T[]> {
-		const data = await axios.post(`${this.url}/action/find`, {
-			dataSource: this.dataSource,
-			database: this.database,
-			collection: this.collection,
-		}, {
-			headers: {
-				'api-key': this.apiKey,
-			},
-		});
+		const response: T[] = [];
 
-		return data.data.documents;
+		let fetchMore = false;
+		let startOffset = 0;
+
+		do {
+			const data = await axios.post(`${this.url}/action/find`, {
+				dataSource: this.dataSource,
+				database: this.database,
+				collection: this.collection,
+				skip: startOffset,
+				limit: 50000,
+			}, {
+				headers: {
+					'api-key': this.apiKey,
+				},
+			});
+
+			fetchMore = data.data.documents?.length === 50000;
+			startOffset += 50000;
+
+			response.push(...data.data.documents);
+		} while(fetchMore);
+
+		return response;
 	}
 
 	public async insertMany(documents: T[]): Promise<void> {
