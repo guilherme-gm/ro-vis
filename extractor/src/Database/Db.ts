@@ -35,12 +35,12 @@ export class Db<T> {
 		}
 	}
 
-	public async get(id: string): Promise<T> {
+	public async get(id: string): Promise<T | null> {
 		const data = await axios.post(`${this.url}/action/findOne`, {
 			dataSource: this.dataSource,
 			database: this.database,
 			collection: this.collection,
-			filters: {
+			filter: {
 				_id: id,
 			},
 		}, {
@@ -49,7 +49,7 @@ export class Db<T> {
 			},
 		});
 
-		return data.data;
+		return data.data.document;
 	}
 
 	public async getAll(): Promise<T[]> {
@@ -63,7 +63,7 @@ export class Db<T> {
 			},
 		});
 
-		return data.data;
+		return data.data.documents;
 	}
 
 	public async insertMany(documents: T[]): Promise<void> {

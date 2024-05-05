@@ -9,8 +9,11 @@ export class LogRecordDao<T extends RecordObject> {
 		this.db = new Db<LogRecord<T>>(collection);
 	}
 
-	public async get(id: string): Promise<LogRecord<T>> {
+	public async get(id: string): Promise<LogRecord<T> | null> {
 		const data = await this.db.get(id);
+		if (data == null) {
+			return null;
+		}
 
 		return new LogRecord(data);
 	}
