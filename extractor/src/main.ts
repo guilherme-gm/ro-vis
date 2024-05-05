@@ -5,7 +5,6 @@ import { LoadQuests } from "./Quest/LoadQuests.js";
 import { MetadataDb } from "./Metadata/MetadataDb.js";
 import { Metadata } from "./Metadata/Metadata.js";
 import { PatchDb } from "./Patches/PatchDb.js";
-import { PatchRecord } from "./Patches/PatchRecord.js";
 
 config();
 
@@ -23,8 +22,13 @@ for (const [metaType, loader] of loaders.entries()) {
 		meta = new Metadata(metaType);
 	}
 
-	for (let i = 0; i < 100; i++) {
+	for (let i = 0; i < patchList.length; i++) {
 		const patch = patchList[i]!;
+		if (patch._id.startsWith('2018-04')) {
+			console.log('Reached breakpoint.');
+			break;
+		}
+
 		if (meta.appliedPatches.has(patch._id)) {
 			continue;
 		}
@@ -33,8 +37,8 @@ for (const [metaType, loader] of loaders.entries()) {
 			continue;
 		}
 
-		// @TODO:
-		console.log(`work on ... ${patch._id}`)
+		console.log(`Running ${loader.name} for ${patch._id}...`);
+		await loader.load(patch);
 
 		meta.appliedPatches.add(patch._id);
 
