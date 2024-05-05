@@ -1,0 +1,8 @@
+node_modules/
+
+# Transpiled files
+dist/
+
+
+# Input files
+extractor/raw

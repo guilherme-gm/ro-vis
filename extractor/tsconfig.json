@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"allowJs": false,
+		"strict": true,
+		"outDir": "dist",
+		"alwaysStrict": true,
+		"noImplicitAny": true,
+		"exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUncheckedIndexedAccess": true,
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"skipLibCheck": true
+	},
+	"include": [
+		"src/**/*"
+	],
+}
