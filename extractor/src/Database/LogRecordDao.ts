@@ -2,11 +2,24 @@ import { LogRecord } from "./LogRecord.js";
 import { RecordObject } from "./RecordObject.js";
 import { Db } from "./Db.js";
 
-export class LogRecordDao<T extends RecordObject> {
+export abstract class LogRecordDao<T extends RecordObject> {
 	private db: Db<LogRecord<T>>;
 
 	constructor(collection: string) {
 		this.db = new Db<LogRecord<T>>(collection);
+	}
+
+	protected abstract toInstance(data: T): T;
+
+	private createRecord(data: LogRecord<T>): LogRecord<T> {
+		const record = new LogRecord(data);
+
+		record.current.value = this.toInstance(record.current.value);
+		record.previous.forEach((prev) => {
+			prev.value = this.toInstance(prev.value);
+		});
+
+		return record;
 	}
 
 	public async get(id: string): Promise<LogRecord<T> | null> {
@@ -15,12 +28,12 @@ export class LogRecordDao<T extends RecordObject> {
 			return null;
 		}
 
-		return new LogRecord(data);
+		return this.createRecord(data);
 	}
 
 	public async getAll(): Promise<LogRecord<T>[]> {
 		const data = await this.db.getAll();
-		return data.map(d => new LogRecord(d));
+		return data.map(d => this.createRecord(d));
 	}
 
 	public async insertMany(documents: LogRecord<T>[]): Promise<void> {
