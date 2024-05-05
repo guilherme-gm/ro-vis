@@ -4,7 +4,7 @@ import { Result } from "./Result.js";
 export class TokenTextTableParser {
 	private readonly reader: CharStreamReader;
 
-	private constructor(text: string) {
+	protected constructor(text: string) {
 		this.reader = new CharStreamReader(text);
 	}
 
@@ -103,9 +103,5 @@ export class TokenTextTableParser {
 
 	public readMultilineCell(): Result<string> {
 		return this._readCell(true);
-	}
-
-	public static fromText(text: string): TokenTextTableParser {
-		return new TokenTextTableParser(text);
 	}
 }
