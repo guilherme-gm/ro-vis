@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { PatchRecord } from "./PatchRecord.js";
-// import { Db } from "./Database/Db.js";
+// import { PatchDb } from "./PatchDb.js";
 
 type PatchEntry = {
 	name: string;
@@ -92,7 +92,7 @@ export class LoadBulkPatchList {
 		}
 
 		// Disabled to prevent accidental execution
-		// const db = new Db<PatchRecord>('patches');
+		// const db = new PatchDb();
 		// while (mergedList.length > 0) {
 		// 	await db.insertMany(mergedList.splice(0, 500));
 		// }
