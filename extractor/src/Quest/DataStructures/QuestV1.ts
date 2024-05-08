@@ -4,16 +4,36 @@ import { RecordObject } from "../../Database/RecordObject.js";
 export class QuestV1 implements RecordObject {
 	public readonly _FileVersion: number = 1;
 
+	/**
+	 * Quest ID
+	 */
 	public Id: number = 0;
 
+	/**
+	 * Quest title ("yellow" title in side UI, or entry name in quest UI list)
+	 */
 	public Title: string = "";
 
+	/**
+	 * Quest long description inside quest UI list
+	 */
 	public Description: string = "";
 
+	/**
+	 * Short, one-line, mission description. Shown in side UI.
+	 */
 	public Summary: string = "";
 
+	/**
+	 * Always "SG_FEEL", used to be the icon in the list of quests,
+	 * but was not really used officially
+	 */
 	public OldIcon: string = "";
 
+	/**
+	 * Always "QUE_NOIMAGE" or empty string (""), used to be something when viewing the quest,
+	 * but was not really used officially
+	 */
 	public OldImage: string = "";
 
 	public getId(): string {
