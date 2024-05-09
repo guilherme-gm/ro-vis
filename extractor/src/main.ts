@@ -24,7 +24,7 @@ for (const [metaType, loader] of loaders.entries()) {
 
 	for (let i = 0; i < patchList.length; i++) {
 		const patch = patchList[i]!;
-		if (patch._id.startsWith('2018-04')) {
+		if (patch._id.startsWith('2020-12')) {
 			console.log('Reached breakpoint.');
 			break;
 		}

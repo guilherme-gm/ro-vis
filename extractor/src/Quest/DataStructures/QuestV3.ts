@@ -8,7 +8,7 @@ import { Quest } from "./Quest.js";
  */
 export class QuestV3 {
 	public static isV3(quest: Quest): quest is QuestV3 {
-		return quest._FileVersion === 1;
+		return quest._FileVersion === 3;
 	}
 
 	public readonly _FileVersion: number = 3;
@@ -33,6 +33,11 @@ export class QuestV3 {
 	 */
 	public Summary: string = "";
 
+	/**
+	 * First seem on 2018-04-04
+	 */
+	public IconName: string = "";
+
 	public getId(): string {
 		return this.Id.toString();
 	}
@@ -55,6 +60,7 @@ export class QuestV3 {
 			|| other.Title != this.Title
 			|| ArrayEqual.isEqual(other.Description, this.Description)
 			|| other.Summary != this.Summary
+			|| other.IconName != this.IconName
 		);
 	}
 }

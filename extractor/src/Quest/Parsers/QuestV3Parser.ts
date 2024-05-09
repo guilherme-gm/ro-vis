@@ -6,7 +6,7 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 		return new QuestV3Parser(filePath);
 	}
 
-	private readonly ExpectedKeys = new Set<string>(['Title', 'Description', 'Summary'])
+	private readonly ExpectedKeys = new Set<string>(['Title', 'Description', 'Summary', 'IconName'])
 
 	public async parse(): Promise<QuestV3[]> {
 		const quests: QuestV3[] = [];
@@ -23,6 +23,7 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 			questv3.Title = questObj.Title ?? '';
 			questv3.Description = questObj.Description ?? '';
 			questv3.Summary = questObj.Summary ?? '';
+			questv3.IconName = questObj.IconName ?? '';
 
 			quests.push(questv3);
 		});

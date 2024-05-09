@@ -133,7 +133,7 @@ export class LoadQuests implements IDataLoader {
 		}
 
 		for (let i = 0; i < updatedRecords.length; i++) {
-			if (i % 100) {
+			if (i % 100 === 0) {
 				console.log(`\tProgress: ${i + 1} / ${updatedRecords.length}`);
 			}
 
