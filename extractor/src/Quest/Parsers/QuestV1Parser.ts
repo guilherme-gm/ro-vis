@@ -10,7 +10,7 @@ export class QuestV1Parser extends TokenTextTableParser {
 		return new QuestV1Parser(content);
 	}
 
-	public parse(): QuestV1[] {
+	public parse(): Promise<QuestV1[]> {
 		const quests: QuestV1[] = [];
 
 		while (!this.isEndOfFile()) {
@@ -37,6 +37,6 @@ export class QuestV1Parser extends TokenTextTableParser {
 			quests.push(quest);
 		}
 
-		return quests;
+		return Promise.resolve(quests);
 	}
 }

@@ -1,13 +1,16 @@
 import { RecordObject } from "../../Database/RecordObject.js";
 import { Quest } from "./Quest.js";
 
-// questid2display.txt ; Since a long time ago (2008?)
-export class QuestV1 implements RecordObject {
-	public static isV1(quest: Quest): quest is QuestV1 {
+/**
+ * System/OngoingQuestInfoList_True.lub
+ * Since 2018-03-21
+ */
+export class QuestV3 {
+	public static isV3(quest: Quest): quest is QuestV3 {
 		return quest._FileVersion === 1;
 	}
 
-	public readonly _FileVersion: number = 1;
+	public readonly _FileVersion: number = 3;
 
 	/**
 	 * Quest ID
@@ -29,18 +32,6 @@ export class QuestV1 implements RecordObject {
 	 */
 	public Summary: string = "";
 
-	/**
-	 * Always "SG_FEEL", used to be the icon in the list of quests,
-	 * but was not really used officially
-	 */
-	public OldIcon: string = "";
-
-	/**
-	 * Always "QUE_NOIMAGE" or empty string (""), used to be something when viewing the quest,
-	 * but was not really used officially
-	 */
-	public OldImage: string = "";
-
 	public getId(): string {
 		return this.Id.toString();
 	}
@@ -54,7 +45,7 @@ export class QuestV1 implements RecordObject {
 			return true;
 		}
 
-		if (!(other instanceof QuestV1)) {
+		if (!(other instanceof QuestV3)) {
 			throw new Error('Invalid type');
 		}
 
@@ -63,8 +54,6 @@ export class QuestV1 implements RecordObject {
 			|| other.Title != this.Title
 			|| other.Description != this.Description
 			|| other.Summary != this.Summary
-			|| other.OldIcon != this.OldIcon
-			|| other.OldImage != this.OldImage
 		);
 	}
 }
