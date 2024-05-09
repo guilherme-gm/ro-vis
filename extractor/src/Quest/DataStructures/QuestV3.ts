@@ -1,3 +1,4 @@
+import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
 import { RecordObject } from "../../Database/RecordObject.js";
 import { Quest } from "./Quest.js";
 
@@ -25,7 +26,7 @@ export class QuestV3 {
 	/**
 	 * Quest long description inside quest UI list
 	 */
-	public Description: string = "";
+	public Description: string[] = [];
 
 	/**
 	 * Short, one-line, mission description. Shown in side UI.
@@ -52,7 +53,7 @@ export class QuestV3 {
 		return (
 			other.Id != this.Id
 			|| other.Title != this.Title
-			|| other.Description != this.Description
+			|| ArrayEqual.isEqual(other.Description, this.Description)
 			|| other.Summary != this.Summary
 		);
 	}
