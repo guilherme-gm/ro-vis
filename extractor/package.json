@@ -3,9 +3,10 @@
 	"version": "1.0.0",
 	"description": "",
 	"type": "module",
-	"main": "index.js",
+	"main": "main.js",
 	"scripts": {
-		"compile": "tsc"
+		"compile": "tsc",
+		"start": "npm run compile && node ./dist/main.js"
 	},
 	"keywords": [],
 	"author": "",
