@@ -132,12 +132,8 @@ export class LoadQuests implements IDataLoader {
 			await questDb.insertMany(newRecordsArr.splice(0, 500));
 		}
 
-		for (let i = 0; i < updatedRecords.length; i++) {
-			if (i % 100 === 0) {
-				console.log(`\tProgress: ${i + 1} / ${updatedRecords.length}`);
-			}
-
-			await questDb.updateOrCreate(updatedRecords[i]!);
+		if (updatedRecords.length > 0) {
+			await questDb.bulkWrite(updatedRecords);
 		}
 	}
 }

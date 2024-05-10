@@ -43,4 +43,8 @@ export abstract class LogRecordDao<T extends RecordObject> {
 	public async updateOrCreate(document: LogRecord<T>): Promise<void> {
 		await this.db.updateOrCreate(document._id, document);
 	}
+
+	public async bulkWrite(documents: LogRecord<T>[]): Promise<void> {
+		await this.db.bulkWrite(documents);
+	}
 }
