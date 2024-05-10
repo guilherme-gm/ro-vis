@@ -1,114 +1,106 @@
-import axios from "axios";
+import {
+	MongoClient,
+	ServerApiVersion,
+	Document,
+	WithId,
+	OptionalUnlessRequiredId,
+	AnyBulkWriteOperation,
+} from "mongodb";
 
-export class Db<T> {
-	private url: string;
+export class Db<T extends Document & { _id: string; }> {
+	private host: string;
 
-	private apiKey: string;
+	private dbUser: string;
 
-	private dataSource: string;
+	private dbPass: string;
 
 	private database: string;
 
 	private collection: string;
 
+	private client: MongoClient;
+
 	constructor(collection: string) {
-		this.url = process.env['DB_URL'] ?? '';
-		this.apiKey = process.env['DB_APIKEY'] ?? '';
-		this.dataSource = process.env['DB_DATASOURCE'] ?? '';
+		this.host = process.env['DB_HOST'] ?? '';
+		this.dbUser = process.env['DB_USER'] ?? '';
+		this.dbPass = process.env['DB_PASS'] ?? '';
 		this.database = process.env['DB_NAME'] ?? '';
 		this.collection = collection;
 
-		if (!this.url) {
+		if (!this.host) {
 			throw new Error('Missing DB_URL');
 		}
 
-		if (!this.apiKey) {
+		if (!this.dbUser) {
 			throw new Error('Missing DB_APIKEY');
 		}
 
-		if (!this.dataSource) {
+		if (!this.dbPass) {
 			throw new Error('Missing DB_DATASOURCE');
 		}
 
 		if (!this.database) {
 			throw new Error('Missing DB_NAME');
 		}
+
+		this.client = new MongoClient(`mongodb+srv://${this.dbUser}:${this.dbPass}@${this.host}/${this.database}?retryWrites=true&w=majority`, {
+			serverApi: {
+				version: ServerApiVersion.v1,
+				strict: true,
+				deprecationErrors: true,
+			},
+		});
 	}
 
 	public async get(id: string): Promise<T | null> {
-		const data = await axios.post(`${this.url}/action/findOne`, {
-			dataSource: this.dataSource,
-			database: this.database,
-			collection: this.collection,
-			filter: {
-				_id: id,
-			},
-		}, {
-			headers: {
-				'api-key': this.apiKey,
-			},
-		});
+		await this.client.connect();
+		const res = await this.client.db()
+			.collection<T>(this.collection)
+			// @ts-expect-error -- I am not sure why, TS simply doesn't get this is string...
+			.findOne({ _id: id });
 
-		return data.data.document;
+		return res as T;
 	}
 
 	public async getAll(): Promise<T[]> {
-		const response: T[] = [];
+		const data = await this.client.db()
+			.collection<T>(this.collection)
+			.find({})
+			.toArray();
 
-		let fetchMore = false;
-		let startOffset = 0;
-
-		do {
-			const data = await axios.post(`${this.url}/action/find`, {
-				dataSource: this.dataSource,
-				database: this.database,
-				collection: this.collection,
-				skip: startOffset,
-				limit: 50000,
-			}, {
-				headers: {
-					'api-key': this.apiKey,
-				},
-			});
-
-			fetchMore = data.data.documents?.length === 50000;
-			startOffset += 50000;
-
-			response.push(...data.data.documents);
-		} while(fetchMore);
-
-		return response;
+		return data as T[];
 	}
 
 	public async insertMany(documents: T[]): Promise<void> {
-		await axios.post(`${this.url}/action/insertMany`, {
-			dataSource: this.dataSource,
-			database: this.database,
-			collection: this.collection,
-			documents: documents,
-		}, {
-			headers: {
-				'api-key': this.apiKey,
-			},
-		});
+		await this.client.db()
+			.collection<T>(this.collection)
+			.insertMany(documents as OptionalUnlessRequiredId<T>[]);
 	}
 
 	public async updateOrCreate(_id: string, document: T): Promise<void> {
-		await axios.post(`${this.url}/action/updateOne`, {
-			dataSource: this.dataSource,
-			database: this.database,
-			collection: this.collection,
-			filter: {
-				_id,
-			},
-			update: {
-				$set: document,
-			},
-			upsert: true,
-		}, {
-			headers: {
-				'api-key': this.apiKey,
-			},
-		});
+		await this.client.db()
+			.collection<T>(this.collection)
+			.updateOne(
+				{ _id: _id } as WithId<T>,
+				{ $set: document },
+				{ upsert: true },
+			);
+	}
+
+	public async bulkWrite(documents: T[]): Promise<void> {
+		const col = this.client.db().collection<T>(this.collection);
+
+		const changes = documents.map((doc): AnyBulkWriteOperation<T> => ({
+			replaceOne: {
+				// @ts-expect-error -- Weird errors...
+				filter: {
+					_id: doc._id,
+				},
+				replacement: doc,
+				upsert: true,
+			}
+		}))
+
+		await col.bulkWrite(changes);
 	}
 }
