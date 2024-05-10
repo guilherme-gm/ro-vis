@@ -2,6 +2,7 @@ import { LogRecordDao } from "../Database/LogRecordDao.js";
 import { Quest } from "./DataStructures/Quest.js";
 import { QuestV1 } from "./DataStructures/QuestV1.js";
 import { QuestV3 } from "./DataStructures/QuestV3.js";
+import { QuestV3RewardItem } from "./DataStructures/QuestV3RewardItem.js";
 
 export class QuestDb extends LogRecordDao<Quest> {
 	constructor() {
@@ -27,6 +28,18 @@ export class QuestDb extends LogRecordDao<Quest> {
 			q.Title = data.Title;
 			q.Summary = data.Summary;
 			q.Description = data.Description;
+			q.IconName = data.IconName;
+			q.NpcSpr = data.NpcSpr;
+			q.NpcPosX = data.NpcPosX;
+			q.RewardEXP = data.RewardEXP;
+			q.RewardJEXP = data.RewardJEXP;
+			q.RewardItemList = data.RewardItemList.map((v) => {
+				const r = new QuestV3RewardItem();
+				r.ItemID = v.ItemID;
+				r.ItemNum = v.ItemNum;
+
+				return r;
+			});
 
 			return q;
 		} else {

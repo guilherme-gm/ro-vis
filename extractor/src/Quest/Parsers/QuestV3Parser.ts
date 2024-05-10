@@ -6,16 +6,40 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 		return new QuestV3Parser(filePath);
 	}
 
-	private readonly ExpectedKeys = new Set<string>(['Title', 'Description', 'Summary', 'IconName'])
+	private readonly ExpectedKeys = new Set<string>([
+		'Title',
+		'Description',
+		'Summary',
+		'IconName',
+		'NpcSpr',
+		'NpcNavi',
+		'NpcPosX',
+		'NpcPosY',
+		'RewardEXP',
+		'RewardJEXP',
+		'RewardItemList',
+	]);
+
+	private readonly RewardExpectedKeys = new Set<string>(['ItemID', 'ItemNum']);
 
 	public async parse(): Promise<QuestV3[]> {
 		const quests: QuestV3[] = [];
 
 		const result = await this.extractLuaTable('QuestInfoList', true);
 		Object.entries(result).forEach(([questId, questObj]) => {
-			const additionalKeys = Object.keys(questObj).filter((key) => !this.ExpectedKeys.has(key));
+			let additionalKeys = Object.keys(questObj).filter((key) => !this.ExpectedKeys.has(key));
 			if (additionalKeys.length > 0) {
 				throw new Error(`Unexpected key found in Quest V3 object. Unexpected keys: ${additionalKeys}`);
+			}
+
+			if (questObj.RewardItemList?.length > 0) {
+				questObj.RewardItemList.forEach((reward) => {
+					additionalKeys = Object.keys(reward).filter((key) => !this.RewardExpectedKeys.has(key));
+
+					if (additionalKeys.length > 0) {
+						throw new Error(`Unexpected key found in Quest V3 Reward object. Unexpected keys: ${additionalKeys}`);
+					}
+				});
 			}
 
 			const questv3 = new QuestV3();
@@ -24,6 +48,12 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 			questv3.Description = questObj.Description ?? '';
 			questv3.Summary = questObj.Summary ?? '';
 			questv3.IconName = questObj.IconName ?? '';
+			questv3.NpcSpr = questObj.NpcSpr ?? '';
+			questv3.NpcNavi = questObj.NpcNavi ?? '';
+			questv3.NpcPosX = questObj.NpcPosX ?? -1;
+			questv3.NpcPosY = questObj.NpcPosY ?? -1;
+			questv3.RewardEXP = questObj.RewardEXP ?? '';
+			questv3.RewardJEXP = questObj.RewardJEXP ?? '';
 
 			quests.push(questv3);
 		});

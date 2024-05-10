@@ -1,6 +1,7 @@
 import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
 import { RecordObject } from "../../Database/RecordObject.js";
 import { Quest } from "./Quest.js";
+import { QuestV3RewardItem } from "./QuestV3RewardItem.js";
 
 /**
  * System/OngoingQuestInfoList_True.lub
@@ -38,6 +39,17 @@ export class QuestV3 {
 	 */
 	public IconName: string = "";
 
+	/**
+	 * First seem on 2018-04-18
+	 */
+	public NpcSpr: string = "";
+	public NpcNavi: string = "";
+	public NpcPosX: number = -1;
+	public NpcPosY: number = -1;
+	public RewardEXP: string = "";
+	public RewardJEXP: string = "";
+	public RewardItemList: QuestV3RewardItem[] = [];
+
 	public getId(): string {
 		return this.Id.toString();
 	}
@@ -56,11 +68,17 @@ export class QuestV3 {
 		}
 
 		return (
-			other.Id != this.Id
-			|| other.Title != this.Title
-			|| ArrayEqual.isEqual(other.Description, this.Description)
+			other.Title != this.Title
+			|| !ArrayEqual.isEqual(other.Description, this.Description)
 			|| other.Summary != this.Summary
 			|| other.IconName != this.IconName
+			|| other.NpcSpr != this.NpcSpr
+			|| other.NpcNavi != this.NpcNavi
+			|| other.NpcPosX != this.NpcPosX
+			|| other.NpcPosY != this.NpcPosY
+			|| other.RewardEXP != this.RewardEXP
+			|| other.RewardJEXP != this.RewardJEXP
+			|| !ArrayEqual.isEqual(this.RewardItemList, other.RewardItemList, (a, b) => a.hasChange(b))
 		);
 	}
 }
