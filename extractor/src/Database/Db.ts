@@ -48,7 +48,7 @@ export class Db<T extends Document & { _id: string; }> {
 		const conn = await backupClient.connect();
 		const data = await conn.db().collection(this.collection).find<T>({}).toArray();
 		await this.client.connect();
-		this.client.db().collection<T>(this.collection).bulkWrite(
+		await this.client.db().collection<T>(this.collection).bulkWrite(
 			// @ts-ignore
 			data.map((d) => ({
 				replaceOne: {
