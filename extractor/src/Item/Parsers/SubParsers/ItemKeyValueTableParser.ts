@@ -2,6 +2,7 @@ import iconv from 'iconv-lite';
 import * as fs from 'fs/promises';
 import { TokenTextTableParser } from '../../../CommonParser/TokenTextTableParser.js';
 import { Result } from '../../../CommonParser/Result.js';
+import { Logger } from '../../../Logger.js';
 
 type ReadFn<T> = keyof {
 	[P in keyof TokenTextTableParser as ReturnType<TokenTextTableParser[P]> extends Result<T>? P : never]: unknown;
@@ -37,10 +38,9 @@ export abstract class ItemKeyValueTableParser<U> extends TokenTextTableParser {
 
 				table.set(id, value);
 			} catch (error) {
-				console.log('----- Failed while reading entry; skipping.... -----');
-				console.error(error)
-				console.log('----------------------------------------------------');
-				console.log('');
+				Logger.error('----- Failed while reading entry; skipping.... -----', error);
+				Logger.error('----------------------------------------------------');
+				Logger.error('');
 			}
 		}
 

@@ -1,4 +1,5 @@
 import * as childProcess from "child_process";
+import { Logger } from "../Logger.js";
 
 export class LuaTableParser<T> {
 	private filePath: string;
@@ -16,7 +17,7 @@ export class LuaTableParser<T> {
 			});
 
 			process.stderr.on('data', (chunk) => {
-				console.error(chunk?.toString() ?? chunk);
+				Logger.error(chunk?.toString() ?? chunk);
 			})
 
 			process.on('close', (code) => {

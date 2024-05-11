@@ -6,6 +6,8 @@ import { MetadataDb } from "./Metadata/MetadataDb.js";
 import { Metadata } from "./Metadata/Metadata.js";
 import { PatchDb } from "./Patches/PatchDb.js";
 import { LoadItem } from "./Item/LoadItems.js";
+import { Logger } from "./Logger.js";
+import chalk from "chalk";
 
 config();
 
@@ -26,11 +28,6 @@ for (const [metaType, loader] of loaders.entries()) {
 
 	for (let i = 0; i < patchList.length; i++) {
 		const patch = patchList[i]!;
-		if (patch._id.startsWith('2020-12')) {
-			console.log('Reached breakpoint.');
-			break;
-		}
-
 		if (meta.appliedPatches.has(patch._id)) {
 			continue;
 		}
@@ -39,7 +36,7 @@ for (const [metaType, loader] of loaders.entries()) {
 			continue;
 		}
 
-		console.log(`Running ${loader.name} for ${patch._id}...`);
+		Logger.info(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(patch._id)}...`);
 		await loader.load(patch);
 
 		meta.appliedPatches.add(patch._id);

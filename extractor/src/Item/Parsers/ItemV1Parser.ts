@@ -1,3 +1,5 @@
+import { Logger } from '../../Logger.js';
+import chalk  from "chalk";
 import { Item } from '../DataStructures/Item.js';
 import { ItemV1 } from '../DataStructures/ItemV1.js';
 import { BookItemNameTableV1Parser } from './SubParsers/BookItemNameTableV1Parser.js';
@@ -153,7 +155,7 @@ export class ItemV1Parser {
 					// @ts-ignore -- too hard to type
 					item[v1Key] = val;
 				} else {
-					console.error(`${reference}: Item ${itemId} does not exists.`);
+					Logger.warn(`${chalk.whiteBright(reference)}: Item ${chalk.whiteBright(itemId)} does not exists.`);
 				}
 
 			}
@@ -231,7 +233,7 @@ export class ItemV1Parser {
 			for (let [itemId, prefix] of this.cardPrefixNameTable) {
 				const item = this.newItemMap.get(itemId);
 				if (!item) {
-					console.error(`Card Prefix: Item ${itemId} doesn't exists, so we can't load its prefix.`);
+					Logger.warn(`${chalk.whiteBright('Card Prefix:')} Item ${itemId} doesn't exists, so we can't load its prefix.`);
 					continue;
 				}
 
@@ -244,7 +246,7 @@ export class ItemV1Parser {
 			for (let itemId of this.cardPostfixNameTable) {
 				const item = this.newItemMap.get(itemId);
 				if (!item) {
-					console.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
+					Logger.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
 					continue;
 				}
 
@@ -252,7 +254,7 @@ export class ItemV1Parser {
 					item.CardPostfix = item.CardPrefix;
 					item.CardPrefix = "";
 				} else if (item.CardPostfix === "") {
-					console.error(`Card Postfix: Item ${itemId} has postfix entry but does not have a prefix/postfix value.`);
+					Logger.error(`Card Postfix: Item ${itemId} has postfix entry but does not have a prefix/postfix value.`);
 				}
 			}
 		}

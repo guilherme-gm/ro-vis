@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import chalk from "chalk";
 import path from "path";
 import { IParser } from "../CommonParser/IParser.js";
 import { patchesRootDir } from "../Config/config.js";
@@ -9,6 +10,7 @@ import { ItemV } from "./DataStructures/ItemV.js";
 import { Item } from "./DataStructures/Item.js";
 import { ItemDb } from "./ItemDb.js";
 import { ItemV1Parser } from "./Parsers/ItemV1Parser.js";
+import { Logger } from "../Logger.js";
 
 export class LoadItem implements IDataLoader {
 	public name: string = LoadItem.name;
@@ -70,7 +72,7 @@ export class LoadItem implements IDataLoader {
 
 	private async getParser(patch: PatchRecord, patchFolder: string, itemMap: Map<number, Item>): Promise<IParser<ItemV>> {
 		const version = this.getItemDataVersion(patch);
-		console.log(`Version: ${version}`);
+		Logger.info(`${chalk.whiteBright('Version:')} ${version}`);
 		if (version === 1) {
 			return new ItemV1Parser(itemMap, {
 				bookItemNameTable: this.getPathIfExists(patch, patchFolder, "data\\bookitemnametable.txt"),
@@ -120,7 +122,7 @@ export class LoadItem implements IDataLoader {
 
 		const patchFolder = path.join(patchesRootDir, patch._id);
 		if (!fs.existsSync(patchFolder)) {
-			console.warn(`!!!! WARN: Folder not found patch "${patch._id}" for file "questid2display"`);
+			Logger.warn(`!!!! WARN: Folder not found patch "${patch._id}" for file "questid2display"`);
 			fs.appendFileSync("./not-found.txt", `${patch._id}\tdata/questid2display.txt\n`);
 			return;
 		}
@@ -145,12 +147,12 @@ export class LoadItem implements IDataLoader {
 		// fs.writeFileSync(`out_${patch._id}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
 
 		if (newRecords.size === 0 && updatedRecords.length === 0) {
-			console.warn(`!!!! WARN: NO-Change patch "${patch._id}" for file "questid2display"`);
+			Logger.warn(`!!!! WARN: NO-Change patch "${patch._id}" for file "questid2display"`);
 			fs.appendFileSync("./no-op.txt", `${patch._id}\tdata/questid2display.txt\n`);
 			return;
 		}
 
-		console.log(`${newRecords.size} new records to create and ${updatedRecords.length} to update...`);
+		Logger.info(`${newRecords.size} new records to create and ${updatedRecords.length} to update...`);
 		const newRecordsArr = [...newRecords.values()];
 		while (newRecordsArr.length > 0) {
 			await itemDb.insertMany(newRecordsArr.splice(0, 500));

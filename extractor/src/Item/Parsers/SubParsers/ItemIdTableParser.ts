@@ -1,6 +1,7 @@
 import iconv from 'iconv-lite';
 import * as fs from 'fs/promises';
 import { TokenTextTableParser } from '../../../CommonParser/TokenTextTableParser.js';
+import { Logger } from '../../../Logger.js';
 
 export abstract class ItemIdTableParser extends TokenTextTableParser {
 	protected static async internalFromFile<T>(filePath: string, ctor: new (content: string) => T): Promise<T> {
@@ -24,10 +25,9 @@ export abstract class ItemIdTableParser extends TokenTextTableParser {
 
 				table.push(id);
 			} catch (error) {
-				console.log('----- Failed while reading entry; skipping.... -----');
-				console.error(error)
-				console.log('----------------------------------------------------');
-				console.log('');
+				Logger.error('----- Failed while reading entry; skipping.... -----', error);
+				Logger.error('----------------------------------------------------');
+				Logger.error('');
 			}
 		}
 
