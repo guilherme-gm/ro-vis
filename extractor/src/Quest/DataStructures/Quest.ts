@@ -79,6 +79,11 @@ export class Quest implements RecordObject {
 	 */
 	public RewardItemList: QuestRewardItem[] = [];
 
+	/**
+	 * Is it a Cooldown quest (?)
+	 */
+	public CoolTimeQuest: number = -1;
+
 	public getId(): string {
 		return this.Id.toString();
 	}

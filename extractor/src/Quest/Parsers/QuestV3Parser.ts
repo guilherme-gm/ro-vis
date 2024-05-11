@@ -1,5 +1,6 @@
 import { LuaTableParser } from '../../CommonParser/LuaTableParser.js';
 import { QuestV3 } from "../DataStructures/QuestV3.js";
+import { QuestV3RewardItem } from '../DataStructures/QuestV3RewardItem.js';
 
 export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 	public static async fromFile(filePath: string): Promise<QuestV3Parser> {
@@ -54,6 +55,13 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 			questv3.NpcPosY = questObj.NpcPosY ?? -1;
 			questv3.RewardEXP = questObj.RewardEXP ?? '';
 			questv3.RewardJEXP = questObj.RewardJEXP ?? '';
+			questv3.RewardItemList = questObj.RewardItemList?.map((reward) => {
+				const r = new QuestV3RewardItem();
+				r.ItemID = reward.ItemID;
+				r.ItemNum = reward.ItemNum;
+
+				return r;
+			}) ?? [];
 
 			quests.push(questv3);
 		});

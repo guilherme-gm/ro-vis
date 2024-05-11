@@ -10,6 +10,7 @@ import { QuestV } from "./DataStructures/QuestV.js";
 import { QuestV1Parser } from "./Parsers/QuestV1Parser.js";
 import { QuestV3Parser } from "./Parsers/QuestV3Parser.js";
 import { QuestDb } from "./QuestDb.js";
+import { QuestV4Parser } from "./Parsers/QuestV4Parser.js";
 
 export class LoadQuests implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -28,8 +29,14 @@ export class LoadQuests implements IDataLoader {
 			 * This marks the end of "questid2display.txt" and lua files/quest/*.lua
 			 */
 			return 1; // Actually 2 due to previous if
-		} else if (date.localeCompare('9999-12-31') < 0) {
+		} else if (date.localeCompare('2020-08-05') < 0) {
+			/**
+			 * 2020-08-05 introduces "CoolTimeQuest" into "System/OnGoingQuestInfoList_True.lub".
+			 * This now becomes "V4"
+			 */
 			return 3;
+		} else if (date.localeCompare('9999-01-01') < 0) {
+			return 4;
 		}
 
 		throw new Error(`Quest version for patch "${patch._id}" is not mapped.`);
@@ -40,7 +47,7 @@ export class LoadQuests implements IDataLoader {
 		let fileName: string;
 		if (version === 1) {
 			fileName = "data\\questid2display.txt";
-		} else if (version === 3) {
+		} else if (version === 3 || version == 4) {
 			fileName = "system\\ongoingquestinfolist_true.lub";
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
@@ -66,6 +73,8 @@ export class LoadQuests implements IDataLoader {
 			return QuestV1Parser.fromFile(path.join(patchFolder, 'data', 'questid2display.txt'));
 		} else if (version === 3) {
 			return QuestV3Parser.fromFile(path.join(patchFolder, 'System', 'OnGoingQuestInfoList_True.lub'));
+		} else if (version === 4) {
+			return QuestV4Parser.fromFile(path.join(patchFolder, 'System', 'OnGoingQuestInfoList_True.lub'));
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
 		}
