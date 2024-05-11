@@ -63,7 +63,11 @@ export class TokenTextTableParser {
 		let cell = '';
 		while (!this.isEndOfFile()
 			&& (multiline || this.reader.peekChar() !== '\n')
-			&& this.reader.peekChar() !== '#'
+			&& (
+				this.reader.peekChar() !== '#'
+				// A "#" followed by a " " is still part of the string.
+				|| (this.reader.peekChar() === '#' && this.reader.peekChar(1) === ' ')
+			)
 		) {
 			cell += this.reader.readChar();
 		}

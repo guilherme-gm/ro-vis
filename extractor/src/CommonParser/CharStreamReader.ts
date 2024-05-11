@@ -44,12 +44,16 @@ export class CharStreamReader {
 		return char;
 	}
 
-	public peekChar(): string | null {
+	public peekChar(skip: number = 0): string | null {
 		if (this.isEndOfFile()) {
 			return null;
 		}
 
-		return this.text[this.pointer]!;
+		if (this.text.length <= this.pointer + skip) {
+			return null;
+		}
+
+		return this.text[this.pointer + skip]!;
 	}
 
 	public unreadChar(): void {
