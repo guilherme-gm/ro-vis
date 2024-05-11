@@ -1,5 +1,6 @@
 import { Item } from '../DataStructures/Item.js';
 import { ItemV1 } from '../DataStructures/ItemV1.js';
+import { BookItemNameTableV1Parser } from './SubParsers/BookItemNameTableV1Parser.js';
 import { ItemDescTableV1Parser } from './SubParsers/ItemDescTableV1Parser.js';
 import { ItemDisplayNameTableV1Parser } from './SubParsers/ItemDisplayNameTableV1Parser.js';
 import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.js';
@@ -42,6 +43,8 @@ export class ItemV1Parser {
 
 	private num2ItemResNameTable: Map<number, string> | null = null;
 
+	private bookItemNameTable: number[] | null = null;
+
 	constructor(itemDb: Map<number, Item>, files: ItemV1Files) {
 		this.itemDb = itemDb;
 		this.files = files;
@@ -77,6 +80,11 @@ export class ItemV1Parser {
 			const parser = await ItemResNameTableV1Parser.fromFile(this.files.num2ItemResNameTable);
 			this.num2ItemResNameTable = await parser.parse();
 		}
+
+		if (this.files.bookItemNameTable) {
+			const parser = await BookItemNameTableV1Parser.fromFile(this.files.bookItemNameTable);
+			this.bookItemNameTable = await parser.parse();
+		}
 	}
 
 	private loadTable<T>(
@@ -92,8 +100,8 @@ export class ItemV1Parser {
 			for (let [itemId, val] of table.entries()) {
 				const item = this.newItemMap.get(itemId);
 				if (item) {
-				// @ts-ignore -- too hard to type
-				item[v1Key] = val;
+					// @ts-ignore -- too hard to type
+					item[v1Key] = val;
 				} else {
 					console.error(`${reference}: Item ${itemId} does not exists.`);
 				}
@@ -107,6 +115,37 @@ export class ItemV1Parser {
 				}
 
 				// @ts-ignore -- too hard to type
+				item[v1Key] = oldItem[itemKey];
+			}
+		}
+	}
+
+	private loadBoolIdTable(
+		reference: string,
+		idTable: number[] | null,
+		v1Key: KeyOfType<ItemV1, boolean>,
+		itemKey: KeyOfType<Item, boolean>,
+	): void {
+		if (idTable) {
+			for (let item of this.newItemMap.values()) {
+				item[v1Key] = false;
+			}
+
+			for (let itemId of idTable) {
+				const item = this.newItemMap.get(itemId);
+				if (!item) {
+					throw new Error(`${reference}: Item ${itemId} does not exists.`);
+				}
+
+				item[v1Key] = true;
+			}
+		} else {
+			for (let item of this.newItemMap.values()) {
+				const oldItem = this.itemDb.get(item.Id);
+				if (!oldItem) {
+					throw new Error(`${reference}: Item ${item.Id} is new, but not loaded.`);
+				}
+
 				item[v1Key] = oldItem[itemKey];
 			}
 		}
@@ -142,6 +181,8 @@ export class ItemV1Parser {
 		this.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName");
 		this.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription");
 		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite");
+
+		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 
 		return [...this.newItemMap.values()];
 	}
