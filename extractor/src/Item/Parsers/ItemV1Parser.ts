@@ -3,6 +3,8 @@ import { ItemV1 } from '../DataStructures/ItemV1.js';
 import { BookItemNameTableV1Parser } from './SubParsers/BookItemNameTableV1Parser.js';
 import { BuyingStoreItemListV1Parser } from './SubParsers/BuyingStoreItemListV1Parser.js';
 import { CardIllustNameTableV1Parser } from './SubParsers/CardIllustNameTableV1Parser.js';
+import { CardPostfixNameTableV1Parser } from './SubParsers/CardPostfixNameTableV1Parser.js';
+import { CardPrefixNameTableV1Parser } from './SubParsers/CardPrefixNameTableV1Parser.js';
 import { ItemDescTableV1Parser } from './SubParsers/ItemDescTableV1Parser.js';
 import { ItemDisplayNameTableV1Parser } from './SubParsers/ItemDisplayNameTableV1Parser.js';
 import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.js';
@@ -53,6 +55,10 @@ export class ItemV1Parser {
 	private slotTable: Map<number, number> | null = null;
 
 	private cardIllustTable: Map<number, string> | null = null;
+
+	private cardPrefixNameTable: Map<number, string> | null = null;
+
+	private cardPostfixNameTable: number[] | null = null;
 
 	constructor(itemDb: Map<number, Item>, files: ItemV1Files) {
 		this.itemDb = itemDb;
@@ -118,6 +124,16 @@ export class ItemV1Parser {
 		if (this.files.num2CardIllustNameTable) {
 			const parser = await CardIllustNameTableV1Parser.fromFile(this.files.num2CardIllustNameTable);
 			this.cardIllustTable = await parser.parse();
+		}
+
+		if (this.files.cardPostFixNameTable) {
+			const parser = await CardPostfixNameTableV1Parser.fromFile(this.files.cardPostFixNameTable);
+			this.cardPostfixNameTable = await parser.parse();
+		}
+
+		if (this.files.cardPrefixNameTable) {
+			const parser = await CardPrefixNameTableV1Parser.fromFile(this.files.cardPrefixNameTable);
+			this.cardPrefixNameTable = await parser.parse();
 		}
 	}
 
@@ -185,6 +201,63 @@ export class ItemV1Parser {
 		}
 	}
 
+	private loadCardFlavor(): void {
+		if (!this.cardPostfixNameTable || !this.cardPrefixNameTable) {
+			for (let item of this.newItemMap.values()) {
+				const oldItem = this.itemDb.get(item.Id);
+				if (oldItem) {
+					item.CardPrefix = oldItem.CardPrefix;
+					item.CardPostfix = oldItem.CardPostfix;
+				} else {
+					item.CardPrefix = "";
+					item.CardPostfix = "";
+				}
+			}
+		}
+
+		// Fix items that no longer have a PostFix. In other words:
+		// An item that was in postfix table but no longer is, their PostFix should now be Prefix
+		if (this.cardPostfixNameTable) {
+			for (let item of this.newItemMap.values()) {
+				if (item.CardPostfix !== "" && !this.cardPostfixNameTable.includes(item.Id)) {
+					item.CardPrefix = item.CardPostfix;
+					item.CardPostfix = "";
+				}
+			}
+		}
+
+		// Update prefixes
+		if (this.cardPrefixNameTable) {
+			for (let [itemId, prefix] of this.cardPrefixNameTable) {
+				const item = this.newItemMap.get(itemId);
+				if (!item) {
+					console.error(`Card Prefix: Item ${itemId} doesn't exists, so we can't load its prefix.`);
+					continue;
+				}
+
+				item.CardPrefix = prefix;
+			}
+		}
+
+		// Update postfixes
+		if (this.cardPostfixNameTable) {
+			for (let itemId of this.cardPostfixNameTable) {
+				const item = this.newItemMap.get(itemId);
+				if (!item) {
+					console.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
+					continue;
+				}
+
+				if (item.CardPrefix !== "") {
+					item.CardPostfix = item.CardPrefix;
+					item.CardPrefix = "";
+				} else if (item.CardPostfix === "") {
+					console.error(`Card Postfix: Item ${itemId} has postfix entry but does not have a prefix/postfix value.`);
+				}
+			}
+		}
+	}
+
 	public async parse(): Promise<ItemV1[]> {
 		await this.parseTables();
 
@@ -221,6 +294,8 @@ export class ItemV1Parser {
 
 		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 		this.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
+
+		this.loadCardFlavor();
 
 		return [...this.newItemMap.values()];
 	}
