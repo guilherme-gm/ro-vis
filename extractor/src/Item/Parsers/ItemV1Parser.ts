@@ -64,7 +64,12 @@ export class ItemV1Parser {
 
 		if (this.files.idNum2ItemDescTable) {
 			const parser = await ItemDescTableV1Parser.fromFile(this.files.idNum2ItemDescTable);
-			this.idNum2ItemDescTable = await parser.parse();
+			const table = await parser.parse();
+
+			this.idNum2ItemDescTable = new Map<number, string[]>();
+			for (const [key, value] of table.entries()) {
+				this.idNum2ItemDescTable.set(key, value.split('\n'));
+			}
 		}
 
 		if (this.files.idNum2ItemResNameTable) {
@@ -79,7 +84,12 @@ export class ItemV1Parser {
 
 		if (this.files.num2ItemDescTable) {
 			const parser = await ItemDescTableV1Parser.fromFile(this.files.num2ItemDescTable);
-			this.num2ItemDescTable = await parser.parse();
+			const table = await parser.parse();
+
+			this.num2ItemDescTable = new Map<number, string[]>();
+			for (const [key, value] of table.entries()) {
+				this.num2ItemDescTable.set(key, value.split('\n'));
+			}
 		}
 
 		if (this.files.num2ItemResNameTable) {
