@@ -28,6 +28,11 @@ for (const [metaType, loader] of loaders.entries()) {
 
 	for (let i = 0; i < patchList.length; i++) {
 		const patch = patchList[i]!;
+		if (!fs.existsSync(path.join(patchesRootDir, patch._id))) {
+			Logger.warn(`Patch ${chalk.whiteBright(patch._id)} does not exists. Skipping...`);
+			continue;
+		}
+
 		if (meta.appliedPatches.has(patch._id)) {
 			continue;
 		}
