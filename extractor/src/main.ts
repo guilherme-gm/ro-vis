@@ -12,6 +12,7 @@ import { Config } from "./Config/config.js";
 import path from "path";
 import { Cli } from "./Cli.js";
 import { MongoMemoryServer } from 'mongodb-memory-server-core';
+import readline from 'readline';
 
 Cli.load();
 
@@ -90,5 +91,21 @@ try {
 		}
 	}
 } finally {
-	mongod?.stop();
+	if (Cli.cli.holdProcess) {
+		Logger.status('Extraction ended. Press ENTER to finish.');
+		if (mongod) {
+			Logger.info(`Temporary DB is running at "${chalk.whiteBright(mongod.getUri())}"`);
+		}
+
+		const readlineInterface = readline.createInterface(process.stdin, process.stdout);
+		await new Promise<void>((resolve) => {
+			readlineInterface.question('', () => { resolve(); });
+		});
+		readlineInterface.close();
+	}
+
+	if (mongod) {
+		Logger.status('Closing temporary database before ending...');
+		mongod?.stop();
+	}
 }
