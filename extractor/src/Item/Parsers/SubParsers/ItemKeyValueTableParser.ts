@@ -38,9 +38,7 @@ export abstract class ItemKeyValueTableParser<U> extends TokenTextTableParser {
 
 				table.set(id, value);
 			} catch (error) {
-				Logger.error('----- Failed while reading entry; skipping.... -----', error);
-				Logger.error('----------------------------------------------------');
-				Logger.error('');
+				Logger.error('Failed while reading entry; skipping...', error);
 			}
 		}
 

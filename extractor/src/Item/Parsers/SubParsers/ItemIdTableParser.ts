@@ -25,9 +25,7 @@ export abstract class ItemIdTableParser extends TokenTextTableParser {
 
 				table.push(id);
 			} catch (error) {
-				Logger.error('----- Failed while reading entry; skipping.... -----', error);
-				Logger.error('----------------------------------------------------');
-				Logger.error('');
+				Logger.error('Failed while reading entry; skipping...', error);
 			}
 		}
 

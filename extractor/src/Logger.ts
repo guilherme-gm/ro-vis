@@ -20,18 +20,25 @@ export class Logger {
 	}
 
 	public status(message: string): void {
-		console.log(chalk.dim(`${chalk.green('[Status]')} ${message}`));
+		console.log(`${chalk.green('[Status]')} ${message}`);
 	}
 
 	public info(message: string): void {
-		console.log(chalk.dim(`${chalk.whiteBright('[Info]')} ${message}`));
+		console.log(`${chalk.whiteBright('[Info]')} ${message}`);
 	}
 
 	public error(message: string, error?: unknown): void {
-		console.error(chalk.dim(`${chalk.red('[Error]')} ${message}`), error ?? '');
+		if (error) {
+			console.error(`${chalk.red('[Error]')} ----------- ${message} -----------`);
+			console.error(error);
+			console.error(`${chalk.red('[Error]')} -------------------------------------------`);
+			console.error('');
+		} else {
+			console.error(`${chalk.red('[Error]')} ${message}`);
+		}
 	}
 
 	public warn(message: string): void {
-		console.warn(chalk.dim(`${chalk.yellow('[Warn]')} ${message}`));
+		console.warn(`${chalk.yellow('[Warn]')} ${message}`);
 	}
 }
