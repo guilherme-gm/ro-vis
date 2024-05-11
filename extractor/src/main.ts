@@ -5,11 +5,13 @@ import { LoadQuests } from "./Quest/LoadQuests.js";
 import { MetadataDb } from "./Metadata/MetadataDb.js";
 import { Metadata } from "./Metadata/Metadata.js";
 import { PatchDb } from "./Patches/PatchDb.js";
+import { LoadItem } from "./Item/LoadItems.js";
 
 config();
 
 const loaders = new Map<MetadataType, IDataLoader>([
 	[MetadataType.Quest, new LoadQuests()],
+	[MetadataType.Item, new LoadItem()],
 ]);
 
 const metadataDb = new MetadataDb();
