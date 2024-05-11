@@ -28,4 +28,8 @@ export class MetadataDb {
 			appliedPatches: [...metadata.appliedPatches],
 		});
 	}
+
+	public async replicate(): Promise<void> {
+		await this.db.replicate();
+	}
 }

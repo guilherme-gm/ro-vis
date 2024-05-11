@@ -47,4 +47,8 @@ export abstract class LogRecordDao<T extends RecordObject> {
 	public async bulkWrite(documents: LogRecord<T>[]): Promise<void> {
 		await this.db.bulkWrite(documents);
 	}
+
+	public async replicate(): Promise<void> {
+		await this.db.replicate();
+	}
 }

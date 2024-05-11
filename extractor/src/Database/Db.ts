@@ -8,50 +8,56 @@ import {
 	Filter,
 	Sort,
 } from "mongodb";
+import { Config } from "../Config/config.js";
 
 export class Db<T extends Document & { _id: string; }> {
-	private host: string;
-
-	private dbUser: string;
-
-	private dbPass: string;
-
-	private database: string;
-
 	private collection: string;
 
 	private client: MongoClient;
 
 	constructor(collection: string) {
-		this.host = process.env['DB_HOST'] ?? '';
-		this.dbUser = process.env['DB_USER'] ?? '';
-		this.dbPass = process.env['DB_PASS'] ?? '';
-		this.database = process.env['DB_NAME'] ?? '';
+		const conf = Config.mainDb;
 		this.collection = collection;
 
-		if (!this.host) {
-			throw new Error('Missing DB_URL');
+		let uri;
+		if (conf.uri) {
+			uri = conf.uri;
+		} else {
+			uri = `mongodb+srv://${conf.user}:${conf.pass}@${conf.host}/${conf.name}?retryWrites=true&w=majority`;
 		}
 
-		if (!this.dbUser) {
-			throw new Error('Missing DB_APIKEY');
-		}
-
-		if (!this.dbPass) {
-			throw new Error('Missing DB_DATASOURCE');
-		}
-
-		if (!this.database) {
-			throw new Error('Missing DB_NAME');
-		}
-
-		this.client = new MongoClient(`mongodb+srv://${this.dbUser}:${this.dbPass}@${this.host}/${this.database}?retryWrites=true&w=majority`, {
+		this.client = new MongoClient(uri, {
 			serverApi: {
 				version: ServerApiVersion.v1,
 				strict: true,
 				deprecationErrors: true,
 			},
 		});
+	}
+
+	public async replicate(): Promise<void> {
+		const conf = Config.backupDb;
+		const backupClient = new MongoClient(`mongodb+srv://${conf.user}:${conf.pass}@${conf.host}/${conf.name}?retryWrites=true&w=majority`, {
+			serverApi: {
+				version: ServerApiVersion.v1,
+				strict: true,
+				deprecationErrors: true,
+			},
+		});
+
+		const conn = await backupClient.connect();
+		const data = await conn.db().collection(this.collection).find<T>({}).toArray();
+		await this.client.connect();
+		this.client.db().collection<T>(this.collection).bulkWrite(
+			// @ts-ignore
+			data.map((d) => ({
+				replaceOne: {
+					filter: { _id: d._id },
+					replacement: d,
+					upsert: true,
+				}
+			}))
+		);
 	}
 
 	public async get(id: string): Promise<T | null> {

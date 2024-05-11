@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import path from "path";
 import { IParser } from "../CommonParser/IParser.js";
-import { patchesRootDir } from "../Config/config.js";
 import { LogRecord } from "../Database/LogRecord.js";
 import { IDataLoader } from "../IDataLoader.js";
 import { PatchRecord } from "../Patches/PatchRecord.js";
@@ -12,6 +11,8 @@ import { QuestV3Parser } from "./Parsers/QuestV3Parser.js";
 import { QuestDb } from "./QuestDb.js";
 import { QuestV4Parser } from "./Parsers/QuestV4Parser.js";
 import { Logger } from "../Logger.js";
+import { Config } from "../Config/config.js";
+import { Cli } from "../Cli.js";
 
 export class LoadQuests implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -97,7 +98,7 @@ export class LoadQuests implements IDataLoader {
 	}
 
 	public async load(patch: PatchRecord): Promise<void> {
-		const patchFolder = path.join(patchesRootDir, patch._id);
+		const patchFolder = path.join(Config.patchesRootDir, patch._id);
 		if (!fs.existsSync(patchFolder)) {
 			Logger.warn(`!!!! WARN: Folder not found patch "${patch._id}" for file "questid2display"`);
 			fs.appendFileSync("./not-found.txt", `${patch._id}\tdata/questid2display.txt\n`);
@@ -107,6 +108,10 @@ export class LoadQuests implements IDataLoader {
 		const quests = await this.getQuestList(patch, patchFolder);
 
 		const questDb = new QuestDb();
+		if (Cli.cli.dryRun && !Cli.cli.cleanRun) {
+			await questDb.replicate();
+		}
+
 		const existingRecords = (await questDb.getAll()).reduce(
 			(memo, record) => {
 				memo.set(record._id, record);

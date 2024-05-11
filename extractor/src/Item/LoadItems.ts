@@ -2,7 +2,6 @@ import * as fs from "fs";
 import chalk from "chalk";
 import path from "path";
 import { IParser } from "../CommonParser/IParser.js";
-import { patchesRootDir } from "../Config/config.js";
 import { LogRecord } from "../Database/LogRecord.js";
 import { IDataLoader } from "../IDataLoader.js";
 import { PatchRecord } from "../Patches/PatchRecord.js";
@@ -11,6 +10,8 @@ import { Item } from "./DataStructures/Item.js";
 import { ItemDb } from "./ItemDb.js";
 import { ItemV1Parser } from "./Parsers/ItemV1Parser.js";
 import { Logger } from "../Logger.js";
+import { Config } from "../Config/config.js";
+import { Cli } from "../Cli.js";
 
 export class LoadItem implements IDataLoader {
 	public name: string = LoadItem.name;
@@ -107,6 +108,10 @@ export class LoadItem implements IDataLoader {
 
 	public async load(patch: PatchRecord): Promise<void> {
 		const itemDb = new ItemDb();
+		if (Cli.cli.dryRun && !Cli.cli.cleanRun) {
+			await itemDb.replicate();
+		}
+
 		const existingRecords = (await itemDb.getAll()).reduce(
 			(memo, record) => {
 				memo.set(record._id, record);
@@ -120,7 +125,7 @@ export class LoadItem implements IDataLoader {
 			itemMap.set(item.current.value.Id, item.current.value);
 		});
 
-		const patchFolder = path.join(patchesRootDir, patch._id);
+		const patchFolder = path.join(Config.patchesRootDir, patch._id);
 		if (!fs.existsSync(patchFolder)) {
 			Logger.warn(`!!!! WARN: Folder not found patch "${patch._id}" for file "questid2display"`);
 			fs.appendFileSync("./not-found.txt", `${patch._id}\tdata/questid2display.txt\n`);
