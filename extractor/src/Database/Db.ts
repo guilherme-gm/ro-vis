@@ -5,6 +5,8 @@ import {
 	WithId,
 	OptionalUnlessRequiredId,
 	AnyBulkWriteOperation,
+	Filter,
+	Sort,
 } from "mongodb";
 
 export class Db<T extends Document & { _id: string; }> {
@@ -62,10 +64,11 @@ export class Db<T extends Document & { _id: string; }> {
 		return res as T;
 	}
 
-	public async getAll(): Promise<T[]> {
+	public async getAll(filter?: Filter<T>, order?: Sort): Promise<T[]> {
 		const data = await this.client.db()
 			.collection<T>(this.collection)
-			.find({})
+			.find(filter ?? {})
+			.sort(order ?? { _id: 1 })
 			.toArray();
 
 		return data as T[];

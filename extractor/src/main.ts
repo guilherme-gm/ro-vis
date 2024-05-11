@@ -14,7 +14,7 @@ const loaders = new Map<MetadataType, IDataLoader>([
 
 const metadataDb = new MetadataDb();
 const patchDb = new PatchDb();
-const patchList = await patchDb.getAll();
+const patchList = await patchDb.getAll({}, { order: 1 });
 
 for (const [metaType, loader] of loaders.entries()) {
 	let meta = await metadataDb.get(metaType);
