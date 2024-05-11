@@ -19,23 +19,26 @@ export class LoadQuests implements IDataLoader {
 		const date = patch._id.substring(0, 10);
 		if (date.localeCompare('2012-03-14') < 0) {
 			/**
-			 * 2012-03-14 was introduced the use of lua files/quest, which contained a few extra info.
-			 * I am ignoring these extra info for now, but will keep the diff here for documentation purposes.
+			 * ??? introduced the quest UI using questid2display.txt
 			 */
 			return 1;
 		} else if (date.localeCompare('2018-03-21') < 0) {
 			/**
+			 * 2012-03-14 was introduced the use of lua files/quest, which contained a few extra info.
+			 * I am ignoring these extra info for now, but will keep the diff here for documentation purposes.
+			 */
+			return 1; // Actually 2
+		} else if (date.localeCompare('2020-08-05') < 0) {
+			/**
 			 * 2018-03-21 was introduced "System/OnGoingQuestInfoList_True.lub" and "System/RecommendedQuestInfoList_True.lub".
 			 * This marks the end of "questid2display.txt" and lua files/quest/*.lua
 			 */
-			return 1; // Actually 2 due to previous if
-		} else if (date.localeCompare('2020-08-05') < 0) {
+			return 3;
+		} else if (date.localeCompare('9999-01-01') < 0) {
 			/**
 			 * 2020-08-05 introduces "CoolTimeQuest" into "System/OnGoingQuestInfoList_True.lub".
 			 * This now becomes "V4"
 			 */
-			return 3;
-		} else if (date.localeCompare('9999-01-01') < 0) {
 			return 4;
 		}
 
