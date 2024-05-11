@@ -1,6 +1,7 @@
 import { Item } from '../DataStructures/Item.js';
 import { ItemV1 } from '../DataStructures/ItemV1.js';
 import { BookItemNameTableV1Parser } from './SubParsers/BookItemNameTableV1Parser.js';
+import { BuyingStoreItemListV1Parser } from './SubParsers/BuyingStoreItemListV1Parser.js';
 import { ItemDescTableV1Parser } from './SubParsers/ItemDescTableV1Parser.js';
 import { ItemDisplayNameTableV1Parser } from './SubParsers/ItemDisplayNameTableV1Parser.js';
 import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.js';
@@ -45,6 +46,8 @@ export class ItemV1Parser {
 
 	private bookItemNameTable: number[] | null = null;
 
+	private buyingStoreItemList: number[] | null = null;
+
 	constructor(itemDb: Map<number, Item>, files: ItemV1Files) {
 		this.itemDb = itemDb;
 		this.files = files;
@@ -84,6 +87,11 @@ export class ItemV1Parser {
 		if (this.files.bookItemNameTable) {
 			const parser = await BookItemNameTableV1Parser.fromFile(this.files.bookItemNameTable);
 			this.bookItemNameTable = await parser.parse();
+		}
+
+		if (this.files.buyingStoreItemList) {
+			const parser = await BuyingStoreItemListV1Parser.fromFile(this.files.buyingStoreItemList);
+			this.buyingStoreItemList = await parser.parse();
 		}
 	}
 
@@ -142,11 +150,11 @@ export class ItemV1Parser {
 		} else {
 			for (let item of this.newItemMap.values()) {
 				const oldItem = this.itemDb.get(item.Id);
-				if (!oldItem) {
-					throw new Error(`${reference}: Item ${item.Id} is new, but not loaded.`);
+				if (oldItem) {
+					item[v1Key] = oldItem[itemKey];
+				} else {
+					item[v1Key] = false;
 				}
-
-				item[v1Key] = oldItem[itemKey];
 			}
 		}
 	}
@@ -183,6 +191,7 @@ export class ItemV1Parser {
 		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite");
 
 		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
+		this.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
 
 		return [...this.newItemMap.values()];
 	}
