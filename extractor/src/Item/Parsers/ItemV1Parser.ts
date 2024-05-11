@@ -5,6 +5,7 @@ import { BuyingStoreItemListV1Parser } from './SubParsers/BuyingStoreItemListV1P
 import { ItemDescTableV1Parser } from './SubParsers/ItemDescTableV1Parser.js';
 import { ItemDisplayNameTableV1Parser } from './SubParsers/ItemDisplayNameTableV1Parser.js';
 import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.js';
+import { ItemSlotCountTableV1Parser } from './SubParsers/ItemSlotCountTableV1Parser.js';
 
 export type ItemV1Files = {
 	bookItemNameTable?: string | null;
@@ -47,6 +48,8 @@ export class ItemV1Parser {
 	private bookItemNameTable: number[] | null = null;
 
 	private buyingStoreItemList: number[] | null = null;
+
+	private slotTable: Map<number, number> | null = null;
 
 	constructor(itemDb: Map<number, Item>, files: ItemV1Files) {
 		this.itemDb = itemDb;
@@ -92,6 +95,11 @@ export class ItemV1Parser {
 		if (this.files.buyingStoreItemList) {
 			const parser = await BuyingStoreItemListV1Parser.fromFile(this.files.buyingStoreItemList);
 			this.buyingStoreItemList = await parser.parse();
+		}
+
+		if (this.files.itemSlotCountTable) {
+			const parser = await ItemSlotCountTableV1Parser.fromFile(this.files.itemSlotCountTable);
+			this.slotTable = await parser.parse();
 		}
 	}
 
@@ -189,6 +197,8 @@ export class ItemV1Parser {
 		this.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName");
 		this.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription");
 		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite");
+
+		this.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount");
 
 		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 		this.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
