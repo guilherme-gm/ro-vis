@@ -23,7 +23,6 @@ export class Cli {
 			.option("--clean-run", "To be used together with '--dry-run'. Only replicate patch list, everything else is run from zero")
 			.option("--only <name>", "Run only a given loader");
 
-			console.log(process.argv);
 		this.program.parse(process.argv);
 
 		this.dryRun = this.program.opts()['dryRun'] ?? false;

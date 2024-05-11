@@ -42,11 +42,15 @@ try {
 	const patchList = await patchDb.getAll({}, { order: 1 });
 
 	const loaders = new Map<MetadataType, IDataLoader>([
-		// [MetadataType.Quest, new LoadQuests()],
+		[MetadataType.Quest, new LoadQuests()],
 		[MetadataType.Item, new LoadItem()],
 	]);
 
 	for (const [metaType, loader] of loaders.entries()) {
+		if (Cli.cli.only !== "" && Cli.cli.only !== metaType) {
+			continue;
+		}
+
 		let meta = await metadataDb.get(metaType);
 		if (meta == null) {
 			meta = new Metadata(metaType);
