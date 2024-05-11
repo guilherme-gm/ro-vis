@@ -7,3 +7,6 @@ dist/
 
 # Input files
 extractor/raw
+
+# Output files
+extractor/out

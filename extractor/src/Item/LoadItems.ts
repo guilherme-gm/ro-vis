@@ -148,8 +148,10 @@ export class LoadItem implements IDataLoader {
 			}
 		}
 
-		// fs.writeFileSync(`out_${patch._id}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
-		// fs.writeFileSync(`out_${patch._id}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
+		if (Cli.cli.dryRun) {
+			fs.writeFileSync(`out/out_${patch._id}_${this.name}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
+			fs.writeFileSync(`out/out_${patch._id}_${this.name}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
+		}
 
 		if (newRecords.size === 0 && updatedRecords.length === 0) {
 			Logger.warn(`!!!! WARN: NO-Change patch "${patch._id}" for file "questid2display"`);

@@ -23,6 +23,9 @@ if (dryRun) {
 
 	const uri = mongod.getUri('ro-vis');
 	Config.overrideMongo(uri);
+
+	fs.rmSync('out', { recursive: true, force: true });
+	fs.mkdirSync('out');
 }
 
 try {
