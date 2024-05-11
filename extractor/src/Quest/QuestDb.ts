@@ -1,8 +1,6 @@
 import { LogRecordDao } from "../Database/LogRecordDao.js";
 import { Quest } from "./DataStructures/Quest.js";
-import { QuestV1 } from "./DataStructures/QuestV1.js";
-import { QuestV3 } from "./DataStructures/QuestV3.js";
-import { QuestV3RewardItem } from "./DataStructures/QuestV3RewardItem.js";
+import { QuestRewardItem } from "./DataStructures/QuestRewardItem.js";
 
 export class QuestDb extends LogRecordDao<Quest> {
 	constructor() {
@@ -10,40 +8,25 @@ export class QuestDb extends LogRecordDao<Quest> {
 	}
 
 	protected override toInstance(data: Quest): Quest {
-		const version = data._FileVersion;
+		const q = new Quest();
 
-		if (QuestV1.isV1(data)) {
-			const q = new QuestV1();
-			q.Id = data.Id;
-			q.Title = data.Title;
-			q.Summary = data.Summary;
-			q.Description = data.Description;
-			q.OldIcon = data.OldIcon;
-			q.OldImage = data.OldImage;
+		q.Id = data.Id;
+		q.Title = data.Title;
+		q.Summary = data.Summary;
+		q.Description = data.Description;
+		q.IconName = data.IconName;
+		q.NpcSpr = data.NpcSpr;
+		q.NpcPosX = data.NpcPosX;
+		q.RewardEXP = data.RewardEXP;
+		q.RewardJEXP = data.RewardJEXP;
+		q.RewardItemList = data.RewardItemList.map((v) => {
+			const r = new QuestRewardItem();
+			r.ItemID = v.ItemID;
+			r.ItemNum = v.ItemNum;
 
-			return q;
-		} else if (QuestV3.isV3(data)) {
-			const q = new QuestV3();
-			q.Id = data.Id;
-			q.Title = data.Title;
-			q.Summary = data.Summary;
-			q.Description = data.Description;
-			q.IconName = data.IconName;
-			q.NpcSpr = data.NpcSpr;
-			q.NpcPosX = data.NpcPosX;
-			q.RewardEXP = data.RewardEXP;
-			q.RewardJEXP = data.RewardJEXP;
-			q.RewardItemList = data.RewardItemList.map((v) => {
-				const r = new QuestV3RewardItem();
-				r.ItemID = v.ItemID;
-				r.ItemNum = v.ItemNum;
+			return r;
+		});
 
-				return r;
-			});
-
-			return q;
-		} else {
-			throw new Error(`Invalid Quest version "${version}"`);
-		}
+		return q;
 	}
 }

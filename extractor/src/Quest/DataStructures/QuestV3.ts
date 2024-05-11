@@ -1,6 +1,6 @@
-import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
-import { RecordObject } from "../../Database/RecordObject.js";
 import { Quest } from "./Quest.js";
+import { QuestRewardItem } from "./QuestRewardItem.js";
+import { QuestV } from "./QuestV.js";
 import { QuestV3RewardItem } from "./QuestV3RewardItem.js";
 
 /**
@@ -8,7 +8,7 @@ import { QuestV3RewardItem } from "./QuestV3RewardItem.js";
  * Since 2018-03-21
  */
 export class QuestV3 {
-	public static isV3(quest: Quest): quest is QuestV3 {
+	public static isV3(quest: QuestV): quest is QuestV3 {
 		return quest._FileVersion === 3;
 	}
 
@@ -58,27 +58,31 @@ export class QuestV3 {
 		return this._FileVersion;
 	}
 
-	public hasChange(other: RecordObject): boolean {
-		if (other.getFileVersion() !== this.getFileVersion()) {
-			return true;
-		}
+	public toQuest(): Quest {
+		const q = new Quest();
 
-		if (!(other instanceof QuestV3)) {
-			throw new Error('Invalid type');
-		}
+		q._FileVersion = this._FileVersion;
+		q.Id = this.Id;
+		q.Title = this.Title;
+		q.Description = this.Description;
+		q.Summary = this.Summary;
+		q.IconName = this.IconName;
+		q.NpcSpr = this.NpcSpr;
+		q.NpcNavi = this.NpcNavi;
+		q.NpcPosX = this.NpcPosX;
+		q.NpcPosY = this.NpcPosY;
+		q.RewardEXP = this.RewardEXP;
+		q.RewardJEXP = this.RewardJEXP;
 
-		return (
-			other.Title != this.Title
-			|| !ArrayEqual.isEqual(other.Description, this.Description)
-			|| other.Summary != this.Summary
-			|| other.IconName != this.IconName
-			|| other.NpcSpr != this.NpcSpr
-			|| other.NpcNavi != this.NpcNavi
-			|| other.NpcPosX != this.NpcPosX
-			|| other.NpcPosY != this.NpcPosY
-			|| other.RewardEXP != this.RewardEXP
-			|| other.RewardJEXP != this.RewardJEXP
-			|| !ArrayEqual.isEqual(this.RewardItemList, other.RewardItemList, (a, b) => a.hasChange(b))
-		);
+		q.RewardItemList = [];
+		this.RewardItemList?.forEach((r) => {
+			const reward = new QuestRewardItem();
+			reward.ItemID = r.ItemID;
+			reward.ItemNum = r.ItemNum;
+
+			q.RewardItemList.push(reward);
+		});
+
+		return q;
 	}
 }

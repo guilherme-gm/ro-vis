@@ -1,15 +1,15 @@
+import * as fs from "fs";
+import path from "path";
+import { IParser } from "../CommonParser/IParser.js";
+import { patchesRootDir } from "../Config/config.js";
 import { LogRecord } from "../Database/LogRecord.js";
-import { QuestV1 } from "./DataStructures/QuestV1.js";
-import { QuestV1Parser } from "./Parsers/QuestV1Parser.js";
-import { QuestDb } from "./QuestDb.js";
 import { IDataLoader } from "../IDataLoader.js";
 import { PatchRecord } from "../Patches/PatchRecord.js";
-import path from "path";
-import { patchesRootDir } from "../Config/config.js";
-import * as fs from "fs";
-import { IParser } from "../CommonParser/IParser.js";
 import { Quest } from "./DataStructures/Quest.js";
+import { QuestV } from "./DataStructures/QuestV.js";
+import { QuestV1Parser } from "./Parsers/QuestV1Parser.js";
 import { QuestV3Parser } from "./Parsers/QuestV3Parser.js";
+import { QuestDb } from "./QuestDb.js";
 
 export class LoadQuests implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -59,7 +59,7 @@ export class LoadQuests implements IDataLoader {
 		return true;
 	}
 
-	private async getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<Quest>> {
+	private async getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<QuestV>> {
 		const version = this.getQuestDataVersion(patch);
 		console.log(`Version: ${version}`);
 		if (version === 1) {
@@ -77,7 +77,7 @@ export class LoadQuests implements IDataLoader {
 
 		const questMap = new Map<string, Quest>();
 		rawQuests.forEach((quest) => {
-			questMap.set(quest.getId(), quest);
+			questMap.set(quest.getId(), quest.toQuest());
 		});
 
 		return [...questMap.values()];
@@ -110,7 +110,7 @@ export class LoadQuests implements IDataLoader {
 			if (!record) {
 				newRecords.set(quest.getId(), new LogRecord<Quest>(patch._id, quest));
 			} else {
-				if (record.current.value.hasChange(quest)) {
+				if (!record.current.value.equals(quest)) {
 					record.addChange(patch._id, quest);
 					updatedRecords.push(record);
 				}

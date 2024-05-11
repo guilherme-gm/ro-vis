@@ -1,9 +1,9 @@
-import { RecordObject } from "../../Database/RecordObject.js";
 import { Quest } from "./Quest.js";
+import { QuestV } from "./QuestV.js";
 
 // questid2display.txt ; Since a long time ago (2008?)
-export class QuestV1 implements RecordObject {
-	public static isV1(quest: Quest): quest is QuestV1 {
+export class QuestV1 {
+	public static isV1(quest: QuestV): quest is QuestV1 {
 		return quest._FileVersion === 1;
 	}
 
@@ -49,22 +49,17 @@ export class QuestV1 implements RecordObject {
 		return this._FileVersion;
 	}
 
-	public hasChange(other: RecordObject): boolean {
-		if (other.getFileVersion() !== this.getFileVersion()) {
-			return true;
-		}
+	public toQuest(): Quest {
+		const q = new Quest();
 
-		if (!(other instanceof QuestV1)) {
-			throw new Error('Invalid type');
-		}
+		q._FileVersion = this._FileVersion;
+		q.Id = this.Id;
+		q.Title = this.Title;
+		q.Description = [this.Description];
+		q.Summary = this.Summary;
+		q.IconName = this.OldIcon;
+		q.OldImage = this.OldImage;
 
-		return (
-			other.Id != this.Id
-			|| other.Title != this.Title
-			|| other.Description != this.Description
-			|| other.Summary != this.Summary
-			|| other.OldIcon != this.OldIcon
-			|| other.OldImage != this.OldImage
-		);
+		return q;
 	}
 }

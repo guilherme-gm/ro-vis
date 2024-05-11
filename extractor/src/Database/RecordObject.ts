@@ -1,5 +1,5 @@
 export interface RecordObject {
 	getId(): string;
 	getFileVersion(): number;
-	hasChange(other: RecordObject): boolean;
+	equals(other: RecordObject): boolean;
 }
