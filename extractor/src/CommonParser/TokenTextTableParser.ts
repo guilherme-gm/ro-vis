@@ -47,10 +47,12 @@ export class TokenTextTableParser {
 		return this.reader.isLineStart();
 	}
 
-	public consumeRestOfLine(): void {
-		while (!this.reader.isEndOfFile() && this.reader.readChar() !== '\n') {
-			continue;
-		}
+	private isEscapedSeparator(): boolean {
+		// In multiline cells, a "#" may be followed by a space and other characters, in this case they are considered part
+		// of the text and not a delimiter.
+		return this.reader.peekChar() === '#'
+			&& this.reader.peekChar(1) === ' '
+			&& /[\w\d]+/.test(this.reader.peekChar(2) ?? '');
 	}
 
 	private _readCell(multiline: boolean): Result<string> {
@@ -63,11 +65,7 @@ export class TokenTextTableParser {
 		let cell = '';
 		while (!this.isEndOfFile()
 			&& (multiline || this.reader.peekChar() !== '\n')
-			&& (
-				this.reader.peekChar() !== '#'
-				// A "#" followed by a " " is still part of the string.
-				|| (this.reader.peekChar() === '#' && this.reader.peekChar(1) === ' ')
-			)
+			&& (this.reader.peekChar() !== '#' || this.isEscapedSeparator())
 		) {
 			cell += this.reader.readChar();
 		}
@@ -79,6 +77,11 @@ export class TokenTextTableParser {
 		const char = this.reader.readChar();
 
 		if (char === '\n' && !multiline) {
+			if (cell.trim() === '') {
+				this.reader.readChar();
+				return this._readCell(multiline);
+			}
+
 			return Result.fail(new Error(`Detected a line break in a cell that does not support multi line. Value: "${cell}". Line ${this.reader.getLineNumber()}`));
 		}
 

@@ -30,12 +30,6 @@ export abstract class ItemKeyValueTableParser<U> extends TokenTextTableParser {
 				const id = this.readIntCell().unwrap();
 				const value = this[this.readFunction]().unwrap() as U;
 
-				// Official files broke the format at some places, this is a workaround
-				// when a record is complete but there are a few trailling characters
-				if (!this.isLineStart()) {
-					this.consumeRestOfLine();
-				}
-
 				table.set(id, value);
 			} catch (error) {
 				Logger.error('Failed while reading entry; skipping...', error);

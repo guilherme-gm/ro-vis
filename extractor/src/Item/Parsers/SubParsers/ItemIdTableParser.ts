@@ -17,12 +17,6 @@ export abstract class ItemIdTableParser extends TokenTextTableParser {
 			try {
 				const id = this.readIntCell().unwrap();
 
-				// Official files broke the format at some places, this is a workaround
-				// when a record is complete but there are a few trailling characters
-				if (!this.isLineStart()) {
-					this.consumeRestOfLine();
-				}
-
 				table.push(id);
 			} catch (error) {
 				Logger.error('Failed while reading entry; skipping...', error);
