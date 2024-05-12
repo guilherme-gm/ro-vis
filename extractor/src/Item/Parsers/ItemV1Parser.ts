@@ -14,6 +14,9 @@ import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.
 import { ItemSlotCountTableV1Parser } from './SubParsers/ItemSlotCountTableV1Parser.js';
 import { ParserResult } from '../../CommonParser/IParser.js';
 import { ParsingResult } from '../../CommonParser/ParsingResult.js';
+import { BoolIdTableMerger } from './DataMergers/BoolIdTableMerger.js';
+import { KeyValueTableMerger } from './DataMergers/KeyValueTableMerger.js';
+import { CardFlavorMerger } from './DataMergers/CardFlavorMerger.js';
 
 export type ItemV1Files = {
 	bookItemNameTable?: string | null;
@@ -28,10 +31,6 @@ export type ItemV1Files = {
 	num2ItemDescTable?: string | null;
 	num2ItemDisplayNameTable?: string | null;
 	num2ItemResNameTable?: string | null;
-};
-
-type KeyOfType<T, V> = keyof {
-	[P in keyof T as T[P] extends V? P: never]: any;
 };
 
 export class ItemV1Parser {
@@ -156,132 +155,6 @@ export class ItemV1Parser {
 		}
 	}
 
-	private loadTable<T>(
-		reference: string, table: Map<number, T> | null,
-		v1Key: KeyOfType<ItemV1, T>,
-		itemKey: KeyOfType<Item, T>,
-		defaultValue?: T,
-	) {
-		if (v1Key === "_FileVersion") {
-			throw new Error('Invalid v1 key "_FileVersion"');
-		}
-
-		if (table) {
-			for (let [itemId, val] of table.entries()) {
-				const item = this.newItemMap.get(itemId);
-				if (item) {
-					// @ts-ignore -- too hard to type
-					item[v1Key] = val;
-				} else {
-					Logger.warn(`${chalk.whiteBright(reference)}: Item ${chalk.whiteBright(itemId)} does not exists.`);
-				}
-
-			}
-		} else {
-			for (let item of this.newItemMap.values()) {
-				const oldItem = this.itemDb.get(item.Id);
-				if (oldItem) {
-					// @ts-ignore -- too hard to type
-					item[v1Key] = oldItem[itemKey];
-				} else if (defaultValue !== undefined) {
-					// @ts-ignore -- too hard to type
-					item[v1Key] = defaultValue;
-				} else {
-					throw new Error(`${reference}: Item ${item.Id} is new, but not loaded.`);
-				}
-			}
-		}
-	}
-
-	private loadBoolIdTable(
-		reference: string,
-		idTable: number[] | null,
-		v1Key: KeyOfType<ItemV1, boolean>,
-		itemKey: KeyOfType<Item, boolean>,
-	): void {
-		if (idTable) {
-			for (let item of this.newItemMap.values()) {
-				item[v1Key] = false;
-			}
-
-			for (let itemId of idTable) {
-				const item = this.newItemMap.get(itemId);
-				if (!item) {
-					Logger.warn(`${reference}: Item ${itemId} does not exists, could not set the flag.`);
-					continue;
-				}
-
-				item[v1Key] = true;
-			}
-		} else {
-			for (let item of this.newItemMap.values()) {
-				const oldItem = this.itemDb.get(item.Id);
-				if (oldItem) {
-					item[v1Key] = oldItem[itemKey];
-				} else {
-					item[v1Key] = false;
-				}
-			}
-		}
-	}
-
-	private loadCardFlavor(): void {
-		if (!this.cardPostfixNameTable || !this.cardPrefixNameTable) {
-			for (let item of this.newItemMap.values()) {
-				const oldItem = this.itemDb.get(item.Id);
-				if (oldItem) {
-					item.CardPrefix = oldItem.CardPrefix;
-					item.CardPostfix = oldItem.CardPostfix;
-				} else {
-					item.CardPrefix = "";
-					item.CardPostfix = "";
-				}
-			}
-		}
-
-		// Fix items that no longer have a PostFix. In other words:
-		// An item that was in postfix table but no longer is, their PostFix should now be Prefix
-		if (this.cardPostfixNameTable) {
-			for (let item of this.newItemMap.values()) {
-				if (item.CardPostfix !== "" && !this.cardPostfixNameTable.includes(item.Id)) {
-					item.CardPrefix = item.CardPostfix;
-					item.CardPostfix = "";
-				}
-			}
-		}
-
-		// Update prefixes
-		if (this.cardPrefixNameTable) {
-			for (let [itemId, prefix] of this.cardPrefixNameTable) {
-				const item = this.newItemMap.get(itemId);
-				if (!item) {
-					Logger.warn(`${chalk.whiteBright('Card Prefix:')} Item ${itemId} doesn't exists, so we can't load its prefix.`);
-					continue;
-				}
-
-				item.CardPrefix = prefix;
-			}
-		}
-
-		// Update postfixes
-		if (this.cardPostfixNameTable) {
-			for (let itemId of this.cardPostfixNameTable) {
-				const item = this.newItemMap.get(itemId);
-				if (!item) {
-					Logger.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
-					continue;
-				}
-
-				if (item.CardPrefix !== "") {
-					item.CardPostfix = item.CardPrefix;
-					item.CardPrefix = "";
-				} else if (item.CardPostfix === "") {
-					Logger.error(`Card Postfix: Item ${itemId} has postfix entry but does not have a prefix/postfix value.`);
-				}
-			}
-		}
-	}
-
 	public async parse(): Promise<ParserResult<ItemV1>> {
 		await this.parseTables();
 
@@ -306,20 +179,23 @@ export class ItemV1Parser {
 			}
 		}
 
-		this.loadTable("Identified Item Desc Table", this.idNum2ItemDescTable, "IdentifiedDescription", "IdentifiedDescription", []);
-		this.loadTable("Identified Item Res Table", this.idNum2ItemResNameTable, "IdentifiedSprite", "IdentifiedSprite", "");
+		const keyValueTableMerger = new KeyValueTableMerger(this.itemDb, this.newItemMap);
+		keyValueTableMerger.loadTable("Identified Item Desc Table", this.idNum2ItemDescTable, "IdentifiedDescription", "IdentifiedDescription", []);
+		keyValueTableMerger.loadTable("Identified Item Res Table", this.idNum2ItemResNameTable, "IdentifiedSprite", "IdentifiedSprite", "");
 
-		this.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName", "");
-		this.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription", []);
-		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite", "");
+		keyValueTableMerger.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName", "");
+		keyValueTableMerger.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription", []);
+		keyValueTableMerger.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite", "");
 
-		this.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount", 0);
-		this.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration", "");
+		keyValueTableMerger.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount", 0);
+		keyValueTableMerger.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration", "");
 
-		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
-		this.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
+		const boolIdTableMerger = new BoolIdTableMerger(this.itemDb, this.newItemMap);
+		boolIdTableMerger.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
+		boolIdTableMerger.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
 
-		this.loadCardFlavor();
+		const cardFlavorMerger = new CardFlavorMerger(this.itemDb, this.newItemMap, this.cardPrefixNameTable, this.cardPostfixNameTable);
+		cardFlavorMerger.loadCardFlavor();
 
 		return {
 			result: ParsingResult.Ok,
