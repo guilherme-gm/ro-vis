@@ -12,6 +12,8 @@ import { ItemDescTableV1Parser } from './SubParsers/ItemDescTableV1Parser.js';
 import { ItemDisplayNameTableV1Parser } from './SubParsers/ItemDisplayNameTableV1Parser.js';
 import { ItemResNameTableV1Parser } from './SubParsers/ItemResNameTableV1Parser.js';
 import { ItemSlotCountTableV1Parser } from './SubParsers/ItemSlotCountTableV1Parser.js';
+import { ParserResult } from '../../CommonParser/IParser.js';
+import { ParsingResult } from '../../CommonParser/ParsingResult.js';
 
 export type ItemV1Files = {
 	bookItemNameTable?: string | null;
@@ -280,7 +282,7 @@ export class ItemV1Parser {
 		}
 	}
 
-	public async parse(): Promise<ItemV1[]> {
+	public async parse(): Promise<ParserResult<ItemV1>> {
 		await this.parseTables();
 
 		this.newItemMap = new Map<number, ItemV1>();
@@ -319,6 +321,9 @@ export class ItemV1Parser {
 
 		this.loadCardFlavor();
 
-		return [...this.newItemMap.values()];
+		return {
+			result: ParsingResult.Ok,
+			data: [...this.newItemMap.values()],
+		};
 	}
 }

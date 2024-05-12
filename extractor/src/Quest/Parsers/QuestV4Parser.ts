@@ -1,6 +1,9 @@
+import * as fs from "fs";
 import { LuaTableParser } from '../../CommonParser/LuaTableParser.js';
 import { QuestV3RewardItem } from '../DataStructures/QuestV3RewardItem.js';
 import { QuestV4 } from '../DataStructures/QuestV4.js';
+import { ParsingResult } from "../../CommonParser/ParsingResult.js";
+import { ParserResult } from "../../CommonParser/IParser.js";
 
 export class QuestV4Parser extends LuaTableParser<QuestV4[]> {
 	public static async fromFile(filePath: string): Promise<QuestV4Parser> {
@@ -24,7 +27,14 @@ export class QuestV4Parser extends LuaTableParser<QuestV4[]> {
 
 	private readonly RewardExpectedKeys = new Set<string>(['ItemID', 'ItemNum']);
 
-	public async parse(): Promise<QuestV4[]> {
+	public async parse(): Promise<ParserResult<QuestV4>> {
+		if (!fs.existsSync(this.filePath)) {
+			return {
+				result: ParsingResult.Empty,
+				data: [],
+			};
+		}
+
 		const quests: QuestV4[] = [];
 
 		const result = await this.extractLuaTable('QuestInfoList', true);
@@ -68,6 +78,9 @@ export class QuestV4Parser extends LuaTableParser<QuestV4[]> {
 			quests.push(questv4);
 		});
 
-		return quests;
+		return {
+			result: ParsingResult.Ok,
+			data: quests,
+		};
 	}
 }

@@ -1,13 +1,14 @@
 import * as fs from "fs";
 import { Cli } from "../Cli.js";
 import { IDataLoader } from "../CommonLoader/IDataLoader.js";
-import { IParser } from "../CommonParser/IParser.js";
+import { IParser, ParserResult } from "../CommonParser/IParser.js";
 import { LogRecord } from "../Database/LogRecord.js";
 import { LogRecordDao } from "../Database/LogRecordDao.js";
 import { RecordObject } from "../Database/RecordObject.js";
 import { Logger } from "../Logger.js";
 import { PatchRecord } from "../Patches/PatchRecord.js";
 import { IFileEntry } from "./IFileEntry.js";
+import { ParsingResult } from "../CommonParser/ParsingResult.js";
 
 export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T>> implements IDataLoader {
 	public abstract name: string;
@@ -24,16 +25,26 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 
 	protected abstract getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<U>>;
 
-	protected async getPatchEntries(patch: PatchRecord, patchFolder: string): Promise<T[]> {
+	protected async getPatchEntries(patch: PatchRecord, patchFolder: string): Promise<ParserResult<T>> {
 		const parser = await this.getParser(patch, patchFolder);
 		const rawEntries = await parser.parse();
 
+		if (rawEntries.result === ParsingResult.Empty) {
+			return {
+				result: ParsingResult.Empty,
+				data: [],
+			};
+		}
+
 		const entriesMap = new Map<string, T>();
-		rawEntries.forEach((entry) => {
+		rawEntries.data.forEach((entry) => {
 			entriesMap.set(entry.getId(), entry.toEntity());
 		});
 
-		return [...entriesMap.values()];
+		return {
+			result: ParsingResult.Ok,
+			data: [...entriesMap.values()],
+		};
 	}
 
 	public async load(patch: PatchRecord, patchDir: string): Promise<void> {
@@ -50,11 +61,15 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 		);
 
 		const patchEntries = await this.getPatchEntries(patch, patchDir);
+		if (patchEntries.result === ParsingResult.Empty) {
+			Logger.warn(`The patch doesn't have files to load. (Probably same file)`);
+			return;
+		}
 
 		const newRecords: Map<string, LogRecord<T>> = new Map<string, LogRecord<T>>();
 		const updatedRecords: LogRecord<T>[] = [];
 
-		for (const patchEntry of patchEntries) {
+		for (const patchEntry of patchEntries.data) {
 			const record = this.existingRecords.get(patchEntry.getId());
 			if (!record) {
 				newRecords.set(patchEntry.getId(), new LogRecord<T>(patch._id, patchEntry));

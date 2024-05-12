@@ -2,7 +2,7 @@ import * as childProcess from "child_process";
 import { Logger } from "../Logger.js";
 
 export class LuaTableParser<T> {
-	private filePath: string;
+	protected filePath: string;
 
 	constructor(filePath: string) {
 		this.filePath = filePath;
