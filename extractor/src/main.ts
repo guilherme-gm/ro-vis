@@ -29,6 +29,8 @@ if (dryRun) {
 	fs.mkdirSync('out');
 }
 
+let exitCode = 0;
+
 try {
 	const metadataDb = new MetadataDb();
 	const patchDb = new PatchDb();
@@ -82,7 +84,7 @@ try {
 				continue;
 			}
 
-			Logger.info(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(patch._id)}...`);
+			Logger.status(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(patch._id)}...`);
 			await loader.load(patch);
 
 			meta.appliedPatches.add(patch._id);
@@ -90,6 +92,9 @@ try {
 			await metadataDb.updateOrCreate(meta._id, meta);
 		}
 	}
+} catch (error) {
+	Logger.error('An unhandled error happened...', error);
+	exitCode = 1;
 } finally {
 	if (Cli.cli.holdProcess) {
 		Logger.status('Extraction ended. Press ENTER to finish.');
@@ -106,6 +111,8 @@ try {
 
 	if (mongod) {
 		Logger.status('Closing temporary database before ending...');
-		mongod?.stop();
+		await mongod?.stop();
 	}
 }
+
+process.exit(exitCode);
