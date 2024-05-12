@@ -21,6 +21,8 @@ export class Cli {
 
 	public only: string = "";
 
+	public onlyPatches: string[] | null = [];
+
 	public load(): void {
 		this.program.name('RO Vis extractor');
 
@@ -30,7 +32,8 @@ export class Cli {
 			.option("--change-dump", "Dump change logs as json files for debugging")
 			.option("--mongo-port <port>", "For dry-run and clean-run, defines the port where the in-memory MongoDB will run on. When not set, a random one is chosen.")
 			.option("--hold-process", "When the extraction finishes/crashes, stop in a 'Press enter to continue' message before ending the process (the temporary DB is also kept running)")
-			.option("--only <name>", "Run only a given loader");
+			.option("--only <name>", "Run only a given loader")
+			.option("--only-patches <patches>", "Only run the following patches, several patches may be specified separating with comma");
 
 		this.program.parse(process.argv);
 
@@ -40,5 +43,6 @@ export class Cli {
 		this.mongoPort = this.program.opts()['mongoPort'] ? parseInt(this.program.opts()['mongoPort'], 10) : undefined;
 		this.holdProcess = this.program.opts()['holdProcess'] ?? false;
 		this.only = this.program.opts()['only'] ?? '';
+		this.onlyPatches = this.program.opts()['onlyPatches']?.split(',') ?? null;
 	}
 }

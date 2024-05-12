@@ -49,7 +49,14 @@ try {
 		await metadataDb.replicate();
 	}
 
-	const patchList = await patchDb.getAll({}, { order: 1 });
+	let patchFilter = {};
+	if (Cli.cli.onlyPatches) {
+		patchFilter = {
+			_id: { $in: Cli.cli.onlyPatches },
+		};
+	}
+
+	const patchList = await patchDb.getAll(patchFilter, { order: 1 });
 
 	const loaders = new Map<MetadataType, IDataLoader>([
 		[MetadataType.Quest, new LoadQuests()],
