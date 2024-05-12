@@ -134,7 +134,6 @@ export class ItemV1Parser {
 		}
 
 		if (this.fileExists(this.files.itemSlotCountTable)) {
-			console.log(this.files.itemSlotCountTable);
 			const parser = await ItemSlotCountTableV1Parser.fromFile(this.files.itemSlotCountTable);
 			this.slotTable = await parser.parse();
 		}
