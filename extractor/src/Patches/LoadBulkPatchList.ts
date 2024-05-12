@@ -29,9 +29,11 @@ export class LoadBulkPatchList {
 
 		const gpfList = Object.entries(gpfPatch)
 			.filter((entry) => entry[0].substring(0, 10).localeCompare('2012-01-01') >= 0)
+			.filter((entry) => !/^\d+-\d+-\d+rData/i.test(entry[0]) && !/_sakray_/i.test(entry[0]) && !/ragexeRE/i.test(entry[0]))
 			.sort((a, b) => a[0].substring(0, 10).localeCompare(b[0].substring(0, 10)));
 		const rgzList = Object.entries(rgzPatch)
 			.filter((entry) => entry[0].substring(0, 10).localeCompare('2012-01-01') >= 0)
+			.filter((entry) => !/^\d+-\d+-\d+rData/i.test(entry[0]) && !/_sakray_/i.test(entry[0]) && !/ragexeRE/i.test(entry[0]))
 			.sort((a, b) => a[0].substring(0, 10).localeCompare(b[0].substring(0, 10)));
 
 		const mergedList: PatchRecord[] = [
