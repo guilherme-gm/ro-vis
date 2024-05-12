@@ -52,6 +52,8 @@ export class ItemMoveInfoV5Parser {
 			moveInfo.canAuction = this.parseRestriction(columns[7]!);
 			moveInfo.canMoveToGuildStorage = this.parseRestriction(columns[8]!);
 			moveInfo.commentName = columns[9]?.replace(/^\/\/ /, "") ?? "";
+
+			table.push(moveInfo);
 		});
 
 		return Promise.resolve(table);
