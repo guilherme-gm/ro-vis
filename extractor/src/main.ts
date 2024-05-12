@@ -86,17 +86,17 @@ try {
 			// 	break;
 			// }
 
-			const patchDir = path.join(Config.patchesRootDir, patch._id);
-			if (!fs.existsSync(patchDir)) {
-				Logger.warn(`Patch ${chalk.whiteBright(patch._id)} does not exists. Skipping...`);
-				continue;
-			}
-
 			if (meta.appliedPatches.has(patch._id)) {
 				continue;
 			}
 
 			if (!loader.hasFileOfInterest(patch)) {
+				continue;
+			}
+
+			const patchDir = path.join(Config.patchesRootDir, patch._id);
+			if (!fs.existsSync(patchDir)) {
+				Logger.warn(`Patch ${chalk.whiteBright(patch._id)} does not exists. Skipping...`);
 				continue;
 			}
 
