@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { Cli } from './Cli.js';
 
 export class Logger {
 	public static logger = new Logger();
@@ -28,11 +29,13 @@ export class Logger {
 	}
 
 	public error(message: string, error?: unknown): void {
-		if (error) {
+		if (error && Cli.cli.showTraces) {
 			console.error(`${chalk.red('[Error]')} ----------- ${message} -----------`);
 			console.error(error);
 			console.error(`${chalk.red('[Error]')} -------------------------------------------`);
 			console.error('');
+		} else if (error) {
+			console.error(`${chalk.red('[Error]')} ${message} -- ${error}`);
 		} else {
 			console.error(`${chalk.red('[Error]')} ${message}`);
 		}
