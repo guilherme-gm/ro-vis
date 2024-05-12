@@ -90,7 +90,7 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 			}
 		}
 
-		if (Cli.cli.dryRun) {
+		if (Cli.cli.changeDump) {
 			fs.writeFileSync(`out/out_${patch._id}_${this.name}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
 			fs.writeFileSync(`out/out_${patch._id}_${this.name}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
 		}
