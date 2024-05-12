@@ -7,4 +7,11 @@ export class ConvertClass {
 			exposeDefaultValues: true,
 		});
 	}
+
+	public static plainToInstance<T>(to: ClassConstructor<T>, value: unknown): T {
+		return plainToInstance(to, value, {
+			excludeExtraneousValues: true,
+			exposeDefaultValues: true,
+		});
+	}
 }

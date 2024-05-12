@@ -1,15 +1,14 @@
-import path from "path";
 import { BasicLoader } from "../CommonLoader/BasicLoader.js";
 import { IDataLoader } from "../CommonLoader/IDataLoader.js";
 import { IParser } from "../CommonParser/IParser.js";
 import { Logger } from "../Logger.js";
-import { PatchRecord } from "../Patches/PatchRecord.js";
 import { Quest } from "./DataStructures/Quest.js";
 import { QuestV } from "./DataStructures/QuestV.js";
 import { QuestV1Parser } from "./Parsers/QuestV1Parser.js";
 import { QuestV3Parser } from "./Parsers/QuestV3Parser.js";
 import { QuestV4Parser } from "./Parsers/QuestV4Parser.js";
 import { QuestDb } from "./QuestDb.js";
+import { Update } from "../Updates/Update.js";
 
 export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -18,7 +17,7 @@ export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoade
 		super(new QuestDb());
 	}
 
-	private getQuestDataVersion(patch: PatchRecord): number {
+	private getQuestDataVersion(patch: Update): number {
 		const date = patch._id.substring(0, 10);
 		if (date.localeCompare('2012-03-14') < 0) {
 			/**
@@ -48,39 +47,34 @@ export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoade
 		throw new Error(`Quest version for patch "${patch._id}" is not mapped.`);
 	}
 
-	public hasFileOfInterest(patch: PatchRecord): boolean {
-		const version = this.getQuestDataVersion(patch);
+	public hasFileOfInterest(update: Update): boolean {
+		const version = this.getQuestDataVersion(update);
 		let fileName: string;
 		if (version === 1) {
-			fileName = "data\\questid2display.txt";
+			fileName = "data/questid2display.txt";
 		} else if (version === 3 || version == 4) {
-			fileName = "system\\ongoingquestinfolist_true.lub";
+			fileName = "system/ongoingquestinfolist_true.lub";
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
 		}
 
-		const entry = patch.files.find((f) => f.toLocaleLowerCase().includes(fileName));
+		const entry = update.updates.find((f) => f.file.toLocaleLowerCase().includes(fileName));
 		if (!entry) {
-			return false;
-		}
-
-		// "[N]o changes"
-		if (entry.startsWith("[N]")) {
 			return false;
 		}
 
 		return true;
 	}
 
-	protected async getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<QuestV>> {
-		const version = this.getQuestDataVersion(patch);
+	protected async getParser(update: Update): Promise<IParser<QuestV>> {
+		const version = this.getQuestDataVersion(update);
 		Logger.info(`Version: ${version}`);
 		if (version === 1) {
-			return QuestV1Parser.fromFile(path.join(patchFolder, 'data', 'questid2display.txt'));
+			return QuestV1Parser.fromFile(this.getPath(update, 'data/questid2display.txt'));
 		} else if (version === 3) {
-			return QuestV3Parser.fromFile(path.join(patchFolder, 'System', 'OnGoingQuestInfoList_True.lub'));
+			return QuestV3Parser.fromFile(this.getPath(update, 'System/OnGoingQuestInfoList_True.lub'));
 		} else if (version === 4) {
-			return QuestV4Parser.fromFile(path.join(patchFolder, 'System', 'OnGoingQuestInfoList_True.lub'));
+			return QuestV4Parser.fromFile(this.getPath(update, 'System/OnGoingQuestInfoList_True.lub'));
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
 		}

@@ -6,9 +6,11 @@ import { LogRecord } from "../Database/LogRecord.js";
 import { LogRecordDao } from "../Database/LogRecordDao.js";
 import { RecordObject } from "../Database/RecordObject.js";
 import { Logger } from "../Logger.js";
-import { PatchRecord } from "../Patches/PatchRecord.js";
 import { IFileEntry } from "./IFileEntry.js";
 import { ParsingResult } from "../CommonParser/ParsingResult.js";
+import { Update } from "../Updates/Update.js";
+import { Config } from "../Config/config.js";
+import path from "path";
 
 export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T>> implements IDataLoader {
 	public abstract name: string;
@@ -21,12 +23,34 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 		this.entityDb = entityDb;
 	}
 
-	public abstract hasFileOfInterest(patch: PatchRecord): boolean;
+	protected getPathIfExists(update: Update, file: string): string | null {
+		const desiredFile = update.updates.find((f) => f.file.toLocaleLowerCase().includes(file.toLocaleLowerCase()));
+		if (!desiredFile) {
+			return null;
+		}
 
-	protected abstract getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<U>>;
+		return path.join(Config.patchesRootDir, desiredFile.patch, desiredFile.file);
+	}
 
-	protected async getPatchEntries(patch: PatchRecord, patchFolder: string): Promise<ParserResult<T>> {
-		const parser = await this.getParser(patch, patchFolder);
+	protected getPath(update: Update, file: string): string {
+		const filePath = this.getPathIfExists(update, file);
+		if (!filePath) {
+			throw new Error(`File ${file} does not exists in update ${update._id} file list.`);
+		}
+
+		if (!fs.existsSync(filePath)) {
+			throw new Error(`File ${filePath} does not exists in disk.`);
+		}
+
+		return filePath;
+	}
+
+	public abstract hasFileOfInterest(update: Update): boolean;
+
+	protected abstract getParser(update: Update): Promise<IParser<U>>;
+
+	protected async getPatchEntries(update: Update): Promise<ParserResult<T>> {
+		const parser = await this.getParser(update);
 		const rawEntries = await parser.parse();
 
 		if (rawEntries.result === ParsingResult.Empty) {
@@ -47,7 +71,7 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 		};
 	}
 
-	public async load(patch: PatchRecord, patchDir: string): Promise<void> {
+	public async load(update: Update): Promise<void> {
 		if (Cli.cli.dryRun) {
 			await this.entityDb.replicate();
 		}
@@ -60,7 +84,7 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 			new Map<string, LogRecord<T>>()
 		);
 
-		const patchEntries = await this.getPatchEntries(patch, patchDir);
+		const patchEntries = await this.getPatchEntries(update);
 		if (patchEntries.result === ParsingResult.Empty) {
 			Logger.warn(`The patch doesn't have files to load. (Probably same file)`);
 			return;
@@ -74,11 +98,11 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 			patchIds.add(patchEntry.getId());
 			const record = this.existingRecords.get(patchEntry.getId());
 			if (!record) {
-				newRecords.set(patchEntry.getId(), new LogRecord<T>(patch._id, patchEntry));
+				newRecords.set(patchEntry.getId(), new LogRecord<T>(update._id, patchEntry));
 			} else {
 				const currentValue = record.current.value;
 				if (currentValue === null || !currentValue.equals(patchEntry)) {
-					record.addChange(patch._id, patchEntry);
+					record.addChange(update._id, patchEntry);
 					updatedRecords.push(record);
 				}
 			}
@@ -86,13 +110,13 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 
 		for (const existingRecord of this.existingRecords.values()) {
 			if (!patchIds.has(existingRecord._id)) {
-				existingRecord.addChange(patch._id, null);
+				existingRecord.addChange(update._id, null);
 			}
 		}
 
 		if (Cli.cli.changeDump) {
-			fs.writeFileSync(`out/out_${patch._id}_${this.name}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
-			fs.writeFileSync(`out/out_${patch._id}_${this.name}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
+			fs.writeFileSync(`out/out_${update._id}_${this.name}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
+			fs.writeFileSync(`out/out_${update._id}_${this.name}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
 		}
 
 		if (newRecords.size === 0 && updatedRecords.length === 0) {

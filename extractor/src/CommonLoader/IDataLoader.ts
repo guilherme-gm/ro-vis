@@ -1,9 +1,9 @@
-import { PatchRecord } from "../Patches/PatchRecord.js";
+import { Update } from "../Updates/Update.js";
 
 export interface IDataLoader {
 	name: string;
 
-	hasFileOfInterest(patch: PatchRecord): boolean;
+	hasFileOfInterest(patch: Update): boolean;
 
-	load(patch: PatchRecord, patchDir: string): Promise<void>;
+	load(update: Update): Promise<void>;
 }
