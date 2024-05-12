@@ -1,3 +1,4 @@
+import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Quest } from "./Quest.js";
 import { QuestRewardItem } from "./QuestRewardItem.js";
 import { QuestV } from "./QuestV.js";
@@ -8,7 +9,7 @@ import { QuestV3RewardItem } from "./QuestV3RewardItem.js";
  * Since 2020-08-05
  * V4 - Adds CoolTimeQuest
  */
-export class QuestV4 {
+export class QuestV4 implements IFileEntry<Quest> {
 	public static isV4(quest: QuestV): quest is QuestV4 {
 		return quest._FileVersion === 4;
 	}
@@ -65,7 +66,7 @@ export class QuestV4 {
 		return this._FileVersion;
 	}
 
-	public toQuest(): Quest {
+	public toEntity(): Quest {
 		const q = new Quest();
 
 		q._FileVersion = this._FileVersion;

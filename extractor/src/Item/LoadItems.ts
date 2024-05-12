@@ -1,19 +1,16 @@
-import * as fs from "fs";
 import chalk from "chalk";
 import path from "path";
+import { BasicLoader } from "../CommonLoader/BasicLoader.js";
+import { IDataLoader } from "../CommonLoader/IDataLoader.js";
 import { IParser } from "../CommonParser/IParser.js";
-import { LogRecord } from "../Database/LogRecord.js";
-import { IDataLoader } from "../IDataLoader.js";
-import { PatchRecord } from "../Patches/PatchRecord.js";
-import { ItemV } from "./DataStructures/ItemV.js";
-import { Item } from "./DataStructures/Item.js";
-import { ItemDb } from "./ItemDb.js";
-import { ItemV1Parser } from "./Parsers/ItemV1Parser.js";
 import { Logger } from "../Logger.js";
-import { Config } from "../Config/config.js";
-import { Cli } from "../Cli.js";
+import { PatchRecord } from "../Patches/PatchRecord.js";
+import { Item } from "./DataStructures/Item.js";
+import { ItemV } from "./DataStructures/ItemV.js";
+import { ItemV1Parser } from "./Parsers/ItemV1Parser.js";
+import { ItemDb } from "./ItemDb.js";
 
-export class LoadItem implements IDataLoader {
+export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 	public name: string = LoadItem.name;
 
 	private readonly v1FileNames = [
@@ -30,6 +27,10 @@ export class LoadItem implements IDataLoader {
 		"data\\num2itemdisplaynametable.txt",
 		"data\\num2itemresnametable.txt",
 	];
+
+	constructor() {
+		super(new ItemDb());
+	}
 
 	private getItemDataVersion(patch: PatchRecord): number {
 		const date = patch._id.substring(0, 10);
@@ -71,7 +72,12 @@ export class LoadItem implements IDataLoader {
 		return path.join(patchFolder, desiredFile);
 	}
 
-	private async getParser(patch: PatchRecord, patchFolder: string, itemMap: Map<number, Item>): Promise<IParser<ItemV>> {
+	protected async getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<ItemV>> {
+		const itemMap = new Map<number, Item>();
+		this.existingRecords.forEach((item) => {
+			itemMap.set(item.current.value.Id, item.current.value);
+		});
+
 		const version = this.getItemDataVersion(patch);
 		Logger.info(`${chalk.whiteBright('Version:')} ${version}`);
 		if (version === 1) {
@@ -91,82 +97,6 @@ export class LoadItem implements IDataLoader {
 			});
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
-		}
-	}
-
-	private async getItemList(patch: PatchRecord, patchFolder: string, itemMap: Map<number, Item>): Promise<Item[]> {
-		const parser = await this.getParser(patch, patchFolder, itemMap);
-		const rawItems = await parser.parse();
-
-		const itemsMap = new Map<string, Item>();
-		rawItems.forEach((item) => {
-			itemsMap.set(item.getId(), item.toItem());
-		});
-
-		return [...itemsMap.values()];
-	}
-
-	public async load(patch: PatchRecord): Promise<void> {
-		const itemDb = new ItemDb();
-		if (Cli.cli.dryRun && !Cli.cli.cleanRun) {
-			await itemDb.replicate();
-		}
-
-		const existingRecords = (await itemDb.getAll()).reduce(
-			(memo, record) => {
-				memo.set(record._id, record);
-				return memo;
-			},
-			new Map<string, LogRecord<Item>>()
-		);
-
-		const itemMap = new Map<number, Item>();
-		existingRecords.forEach((item) => {
-			itemMap.set(item.current.value.Id, item.current.value);
-		});
-
-		const patchFolder = path.join(Config.patchesRootDir, patch._id);
-		if (!fs.existsSync(patchFolder)) {
-			Logger.warn(`!!!! WARN: Folder not found patch "${patch._id}" for file "questid2display"`);
-			fs.appendFileSync("./not-found.txt", `${patch._id}\tdata/questid2display.txt\n`);
-			return;
-		}
-
-		const items = await this.getItemList(patch, patchFolder, itemMap);
-		const newRecords: Map<string, LogRecord<Item>> = new Map<string, LogRecord<Item>>();
-		const updatedRecords: LogRecord<Item>[] = [];
-
-		for (const item of items) {
-			const record = existingRecords.get(item.getId());
-			if (!record) {
-				newRecords.set(item.getId(), new LogRecord<Item>(patch._id, item));
-			} else {
-				if (!record.current.value.equals(item)) {
-					record.addChange(patch._id, item);
-					updatedRecords.push(record);
-				}
-			}
-		}
-
-		if (Cli.cli.dryRun) {
-			fs.writeFileSync(`out/out_${patch._id}_${this.name}_new.json`, JSON.stringify([...newRecords.values()], null, 4));
-			fs.writeFileSync(`out/out_${patch._id}_${this.name}_upd.json`, JSON.stringify([...updatedRecords], null, 4));
-		}
-
-		if (newRecords.size === 0 && updatedRecords.length === 0) {
-			Logger.warn(`!!!! WARN: NO-Change patch "${patch._id}" for file "questid2display"`);
-			fs.appendFileSync("./no-op.txt", `${patch._id}\tdata/questid2display.txt\n`);
-			return;
-		}
-
-		Logger.info(`${newRecords.size} new records to create and ${updatedRecords.length} to update...`);
-		const newRecordsArr = [...newRecords.values()];
-		while (newRecordsArr.length > 0) {
-			await itemDb.insertMany(newRecordsArr.splice(0, 500));
-		}
-
-		if (updatedRecords.length > 0) {
-			await itemDb.bulkWrite(updatedRecords);
 		}
 	}
 }

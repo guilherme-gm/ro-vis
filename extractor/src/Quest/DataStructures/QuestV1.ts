@@ -1,8 +1,9 @@
+import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Quest } from "./Quest.js";
 import { QuestV } from "./QuestV.js";
 
 // questid2display.txt ; Since a long time ago (2008?)
-export class QuestV1 {
+export class QuestV1 implements IFileEntry<Quest> {
 	public static isV1(quest: QuestV): quest is QuestV1 {
 		return quest._FileVersion === 1;
 	}
@@ -49,7 +50,7 @@ export class QuestV1 {
 		return this._FileVersion;
 	}
 
-	public toQuest(): Quest {
+	public toEntity(): Quest {
 		const q = new Quest();
 
 		q._FileVersion = this._FileVersion;

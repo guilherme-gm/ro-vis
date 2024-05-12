@@ -1,3 +1,4 @@
+import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Quest } from "./Quest.js";
 import { QuestRewardItem } from "./QuestRewardItem.js";
 import { QuestV } from "./QuestV.js";
@@ -7,7 +8,7 @@ import { QuestV3RewardItem } from "./QuestV3RewardItem.js";
  * System/OngoingQuestInfoList_True.lub
  * Since 2018-03-21
  */
-export class QuestV3 {
+export class QuestV3 implements IFileEntry<Quest> {
 	public static isV3(quest: QuestV): quest is QuestV3 {
 		return quest._FileVersion === 3;
 	}
@@ -58,7 +59,7 @@ export class QuestV3 {
 		return this._FileVersion;
 	}
 
-	public toQuest(): Quest {
+	public toEntity(): Quest {
 		const q = new Quest();
 
 		q._FileVersion = this._FileVersion;

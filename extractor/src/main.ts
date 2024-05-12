@@ -1,5 +1,5 @@
 import { MetadataType } from "./Metadata/MetadataType.js";
-import { IDataLoader } from "./IDataLoader.js";
+import { IDataLoader } from "./CommonLoader/IDataLoader.js";
 import { LoadQuests } from "./Quest/LoadQuests.js";
 import { MetadataDb } from "./Metadata/MetadataDb.js";
 import { Metadata } from "./Metadata/Metadata.js";
@@ -80,7 +80,8 @@ try {
 			// 	break;
 			// }
 
-			if (!fs.existsSync(path.join(Config.patchesRootDir, patch._id))) {
+			const patchDir = path.join(Config.patchesRootDir, patch._id);
+			if (!fs.existsSync(patchDir)) {
 				Logger.warn(`Patch ${chalk.whiteBright(patch._id)} does not exists. Skipping...`);
 				continue;
 			}
@@ -94,7 +95,7 @@ try {
 			}
 
 			Logger.status(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(patch._id)}...`);
-			await loader.load(patch);
+			await loader.load(patch, patchDir);
 
 			meta.appliedPatches.add(patch._id);
 

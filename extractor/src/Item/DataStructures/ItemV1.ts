@@ -1,3 +1,4 @@
+import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Item } from "./Item.js";
 import { ItemV } from "./ItemV.js";
 
@@ -12,7 +13,7 @@ import { ItemV } from "./ItemV.js";
  * - cardprefixnametable.txt
  * - num2cardillustnametable.txt
  */
-export class ItemV1 {
+export class ItemV1 implements IFileEntry<Item> {
 	public static isV1(quest: ItemV): quest is ItemV1 {
 		return quest._FileVersion === 1;
 	}
@@ -80,7 +81,7 @@ export class ItemV1 {
 		return i;
 	}
 
-	public toItem(): Item {
+	public toEntity(): Item {
 		const i = new Item();
 
 		i._FileVersion = this._FileVersion;
