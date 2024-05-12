@@ -13,6 +13,8 @@ import path from "path";
 import { Cli } from "./Cli.js";
 import { MongoMemoryServer } from 'mongodb-memory-server-core';
 import readline from 'readline';
+import { LoadBulkPatchList } from "./Patches/LoadBulkPatchList.js";
+import { MemoryServerInstanceOpts } from "mongodb-memory-server-core/lib/MongoMemoryServer.js";
 
 Cli.load();
 
@@ -20,7 +22,12 @@ let mongod: MongoMemoryServer | null = null;
 const dryRun = Cli.cli.dryRun;
 const cleanRun = Cli.cli.cleanRun;
 if (dryRun) {
-	mongod = await MongoMemoryServer.create();
+	const opts: MemoryServerInstanceOpts = {};
+	if (Cli.cli.mongoPort) {
+		opts.port = Cli.cli.mongoPort;
+	}
+
+	mongod = await MongoMemoryServer.create({ instance: opts });
 
 	const uri = mongod.getUri('ro-vis');
 	Config.overrideMongo(uri);
@@ -35,9 +42,11 @@ try {
 	const metadataDb = new MetadataDb();
 	const patchDb = new PatchDb();
 	if (dryRun) {
-		await patchDb.replicate();
-
-		if (!cleanRun) {
+		if (cleanRun) {
+			const patchListLoader = new LoadBulkPatchList();
+			await patchListLoader.do();
+		} else {
+			await patchDb.replicate();
 			await metadataDb.replicate();
 		}
 	}

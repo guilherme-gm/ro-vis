@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { PatchRecord } from "./PatchRecord.js";
-// import { PatchDb } from "./PatchDb.js";
+import { PatchDb } from "./PatchDb.js";
 
 type PatchEntry = {
 	name: string;
@@ -34,8 +34,31 @@ export class LoadBulkPatchList {
 			.filter((entry) => entry[0].substring(0, 10).localeCompare('2012-01-01') >= 0)
 			.sort((a, b) => a[0].substring(0, 10).localeCompare(b[0].substring(0, 10)));
 
-		const mergedList: PatchRecord[] = [];
-		let i = 0;
+		const mergedList: PatchRecord[] = [
+			// The first patch, made up of the first presence of each of them and adapted if needed.
+			// This allows us to build a full ItemDB entry that is improved as we go.
+			{
+				"_id" : "2012-01-00_dummy",
+				"order" : 0,
+				"files" : [
+					"data\\bookitemnametable.txt",
+					"data\\buyingstoreitemlist.txt",
+					"data\\cardpostfixnametable.txt",
+					"data\\cardprefixnametable.txt",
+					"data\\idnum2itemdesctable.txt",
+					"data\\idnum2itemdisplaynametable.txt",
+					"data\\idnum2itemresnametable.txt",
+					"data\\itemslotcounttable.txt",
+					"data\\num2cardillustnametable.txt",
+					"data\\num2itemdesctable.txt",
+					"data\\num2itemdisplaynametable.txt",
+					"data\\num2itemresnametable.txt"
+				],
+				"tags" : [ "startup data" ]
+			}
+		];
+
+		let i = 1;
 		while (gpfList.length > 0 && rgzList.length > 0) {
 			let gpfHead = gpfList[0]![0].toLocaleLowerCase().substring(0, 10);
 			let rgzHead = rgzList[0]![0].toLocaleLowerCase().substring(0, 10);
@@ -92,9 +115,9 @@ export class LoadBulkPatchList {
 		}
 
 		// Disabled to prevent accidental execution
-		// const db = new PatchDb();
-		// while (mergedList.length > 0) {
-		// 	await db.insertMany(mergedList.splice(0, 500));
-		// }
+		const db = new PatchDb();
+		while (mergedList.length > 0) {
+			await db.insertMany(mergedList.splice(0, 500));
+		}
 	}
 }
