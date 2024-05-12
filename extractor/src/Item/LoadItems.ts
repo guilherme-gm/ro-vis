@@ -81,7 +81,9 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 	protected async getParser(patch: PatchRecord, patchFolder: string): Promise<IParser<ItemV>> {
 		const itemMap = new Map<number, Item>();
 		this.existingRecords.forEach((item) => {
-			itemMap.set(item.current.value.Id, item.current.value);
+			if (item.current.value !== null) {
+				itemMap.set(item.current.value.Id, item.current.value);
+			}
 		});
 
 		const version = this.getItemDataVersion(patch);

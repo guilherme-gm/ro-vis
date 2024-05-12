@@ -9,7 +9,7 @@ export abstract class LogRecordDao<T extends RecordObject> {
 		this.db = new Db<LogRecord<T>>(collection);
 	}
 
-	protected abstract toInstance(data: T): T;
+	protected abstract toInstance(data: T | null): T | null;
 
 	private createRecord(data: LogRecord<T>): LogRecord<T> {
 		const record = new LogRecord(data);

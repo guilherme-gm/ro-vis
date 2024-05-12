@@ -6,7 +6,11 @@ export class ItemDb extends LogRecordDao<Item> {
 		super('items');
 	}
 
-	protected override toInstance(data: Item): Item {
+	protected override toInstance(data: Item | null): Item | null {
+		if (data === null) {
+			return null;
+		}
+
 		const i = new Item();
 
 		i._FileVersion = data._FileVersion;

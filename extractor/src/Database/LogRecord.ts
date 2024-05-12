@@ -5,12 +5,12 @@ export class LogRecord<T extends RecordObject> {
 
 	public current!: {
 		patch: string;
-		value: T;
+		value: T | null;
 	};
 
 	public previous!: {
 		patch: string;
-		value: T;
+		value: T | null;
 	}[];
 
 	constructor(patch: string, currentValue: T);
@@ -32,11 +32,7 @@ export class LogRecord<T extends RecordObject> {
 		}
 	}
 
-	public addChange(patch: string, value: T): void {
-		if (this._id !== value.getId()) {
-			throw new Error(`ID Mismatch (${this._id} vs ${value.getId()})`);
-		}
-
+	public addChange(patch: string, value: T | null): void {
 		if (this.current.patch === patch) {
 			throw new Error(`${this._id} already has a change for patch "${patch}.`);
 		}

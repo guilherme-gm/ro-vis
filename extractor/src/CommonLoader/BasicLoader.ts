@@ -69,15 +69,24 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 		const newRecords: Map<string, LogRecord<T>> = new Map<string, LogRecord<T>>();
 		const updatedRecords: LogRecord<T>[] = [];
 
+		const patchIds = new Set<string>();
 		for (const patchEntry of patchEntries.data) {
+			patchIds.add(patchEntry.getId());
 			const record = this.existingRecords.get(patchEntry.getId());
 			if (!record) {
 				newRecords.set(patchEntry.getId(), new LogRecord<T>(patch._id, patchEntry));
 			} else {
-				if (!record.current.value.equals(patchEntry)) {
+				const currentValue = record.current.value;
+				if (currentValue === null || !currentValue.equals(patchEntry)) {
 					record.addChange(patch._id, patchEntry);
 					updatedRecords.push(record);
 				}
+			}
+		}
+
+		for (const existingRecord of this.existingRecords.values()) {
+			if (!patchIds.has(existingRecord._id)) {
+				existingRecord.addChange(patch._id, null);
 			}
 		}
 

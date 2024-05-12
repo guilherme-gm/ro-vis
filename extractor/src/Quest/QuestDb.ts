@@ -7,7 +7,11 @@ export class QuestDb extends LogRecordDao<Quest> {
 		super('quests');
 	}
 
-	protected override toInstance(data: Quest): Quest {
+	protected override toInstance(data: Quest | null): Quest | null {
+		if (data === null) {
+			return null;
+		}
+
 		const q = new Quest();
 
 		q.Id = data.Id;
