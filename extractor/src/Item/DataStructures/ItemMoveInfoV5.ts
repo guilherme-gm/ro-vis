@@ -1,54 +1,46 @@
+import { Expose } from "class-transformer";
 import { ItemMoveInfo } from "./ItemMoveInfo.js";
+import { ConvertClass } from "../../Utils/ConvertClass.js";
 
 export class ItemMoveInfoV5 {
+	@Expose()
 	public itemId: number = 0;
 
+	@Expose()
 	public canDrop: boolean = true;
 
+	@Expose()
 	public canTrade: boolean = true;
 
+	@Expose()
 	public canMoveToStorage: boolean = true;
 
+	@Expose()
 	public canMoveToCart: boolean = true;
 
+	@Expose()
 	public canSellToNpc: boolean = true;
 
+	@Expose()
 	public canMail: boolean = true;
 
+	@Expose()
 	public canAuction: boolean = true;
 
+	@Expose()
 	public canMoveToGuildStorage: boolean = true;
 
+	@Expose()
 	public commentName: string = "";
 
 	public static fromItemMoveInfo(id: number, move: ItemMoveInfo): ItemMoveInfoV5 {
-		const m = new ItemMoveInfoV5();
+		const m = ConvertClass.convert(move, ItemMoveInfoV5);
 		m.itemId = id;
-		m.canDrop = move.canDrop;
-		m.canTrade = move.canTrade;
-		m.canMoveToStorage = move.canMoveToStorage;
-		m.canMoveToCart = move.canMoveToCart;
-		m.canSellToNpc = move.canSellToNpc;
-		m.canMail = move.canMail;
-		m.canAuction = move.canAuction;
-		m.canMoveToGuildStorage = move.canMoveToGuildStorage;
-		m.commentName = move.commentName;
 
 		return m;
 	}
 
 	public toEntity(): ItemMoveInfo {
-		const m = new ItemMoveInfo();
-		m.canDrop = this.canDrop;
-		m.canTrade = this.canTrade;
-		m.canMoveToStorage = this.canMoveToStorage;
-		m.canMoveToCart = this.canMoveToCart;
-		m.canSellToNpc = this.canSellToNpc;
-		m.canMail = this.canMail;
-		m.canAuction = this.canAuction;
-		m.canMoveToGuildStorage = this.canMoveToGuildStorage;
-		m.commentName = this.commentName;
-
-		return m;
+		return ConvertClass.convert(this, ItemMoveInfo);
 	}
 }

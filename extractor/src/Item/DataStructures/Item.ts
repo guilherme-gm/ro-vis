@@ -1,3 +1,4 @@
+import { Expose, Type } from "class-transformer";
 import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
 import { RecordObject } from "../../Database/RecordObject.js";
 import { ItemMoveInfo } from "./ItemMoveInfo.js";
@@ -9,39 +10,56 @@ export class Item implements RecordObject {
 	/**
 	 * The File Version that originated this object
 	 */
+	@Expose()
 	public _FileVersion: number = -1;
 
 	/**
 	 * Item ID
 	 */
+	@Expose()
 	public Id: number = 0;
 
+	@Expose()
 	public IdentifiedName: string = "";
 
+	@Expose()
 	public IdentifiedDescription: string[] = [];
 
+	@Expose()
 	public IdentifiedSprite: string = "";
 
+	@Expose()
 	public UnidentifiedName: string = "";
 
+	@Expose()
 	public UnidentifiedDescription: string[] = [];
 
+	@Expose()
 	public UnidentifiedSprite: string = "";
 
+	@Expose()
 	public SlotCount: number = -1;
 
+	@Expose()
 	public IsBook: boolean = false;
 
+	@Expose()
 	public CanUseBuyingStore: boolean = false;
 
+	@Expose()
 	public CardPrefix: string = "";
 
+	@Expose()
 	public CardPostfix: string = "";
 
+	@Expose()
 	public CardIllustration: string = "";
 
+	@Expose()
 	public ClassNum: number = 0;
 
+	@Expose()
+	@Type(() => ItemMoveInfo)
 	public MoveInfo: ItemMoveInfo = new ItemMoveInfo();
 
 	public getId(): string {

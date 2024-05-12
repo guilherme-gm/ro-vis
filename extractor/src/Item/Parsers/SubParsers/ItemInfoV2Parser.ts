@@ -40,15 +40,15 @@ export class ItemInfoV2Parser extends LuaTableParser<ItemInfoV2[]> {
 
 			const itemV2: ItemV2 = new ItemV2();
 			itemV2.Id = parseInt(itemId, 10),
-				// Identified
+			// Identified
 			itemV2.IdentifiedName = itemObj.identifiedDisplayName ?? "",
 			itemV2.IdentifiedDescription = itemObj.identifiedDescriptionName ?? [],
 			itemV2.IdentifiedSprite = itemObj.identifiedResourceName ?? "",
-				// Unidentified
+			// Unidentified
 			itemV2.UnidentifiedName = itemObj.unidentifiedDisplayName ?? "",
 			itemV2.UnidentifiedDescription = itemObj.unidentifiedDescriptionName ?? [],
 			itemV2.UnidentifiedSprite = itemObj.unidentifiedResourceName ?? "",
-				// Others
+			// Others
 			itemV2.SlotCount = itemObj.slotCount ?? 0,
 			itemV2.ClassNum = itemObj.ClassNum ?? 0,
 

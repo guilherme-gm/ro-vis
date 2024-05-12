@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { MetadataType } from "./Metadata/MetadataType.js";
 import { IDataLoader } from "./CommonLoader/IDataLoader.js";
 import { LoadQuests } from "./Quest/LoadQuests.js";

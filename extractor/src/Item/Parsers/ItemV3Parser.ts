@@ -17,6 +17,7 @@ import { ItemV3 } from "../DataStructures/ItemV3.js";
 import { ItemMoveInfoV5 } from "../DataStructures/ItemMoveInfoV5.js";
 import { ItemMoveInfoV5Parser } from "./SubParsers/ItemMoveInfoV5Parser.js";
 import { ItemMoveInfoMerger } from "./DataMergers/ItemMoveInfoMerger.js";
+import { ConvertClass } from "../../Utils/ConvertClass.js";
 
 export type ItemV3Files = {
 	itemInfoLua?: string | null;
@@ -72,18 +73,7 @@ export class ItemV3Parser {
 			const parser = await ItemInfoV2Parser.fromFile(this.files.itemInfoLua);
 			const v2Items = await parser.parse();
 			this.itemInfo = v2Items.map((v2Item) => {
-				const v3Item = new ItemV3();
-				v3Item.Id = v2Item.Id;
-				v3Item.IdentifiedName = v2Item.IdentifiedName;
-				v3Item.IdentifiedDescription = v2Item.IdentifiedDescription;
-				v3Item.IdentifiedSprite = v2Item.IdentifiedSprite;
-				v3Item.UnidentifiedName = v2Item.UnidentifiedName;
-				v3Item.UnidentifiedDescription = v2Item.UnidentifiedDescription;
-				v3Item.UnidentifiedSprite = v2Item.UnidentifiedSprite;
-				v3Item.SlotCount = v2Item.SlotCount;
-				v3Item.ClassNum = v2Item.ClassNum;
-
-				return v3Item;
+				return ConvertClass.convert(v2Item, ItemV3);
 			})
 		}
 
