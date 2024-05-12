@@ -1,5 +1,6 @@
 import { LogRecordDao } from "../Database/LogRecordDao.js";
 import { Item } from "./DataStructures/Item.js";
+import { ItemMoveInfo } from "./DataStructures/ItemMoveInfo.js";
 
 export class ItemDb extends LogRecordDao<Item> {
 	constructor() {
@@ -27,6 +28,17 @@ export class ItemDb extends LogRecordDao<Item> {
 		i.CardPrefix = data.CardPrefix;
 		i.CardPostfix = data.CardPostfix;
 		i.CardIllustration = data.CardIllustration;
+		i.ClassNum = data.ClassNum;
+		i.MoveInfo = new ItemMoveInfo();
+		i.MoveInfo.canDrop = data.MoveInfo.canDrop;
+		i.MoveInfo.canTrade = data.MoveInfo.canTrade;
+		i.MoveInfo.canMoveToStorage = data.MoveInfo.canMoveToStorage;
+		i.MoveInfo.canMoveToCart = data.MoveInfo.canMoveToCart;
+		i.MoveInfo.canSellToNpc = data.MoveInfo.canSellToNpc;
+		i.MoveInfo.canMail = data.MoveInfo.canMail;
+		i.MoveInfo.canAuction = data.MoveInfo.canAuction;
+		i.MoveInfo.canMoveToGuildStorage = data.MoveInfo.canMoveToGuildStorage;
+		i.MoveInfo.commentName = data.MoveInfo.commentName;
 
 		return i;
 	}

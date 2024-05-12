@@ -1,22 +1,24 @@
 import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Item } from "./Item.js";
+import { ItemMoveInfoV5 } from "./ItemMoveInfoV5.js";
 import { ItemV } from "./ItemV.js";
 
 /**
- * Since 2012-07-11; Introduced ClassNum
+ * Since 2015-04-21; Introduced ItemMoveInfoV5
  * - itemInfo.lua
+ * - ItemMoveInfoV5.txt
  * - bookitemnametable.txt
  * - buyingstoreitemlist.txt
  * - cardpostfixnametable.txt
  * - cardprefixnametable.txt
  * - num2cardillustnametable.txt
  */
-export class ItemV2 implements IFileEntry<Item> {
-	public static isV2(item: ItemV): item is ItemV2 {
-		return item._FileVersion === 2;
+export class ItemV3 implements IFileEntry<Item> {
+	public static isV3(item: ItemV): item is ItemV3 {
+		return item._FileVersion === 3;
 	}
 
-	public readonly _FileVersion: number = 2;
+	public readonly _FileVersion: number = 3;
 
 	/**
 	 * Item ID
@@ -49,6 +51,8 @@ export class ItemV2 implements IFileEntry<Item> {
 
 	public ClassNum: number = 0;
 
+	public MoveInfo: ItemMoveInfoV5 = new ItemMoveInfoV5();
+
 	public getId(): string {
 		return this.Id.toString();
 	}
@@ -57,11 +61,11 @@ export class ItemV2 implements IFileEntry<Item> {
 		return this._FileVersion;
 	}
 
-	public static fromItem(item: Item): ItemV2 {
-		const i = new ItemV2();
+	public static fromItem(item: Item): ItemV3 {
+		const i = new ItemV3();
 
-		if (item._FileVersion > 2) {
-			throw new Error(`Can not convert item v${item._FileVersion} to V2`);
+		if (item._FileVersion > 3) {
+			throw new Error(`Can not convert item v${item._FileVersion} to V3`);
 		}
 
 		i.Id = item.Id;
@@ -78,6 +82,7 @@ export class ItemV2 implements IFileEntry<Item> {
 		i.CardPostfix = item.CardPostfix;
 		i.CardIllustration = item.CardIllustration;
 		i.ClassNum = item.ClassNum;
+		i.MoveInfo = ItemMoveInfoV5.fromItemMoveInfo(item.Id, item.MoveInfo);
 
 		return i;
 	}
@@ -100,6 +105,7 @@ export class ItemV2 implements IFileEntry<Item> {
 		i.CardPostfix = this.CardPostfix;
 		i.CardIllustration = this.CardIllustration;
 		i.ClassNum = this.ClassNum;
+		i.MoveInfo = this.MoveInfo.toEntity();
 
 		return i;
 	}

@@ -1,5 +1,6 @@
 import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
 import { RecordObject } from "../../Database/RecordObject.js";
+import { ItemMoveInfo } from "./ItemMoveInfo.js";
 
 /**
  * Represents a Item in the tool.
@@ -41,6 +42,8 @@ export class Item implements RecordObject {
 
 	public ClassNum: number = 0;
 
+	public MoveInfo: ItemMoveInfo = new ItemMoveInfo();
+
 	public getId(): string {
 		return this.Id.toString();
 	}
@@ -64,6 +67,8 @@ export class Item implements RecordObject {
 			&& this.CardPrefix === other.CardPrefix
 			&& this.CardPostfix === other.CardPostfix
 			&& this.CardIllustration === other.CardIllustration
+			&& this.ClassNum === other.ClassNum
+			&& this.MoveInfo.equals(other.MoveInfo)
 		);
 	}
 }

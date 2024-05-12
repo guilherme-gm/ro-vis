@@ -10,6 +10,7 @@ import { ItemV } from "./DataStructures/ItemV.js";
 import { ItemV1Parser } from "./Parsers/ItemV1Parser.js";
 import { ItemDb } from "./ItemDb.js";
 import { ItemV2Parser } from "./Parsers/ItemV2Parser.js";
+import { ItemV3Parser } from "./Parsers/ItemV3Parser.js";
 
 export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 	public name: string = LoadItem.name;
@@ -31,6 +32,16 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 
 	private readonly v2FileNames = [
 		"System\\itemInfo.lub",
+		"data\\bookitemnametable.txt",
+		"data\\buyingstoreitemlist.txt",
+		"data\\cardpostfixnametable.txt",
+		"data\\cardprefixnametable.txt",
+		"data\\num2cardillustnametable.txt",
+	];
+
+	private readonly v3FileNames = [
+		"System\\itemInfo.lub",
+		"data\\itemmoveinfov5.txt",
 		"data\\bookitemnametable.txt",
 		"data\\buyingstoreitemlist.txt",
 		"data\\cardpostfixnametable.txt",
@@ -70,6 +81,8 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 			fileNames = this.v1FileNames;
 		} else if (version === 2) {
 			fileNames = this.v2FileNames;
+		} else if (version === 3) {
+			fileNames = this.v3FileNames;
 		} else {
 			throw new Error(`Unsupported item version "${version}"`);
 		}
@@ -121,6 +134,16 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 		} else if (version === 2) {
 			return new ItemV2Parser(itemMap, {
 				itemInfoLua: this.getPathIfExists(patch, patchFolder, "system\\itemInfo.lub"),
+				bookItemNameTable: this.getPathIfExists(patch, patchFolder, "data\\bookitemnametable.txt"),
+				buyingStoreItemList: this.getPathIfExists(patch, patchFolder, "data\\buyingstoreitemlist.txt"),
+				cardPostFixNameTable: this.getPathIfExists(patch, patchFolder, "data\\cardpostfixnametable.txt"),
+				cardPrefixNameTable: this.getPathIfExists(patch, patchFolder, "data\\cardprefixnametable.txt"),
+				num2CardIllustNameTable: this.getPathIfExists(patch, patchFolder, "data\\num2cardillustnametable.txt"),
+			});
+		} else if (version === 3) {
+			return new ItemV3Parser(itemMap, {
+				itemInfoLua: this.getPathIfExists(patch, patchFolder, "system\\itemInfo.lub"),
+				moveInfoTable: this.getPathIfExists(patch, patchFolder, "data\\itemmoveinfov5.txt"),
 				bookItemNameTable: this.getPathIfExists(patch, patchFolder, "data\\bookitemnametable.txt"),
 				buyingStoreItemList: this.getPathIfExists(patch, patchFolder, "data\\buyingstoreitemlist.txt"),
 				cardPostFixNameTable: this.getPathIfExists(patch, patchFolder, "data\\cardpostfixnametable.txt"),
