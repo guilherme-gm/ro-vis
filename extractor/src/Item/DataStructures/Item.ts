@@ -39,6 +39,8 @@ export class Item implements RecordObject {
 
 	public CardIllustration: string = "";
 
+	public ClassNum: number = 0;
+
 	public getId(): string {
 		return this.Id.toString();
 	}
