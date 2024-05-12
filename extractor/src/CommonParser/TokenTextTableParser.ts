@@ -97,9 +97,10 @@ export class TokenTextTableParser {
 			return Result.fail(cell.error!);
 		}
 
-		const value = parseInt(cell.unwrap(), 10);
+		const text = cell.unwrap();
+		const value = parseInt(text, 10);
 		if (isNaN(value)) {
-			throw new Error(`Detected an invalid number in a cell. Value: "${cell}". Line ${this.reader.getLineNumber()}`);
+			throw new Error(`Detected an invalid number in a cell. Value: "${text}". Line ${this.reader.getLineNumber()}`);
 		}
 
 		return Result.ok(value);
