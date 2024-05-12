@@ -34,11 +34,17 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 
 	private getItemDataVersion(patch: PatchRecord): number {
 		const date = patch._id.substring(0, 10);
-		if (date.localeCompare('2012-04-18') < 0) {
+		if (date.localeCompare('2012-07-11') < 0) {
 			/**
 			 * Everything is txt
 			 */
 			return 1;
+		} else if (date.localeCompare('2017-04-19') < 0) {
+			// System/ItemInfo.lub
+			return 2;
+		} else if (date.localeCompare('9999-12-31') < 0) {
+			// System/ItemInfo_true.lub
+			return 10;
 		}
 
 		throw new Error(`Item version for patch "${patch._id}" is not mapped.`);
