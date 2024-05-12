@@ -1,5 +1,6 @@
 import { Logger } from '../../Logger.js';
 import chalk  from "chalk";
+import * as fs from "fs";
 import { Item } from '../DataStructures/Item.js';
 import { ItemV1 } from '../DataStructures/ItemV1.js';
 import { BookItemNameTableV1Parser } from './SubParsers/BookItemNameTableV1Parser.js';
@@ -67,13 +68,26 @@ export class ItemV1Parser {
 		this.files = files;
 	}
 
+	private fileExists(path: string | null | undefined): path is string {
+		if (!path) {
+			return false;
+		}
+
+		const exists = fs.existsSync(path);
+		if (!exists) {
+			Logger.warn(`File "${path}" doesn't exists (most likely it was the same as a previous patch)`);
+		}
+
+		return exists;
+	}
+
 	private async parseTables(): Promise<void> {
-		if (this.files.idNum2ItemDisplayNameTable) {
+		if (this.fileExists(this.files.idNum2ItemDisplayNameTable)) {
 			const parser = await ItemDisplayNameTableV1Parser.fromFile(this.files.idNum2ItemDisplayNameTable);
 			this.idNum2ItemNameTable = await parser.parse();
 		}
 
-		if (this.files.idNum2ItemDescTable) {
+		if (this.fileExists(this.files.idNum2ItemDescTable)) {
 			const parser = await ItemDescTableV1Parser.fromFile(this.files.idNum2ItemDescTable);
 			const table = await parser.parse();
 
@@ -83,17 +97,17 @@ export class ItemV1Parser {
 			}
 		}
 
-		if (this.files.idNum2ItemResNameTable) {
+		if (this.fileExists(this.files.idNum2ItemResNameTable)) {
 			const parser = await ItemResNameTableV1Parser.fromFile(this.files.idNum2ItemResNameTable);
 			this.idNum2ItemResNameTable = await parser.parse();
 		}
 
-		if (this.files.num2ItemDisplayNameTable) {
+		if (this.fileExists(this.files.num2ItemDisplayNameTable)) {
 			const parser = await ItemDisplayNameTableV1Parser.fromFile(this.files.num2ItemDisplayNameTable);
 			this.num2ItemNameTable = await parser.parse();
 		}
 
-		if (this.files.num2ItemDescTable) {
+		if (this.fileExists(this.files.num2ItemDescTable)) {
 			const parser = await ItemDescTableV1Parser.fromFile(this.files.num2ItemDescTable);
 			const table = await parser.parse();
 
@@ -103,37 +117,38 @@ export class ItemV1Parser {
 			}
 		}
 
-		if (this.files.num2ItemResNameTable) {
+		if (this.fileExists(this.files.num2ItemResNameTable)) {
 			const parser = await ItemResNameTableV1Parser.fromFile(this.files.num2ItemResNameTable);
 			this.num2ItemResNameTable = await parser.parse();
 		}
 
-		if (this.files.bookItemNameTable) {
+		if (this.fileExists(this.files.bookItemNameTable)) {
 			const parser = await BookItemNameTableV1Parser.fromFile(this.files.bookItemNameTable);
 			this.bookItemNameTable = await parser.parse();
 		}
 
-		if (this.files.buyingStoreItemList) {
+		if (this.fileExists(this.files.buyingStoreItemList)) {
 			const parser = await BuyingStoreItemListV1Parser.fromFile(this.files.buyingStoreItemList);
 			this.buyingStoreItemList = await parser.parse();
 		}
 
-		if (this.files.itemSlotCountTable) {
+		if (this.fileExists(this.files.itemSlotCountTable)) {
+			console.log(this.files.itemSlotCountTable);
 			const parser = await ItemSlotCountTableV1Parser.fromFile(this.files.itemSlotCountTable);
 			this.slotTable = await parser.parse();
 		}
 
-		if (this.files.num2CardIllustNameTable) {
+		if (this.fileExists(this.files.num2CardIllustNameTable)) {
 			const parser = await CardIllustNameTableV1Parser.fromFile(this.files.num2CardIllustNameTable);
 			this.cardIllustTable = await parser.parse();
 		}
 
-		if (this.files.cardPostFixNameTable) {
+		if (this.fileExists(this.files.cardPostFixNameTable)) {
 			const parser = await CardPostfixNameTableV1Parser.fromFile(this.files.cardPostFixNameTable);
 			this.cardPostfixNameTable = await parser.parse();
 		}
 
-		if (this.files.cardPrefixNameTable) {
+		if (this.fileExists(this.files.cardPrefixNameTable)) {
 			const parser = await CardPrefixNameTableV1Parser.fromFile(this.files.cardPrefixNameTable);
 			this.cardPrefixNameTable = await parser.parse();
 		}
@@ -143,6 +158,7 @@ export class ItemV1Parser {
 		reference: string, table: Map<number, T> | null,
 		v1Key: KeyOfType<ItemV1, T>,
 		itemKey: KeyOfType<Item, T>,
+		defaultValue?: T,
 	) {
 		if (v1Key === "_FileVersion") {
 			throw new Error('Invalid v1 key "_FileVersion"');
@@ -162,12 +178,15 @@ export class ItemV1Parser {
 		} else {
 			for (let item of this.newItemMap.values()) {
 				const oldItem = this.itemDb.get(item.Id);
-				if (!oldItem) {
+				if (oldItem) {
+					// @ts-ignore -- too hard to type
+					item[v1Key] = oldItem[itemKey];
+				} else if (defaultValue !== undefined) {
+					// @ts-ignore -- too hard to type
+					item[v1Key] = defaultValue;
+				} else {
 					throw new Error(`${reference}: Item ${item.Id} is new, but not loaded.`);
 				}
-
-				// @ts-ignore -- too hard to type
-				item[v1Key] = oldItem[itemKey];
 			}
 		}
 	}
@@ -186,7 +205,8 @@ export class ItemV1Parser {
 			for (let itemId of idTable) {
 				const item = this.newItemMap.get(itemId);
 				if (!item) {
-					throw new Error(`${reference}: Item ${itemId} does not exists.`);
+					Logger.warn(`${reference}: Item ${itemId} does not exists, could not set the flag.`);
+					continue;
 				}
 
 				item[v1Key] = true;
@@ -284,15 +304,15 @@ export class ItemV1Parser {
 			}
 		}
 
-		this.loadTable("Identified Item Desc Table", this.idNum2ItemDescTable, "IdentifiedDescription", "IdentifiedDescription");
-		this.loadTable("Identified Item Res Table", this.idNum2ItemResNameTable, "IdentifiedSprite", "IdentifiedSprite");
+		this.loadTable("Identified Item Desc Table", this.idNum2ItemDescTable, "IdentifiedDescription", "IdentifiedDescription", []);
+		this.loadTable("Identified Item Res Table", this.idNum2ItemResNameTable, "IdentifiedSprite", "IdentifiedSprite", "");
 
-		this.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName");
-		this.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription");
-		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite");
+		this.loadTable("Unidentified Item Name Table", this.num2ItemNameTable, "UnidentifiedName", "UnidentifiedName", "");
+		this.loadTable("Unidentified Item Desc Table", this.num2ItemDescTable, "UnidentifiedDescription", "UnidentifiedDescription", []);
+		this.loadTable("Unidentified Item Res Table", this.num2ItemResNameTable, "UnidentifiedSprite", "UnidentifiedSprite", "");
 
-		this.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount");
-		this.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration");
+		this.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount", 0);
+		this.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration", "");
 
 		this.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 		this.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
