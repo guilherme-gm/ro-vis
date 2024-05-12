@@ -48,7 +48,7 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 	}
 
 	public async load(patch: PatchRecord, patchDir: string): Promise<void> {
-		if (Cli.cli.dryRun && !Cli.cli.cleanRun) {
+		if (Cli.cli.dryRun) {
 			await this.entityDb.replicate();
 		}
 

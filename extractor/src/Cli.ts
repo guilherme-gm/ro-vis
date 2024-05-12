@@ -26,7 +26,7 @@ export class Cli {
 
 		this.program
 			.option("--dry-run", "Replicate data to an in-memory DB to execute the process")
-			.option("--clean-run", "To be used together with '--dry-run'. Only replicate patch list, everything else is run from zero")
+			.option("--clean-run", "Run everything from scratch in a in-memory DB")
 			.option("--change-dump", "Dump change logs as json files for debugging")
 			.option("--mongo-port <port>", "For dry-run and clean-run, defines the port where the in-memory MongoDB will run on. When not set, a random one is chosen.")
 			.option("--hold-process", "When the extraction finishes/crashes, stop in a 'Press enter to continue' message before ending the process (the temporary DB is also kept running)")

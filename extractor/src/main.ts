@@ -21,7 +21,7 @@ Cli.load();
 let mongod: MongoMemoryServer | null = null;
 const dryRun = Cli.cli.dryRun;
 const cleanRun = Cli.cli.cleanRun;
-if (dryRun) {
+if (dryRun || cleanRun) {
 	const opts: MemoryServerInstanceOpts = {};
 	if (Cli.cli.mongoPort) {
 		opts.port = Cli.cli.mongoPort;
@@ -41,14 +41,12 @@ let exitCode = 0;
 try {
 	const metadataDb = new MetadataDb();
 	const patchDb = new PatchDb();
-	if (dryRun) {
-		if (cleanRun) {
-			const patchListLoader = new LoadBulkPatchList();
-			await patchListLoader.do();
-		} else {
-			await patchDb.replicate();
-			await metadataDb.replicate();
-		}
+	if (cleanRun) {
+		const patchListLoader = new LoadBulkPatchList();
+		await patchListLoader.do();
+	} else if (dryRun) {
+		await patchDb.replicate();
+		await metadataDb.replicate();
 	}
 
 	const patchList = await patchDb.getAll({}, { order: 1 });
