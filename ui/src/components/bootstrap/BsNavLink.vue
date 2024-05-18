@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, type RouterLinkProps } from "vue-router";
 
 withDefaults(defineProps<{
 	label: string;
-	to?: string;
+	to?: string | RouterLinkProps["to"];
 	href?: string;
 	currentPage?: boolean;
 }>(), {
