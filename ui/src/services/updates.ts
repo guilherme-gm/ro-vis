@@ -2,6 +2,11 @@ import { ref } from "vue";
 import type { Update } from "@/models/Update";
 import { useApi } from "./api";
 
+type GetUpdatesResponse = {
+	total: number;
+	list: Update[];
+};
+
 const api = useApi();
 
 const isLoading = ref(false);
@@ -11,9 +16,9 @@ async function getUpdates(): Promise<void> {
 	try {
 		isLoading.value = true;
 
-		const list = await api.get<Update[]>('updates/');
+		const list = await api.get<GetUpdatesResponse>('updates/');
 
-		updateList.value = list.map((item) => {
+		updateList.value = list.list.map((item) => {
 			item.updates = item.updates.sort((a, b) => a.file.localeCompare(b.file));
 			return item;
 		});
