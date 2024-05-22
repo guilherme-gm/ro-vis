@@ -13,15 +13,15 @@ class ListPatches extends ApiRoute {
 
 		$this->initDb();
 
-		$data = $this->db->select(
+		$data = $this->db->get(
 			"updates",
 			["id", "patches"],
 			["id" => $id]
 		);
 
 		return [
-			"id" => $data[0]["id"],
-			"patches" => json_decode($data[0]["patches"], true),
+			"id" => $data["id"],
+			"patches" => json_decode($data["patches"], true),
 		];
 	}
 }
