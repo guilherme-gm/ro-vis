@@ -7,6 +7,8 @@ class ListUpdates extends ApiRoute {
 
 		$start = $_GET['start'] ?? 0;
 
+		$count = $this->db->count("updates");
+
 		$data = $this->db->select(
 			"updates",
 			["id", "order", "updates", "tags"],
@@ -16,9 +18,9 @@ class ListUpdates extends ApiRoute {
 			]
 		);
 
-		$output = [];
+		$list = [];
 		foreach ($data as $value) {
-			array_push($output, [
+			array_push($list, [
 				"id" => $value["id"],
 				"order" => $value["order"],
 				"updates" => json_decode($value["updates"], true),
@@ -26,7 +28,10 @@ class ListUpdates extends ApiRoute {
 			]);
 		}
 
-		return $output;
+		return [
+			"total" => $count,
+			"list" => $list,
+		];
 	}
 }
 
