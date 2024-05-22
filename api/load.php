@@ -14,10 +14,14 @@ if ($handle) {
 			"tags" => "",
 		]);
 
-		if (count($arr) == 100) {
+		if (count($arr) == 50) {
 			$database->insert("updates", $arr);
 			$arr = [];
 		}
+	}
+
+	if (count($arr) > 0) {
+		$database->insert("updates", $arr);
 	}
 
 	fclose($handle);
