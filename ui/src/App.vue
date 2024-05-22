@@ -1,26 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import SiteHeader from "./components/SiteHeader.vue";
-import { useMongo } from "./services/mongo";
 import { ref } from "vue";
 import BsBorderSpinner from "./components/bootstrap/Spinner/BsBorderSpinner.vue";
 import { BIconXLg } from "bootstrap-icons-vue";
 
-const loading = ref(true);
+const loading = ref(false);
 const errorMesage = ref('');
-
-async function loadApp(): Promise<void> {
-	loading.value = true;
-	try {
-		const mongo = useMongo();
-		await mongo.login();
-		loading.value = false;
-	} catch (error) {
-		errorMesage.value = (error as Error)?.message ?? error;
-	}
-}
-
-loadApp();
 </script>
 
 <template>
@@ -38,7 +24,7 @@ loadApp();
 			<p><strong>Details:</strong> {{ errorMesage }}</p>
 		</div>
 	</main>
-	<main v-else class="flex-shrink-0 h-100">
+	<main v-else class="flex-shrink-0 h-100 p-4">
 		<RouterView />
 	</main>
 </template>
