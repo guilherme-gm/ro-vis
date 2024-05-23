@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import type { Update } from "@/models/Update";
 import { useApi } from "./api";
+import { LoadState } from "./LoadState";
 
 type GetUpdatesResponse = {
 	total: number;
@@ -8,31 +9,36 @@ type GetUpdatesResponse = {
 };
 
 const api = useApi();
+const total = ref(-1);
 
-const isLoading = ref(false);
-const updateList = ref<Update[]>([]);
+const state = ref<LoadState>(LoadState.None);
 
-async function getUpdates(): Promise<void> {
+async function getUpdates(page: number): Promise<Update[]> {
 	try {
-		isLoading.value = true;
+		state.value = LoadState.Loading;
 
-		const list = await api.get<GetUpdatesResponse>('updates/');
+		const list = await api.get<GetUpdatesResponse>('updates/', { start: ((page - 1) * 100) });
 
-		updateList.value = list.list.map((item) => {
+		const updateList = list.list.map((item) => {
 			item.updates = item.updates.sort((a, b) => a.file.localeCompare(b.file));
 			return item;
 		});
+		total.value = list.total;
+
+		state.value = LoadState.Loaded;
+
+		return updateList;
 	} catch (error) {
-		console.error(error);
-	} finally {
-		isLoading.value = false;
+		state.value = LoadState.Error;
 	}
+
+	return [];
 }
 
 export function useUpdates() {
 	return {
-		isLoading,
-		updateList,
+		state,
+		total,
 		getUpdates,
 	};
 }
