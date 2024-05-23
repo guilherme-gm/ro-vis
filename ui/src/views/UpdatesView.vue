@@ -46,6 +46,15 @@ loadPage(1);
 		<strong>{{ total }}</strong> items to show.
 	</p>
 
+	<BsPagination
+		description="Update list page"
+		:pages="pages"
+		:current-page="currentPage"
+		:center="true"
+		@changed="loadPage"
+		class="mt-3"
+	/>
+
 	<div v-if="state === LoadState.Loaded">
 		<BsAccordion>
 			<BsAccordionItem
