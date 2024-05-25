@@ -52,7 +52,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 
 <template>
 	<ListingBase
-		title="Items in patch"
+		:title="`Items in patch ${patch}`"
 		:total="total"
 		:state="state"
 		:current-page="currentPage"
