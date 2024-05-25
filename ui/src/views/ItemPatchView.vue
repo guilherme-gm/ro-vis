@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DiffedValue from '@/components/DiffedValue.vue';
 import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
@@ -91,11 +92,13 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 							<th>Info</th>
 							<th>Previous</th>
 							<th>New</th>
+							<th>Diff</th>
 						</tr>
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
 							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
 							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
+							<td><DiffedValue :from="val.previous![info[1]]" :to="val.current![info[1]]" /></td>
 						</tr>
 					</tbody>
 				</table>
