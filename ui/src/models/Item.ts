@@ -25,13 +25,13 @@ export type Item = {
 
 	IdentifiedName: string;
 
-	IdentifiedDescription: string[];
+	IdentifiedDescription: string;
 
 	IdentifiedSprite: string;
 
 	UnidentifiedName: string;
 
-	UnidentifiedDescription: string[];
+	UnidentifiedDescription: string;
 
 	UnidentifiedSprite: string;
 
@@ -50,6 +50,4 @@ export type Item = {
 	ClassNum: number;
 
 	MoveInfo: ItemMoveInfo;
-
-	PreviousVersion: Item;
 };

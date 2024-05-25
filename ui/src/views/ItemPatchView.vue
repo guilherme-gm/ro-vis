@@ -3,8 +3,8 @@ import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
 import type { Item } from '@/models/Item';
-import { useItems } from '@/services/items';
-import { ref } from 'vue';
+import { useItems, type PatchItem } from '@/services/items';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -16,7 +16,7 @@ const {
 	getPatchItems,
 } = useItems();
 
-const list = ref<Item[]>([]);
+const list = ref<PatchItem[]>([]);
 const currentPage = ref(0);
 
 async function loadPage(page: number): Promise<void> {
@@ -41,6 +41,10 @@ const fields = ref<[string, keyof Item][]>([
 ]);
 
 loadPage(1);
+
+const newItems = computed(() => list.value.filter((v) => v.previous === null));
+const updatedItems = computed(() => list.value.filter((v) => v.previous !== null && v.current !== null));
+const deletedItems = computed(() => list.value.filter((v) => v.previous !== null && v.current === null));
 </script>
 
 <template>
@@ -51,11 +55,35 @@ loadPage(1);
 		:current-page="currentPage"
 		@page-changed="loadPage"
 	>
-		<BsAccordion>
+		<h4>New items</h4>
+		<BsAccordion v-if="newItems.length > 0">
 			<BsAccordionItem
-				v-for="(val) in list"
-				:key="val.ItemId"
-				:title="`#${val.ItemId} - ${val.IdentifiedName} (${val.MoveInfo?.commentName ?? ''})`"
+				v-for="(val) in newItems"
+				:key="val.current?.ItemId"
+				:title="`#${val.current?.ItemId} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
+			>
+				<table class="table table-striped table-sm">
+					<tbody>
+						<tr>
+							<th>Info</th>
+							<th>New</th>
+						</tr>
+						<tr v-for="(info) of fields" :key="info[1]">
+							<th>{{ info[0] }}</th>
+							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
+						</tr>
+					</tbody>
+				</table>
+			</BsAccordionItem>
+		</BsAccordion>
+		<p v-else>No new items in this page</p>
+
+		<h4 class="mt-3">Updated Items</h4>
+		<BsAccordion v-if="updatedItems.length > 0">
+			<BsAccordionItem
+				v-for="(val) in updatedItems"
+				:key="val.current?.ItemId ?? val.previous?.ItemId"
+				:title="`#${val.current?.ItemId ?? val.previous?.ItemId} - ${val?.current?.IdentifiedName ?? val?.previous?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
 				<table class="table table-striped table-sm">
 					<tbody>
@@ -66,12 +94,36 @@ loadPage(1);
 						</tr>
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
-							<td><pre>{{ (Array.isArray(val[info[1]]) ? (val[info[1]] as string[]).join('\n') : val[info[1]]) }}</pre></td>
-							<td><pre>{{ (Array.isArray(val[info[1]]) ? (val[info[1]] as string[]).join('\n') : val[info[1]]) }}</pre></td>
+							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
+							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
 						</tr>
 					</tbody>
 				</table>
 			</BsAccordionItem>
 		</BsAccordion>
+		<p v-else>No updated items in this page</p>
+
+		<h4 class="mt-3">Deleted Items</h4>
+		<BsAccordion v-if="deletedItems.length > 0">
+			<BsAccordionItem
+				v-for="(val) in deletedItems"
+				:key="val.previous?.ItemId"
+				:title="`#${val.previous?.ItemId} - ${val?.previous?.IdentifiedName} (${val?.previous?.MoveInfo?.commentName ?? ''})`"
+			>
+				<table class="table table-striped table-sm">
+					<tbody>
+						<tr>
+							<th>Info</th>
+							<th>Previous</th>
+						</tr>
+						<tr v-for="(info) of fields" :key="info[1]">
+							<th>{{ info[0] }}</th>
+							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
+						</tr>
+					</tbody>
+				</table>
+			</BsAccordionItem>
+		</BsAccordion>
+		<p v-else>No deleted items in this page</p>
 	</ListingBase>
 </template>

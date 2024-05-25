@@ -3,9 +3,14 @@ import { useApi } from "./api";
 import { LoadState } from "./LoadState";
 import type { Item } from "@/models/Item";
 
+export type PatchItem = {
+	previous: Item | null;
+	current: Item | null;
+};
+
 type GetItemsResponse = {
 	total: number;
-	list: Item[];
+	list: PatchItem[];
 };
 
 const api = useApi();
@@ -33,7 +38,7 @@ async function getItems(page: number): Promise<Item[]> {
 }
 */
 
-async function getPatchItems(patch: string, page: number): Promise<Item[]> {
+async function getPatchItems(patch: string, page: number): Promise<PatchItem[]> {
 	try {
 		state.value = LoadState.Loading;
 
