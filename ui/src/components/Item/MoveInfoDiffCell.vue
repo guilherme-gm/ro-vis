@@ -3,32 +3,48 @@ import type { ItemMoveInfo } from '@/models/Item';
 import ATooltip from '../ATooltip.vue';
 import { useMoveInfo } from './moveInfo';
 
-defineProps<{
-	info: ItemMoveInfo | null;
+const props = defineProps<{
+	from: ItemMoveInfo | null;
+	to: ItemMoveInfo | null;
 }>();
 
 const { fields } = useMoveInfo();
+
+function getClassName(key: keyof ItemMoveInfo): 'no-change' | 'added' | 'removed' {
+	if (props.from?.[key] === props.to?.[key]) {
+		return 'no-change';
+	}
+
+	if (props.to === null) {
+		return 'removed';
+	}
+
+	return props.to[key] ? 'added' : 'removed';
+}
 </script>
 
 <template>
-	<span v-if="info === null">N/A</span>
-	<div v-else class="d-flex gap-3">
+	<div class="d-flex gap-3">
 		<ATooltip v-for="(fInfo) of fields" :key="fInfo.key" :text="fInfo.label">
 			<component
 				:is="fInfo.icon"
 				class="fs-4"
-				:class="{ disabled: !info[fInfo.key], enabled: info[fInfo.key] }"
+				:class="{ [getClassName(fInfo.key)]: true }"
 			/>
 		</ATooltip>
 	</div>
 </template>
 
 <style scoped>
-	.disabled {
+	.removed {
 		color: rgb(236, 85, 85);
 	}
 
-	.enabled {
+	.added {
 		color: rgb(89, 189, 114);
+	}
+
+	.no-change {
+		color: grey;
 	}
 </style>

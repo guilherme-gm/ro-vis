@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DiffedValue from '@/components/DiffedValue.vue';
 import MoveInfoCell from '@/components/Item/MoveInfoCell.vue';
+import MoveInfoDiffCell from '@/components/Item/MoveInfoDiffCell.vue';
 import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
@@ -109,7 +110,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 							<th>Move Info</th>
 							<td><MoveInfoCell :info="val.previous?.MoveInfo ?? null" /></td>
 							<td><MoveInfoCell :info="val.current?.MoveInfo ?? null" /></td>
-							<td>TODO</td>
+							<td><MoveInfoDiffCell :from="val.previous?.MoveInfo ?? null" :to="val.current?.MoveInfo ?? null" /></td>
 						</tr>
 					</tbody>
 				</table>
