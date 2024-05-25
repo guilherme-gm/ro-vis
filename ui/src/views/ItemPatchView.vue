@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DiffedValue from '@/components/DiffedValue.vue';
+import MoveInfoCell from '@/components/Item/MoveInfoCell.vue';
 import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
@@ -73,6 +74,10 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 							<th>{{ info[0] }}</th>
 							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
 						</tr>
+						<tr>
+							<th>Move Info</th>
+							<td><MoveInfoCell :info="val.current?.MoveInfo ?? null" /></td>
+						</tr>
 					</tbody>
 				</table>
 			</BsAccordionItem>
@@ -100,6 +105,12 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
 							<td><DiffedValue :from="val.previous![info[1]]" :to="val.current![info[1]]" /></td>
 						</tr>
+						<tr>
+							<th>Move Info</th>
+							<td><MoveInfoCell :info="val.previous?.MoveInfo ?? null" /></td>
+							<td><MoveInfoCell :info="val.current?.MoveInfo ?? null" /></td>
+							<td>TODO</td>
+						</tr>
 					</tbody>
 				</table>
 			</BsAccordionItem>
@@ -122,6 +133,10 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
 							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
+						</tr>
+						<tr>
+							<th>Move Info</th>
+							<td><MoveInfoCell :info="val.previous?.MoveInfo ?? null" /></td>
 						</tr>
 					</tbody>
 				</table>
