@@ -28,5 +28,5 @@ reDiff();
 </script>
 
 <template>
-	<pre ref="diffSlot"></pre>
+	<pre ref="diffSlot" class="pre-preserve"></pre>
 </template>

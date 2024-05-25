@@ -73,7 +73,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 						</tr>
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
-							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
+							<td><pre class="pre-preserve">{{ val.current?.[info[1]] ?? "-" }}</pre></td>
 						</tr>
 						<tr>
 							<th>Move Info</th>
@@ -102,8 +102,8 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 						</tr>
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
-							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
-							<td><pre>{{ val.current?.[info[1]] ?? "-" }}</pre></td>
+							<td><pre class="pre-preserve">{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
+							<td><pre class="pre-preserve">{{ val.current?.[info[1]] ?? "-" }}</pre></td>
 							<td><DiffedValue :from="val.previous![info[1]]" :to="val.current![info[1]]" /></td>
 						</tr>
 						<tr>
@@ -133,7 +133,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 						</tr>
 						<tr v-for="(info) of fields" :key="info[1]">
 							<th>{{ info[0] }}</th>
-							<td><pre>{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
+							<td><pre class="pre-preserve">{{ val.previous?.[info[1]] ?? "-" }}</pre></td>
 						</tr>
 						<tr>
 							<th>Move Info</th>
