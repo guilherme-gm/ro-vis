@@ -4,6 +4,8 @@ import BsListGroup from '@/components/bootstrap/ListGroup/BsListGroup.vue';
 import BsListGroupItem from '@/components/bootstrap/ListGroup/BsListGroupItem.vue';
 import { RouteName } from '@/router/RouteName';
 
+document.title = "ROVis";
+
 </script>
 
 <template>

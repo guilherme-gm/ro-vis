@@ -11,6 +11,8 @@ import { useUpdates } from '@/services/updates';
 import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { ref } from 'vue';
 
+document.title = "Update history - ROVis";
+
 const {
 	state,
 	total,
