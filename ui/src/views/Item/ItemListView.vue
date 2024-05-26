@@ -5,7 +5,7 @@ import BsListGroup from '@/components/bootstrap/ListGroup/BsListGroup.vue';
 import BsListGroupItem from '@/components/bootstrap/ListGroup/BsListGroupItem.vue';
 import type { MinItem } from '@/models/Item';
 import { RouteName } from '@/router/RouteName';
-import { useItems } from '@/services/items';
+import { ItemApi } from '@/services/ItemApi';
 import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ const {
 	state,
 	total,
 	getItems,
-} = useItems();
+} = ItemApi.use();
 
 const list = ref<MinItem[]>([]);
 const currentPage = ref(0);

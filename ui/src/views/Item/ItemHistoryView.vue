@@ -3,7 +3,7 @@ import ItemCompareTable from '@/components/Item/ItemCompareTable.vue';
 import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
-import { useItems, type PatchItem } from '@/services/items';
+import { ItemApi, type ItemPatch } from '@/services/ItemApi';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -14,11 +14,11 @@ document.title = `Item #${itemId} history - ROVis`;
 
 const {
 	state,
-	itemHistoryTotal,
+	historyTotal,
 	getItemHistory,
-} = useItems();
+} = ItemApi.use();
 
-const list = ref<PatchItem[]>([]);
+const list = ref<ItemPatch[]>([]);
 const currentPage = ref(0);
 
 async function loadPage(page: number): Promise<void> {
@@ -32,7 +32,7 @@ loadPage(1);
 <template>
 	<ListingBase
 		:title="`History for item ID #${itemId}`"
-		:total="itemHistoryTotal"
+		:total="historyTotal"
 		:state="state"
 		:current-page="currentPage"
 		@page-changed="loadPage"

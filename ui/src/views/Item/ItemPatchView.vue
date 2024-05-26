@@ -5,7 +5,7 @@ import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
 import BsLink from '@/components/bootstrap/BsLink.vue';
 import { RouteName } from '@/router/RouteName';
-import { useItems, type PatchItem } from '@/services/items';
+import { ItemApi, type ItemPatch } from '@/services/ItemApi';
 import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -19,9 +19,9 @@ const {
 	state,
 	total,
 	getPatchItems,
-} = useItems();
+} = ItemApi.use();
 
-const list = ref<PatchItem[]>([]);
+const list = ref<ItemPatch[]>([]);
 const currentPage = ref(0);
 
 async function loadPage(page: number): Promise<void> {
