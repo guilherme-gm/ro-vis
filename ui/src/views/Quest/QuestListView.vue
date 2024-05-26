@@ -42,7 +42,7 @@ loadPage(1);
 				:key="`${quest.id}-${quest.patch}`"
 			>
 				<BsLink
-					:to="{ name: RouteName.ItemHistory, params: { itemId: quest.id } }"
+					:to="{ name: RouteName.QuestHistory, params: { questId: quest.id } }"
 					target="_blank"
 				>
 					#{{ quest.id }} - {{ quest.Title }} (Last updated: {{ quest.patch }})

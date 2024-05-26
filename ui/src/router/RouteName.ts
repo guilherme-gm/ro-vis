@@ -9,4 +9,5 @@ export enum RouteName {
 
 	// Quests
 	QuestList = "questList",
+	QuestHistory = "questHistory",
 }
