@@ -3,12 +3,17 @@ import ItemCompareTable from '@/components/Item/ItemCompareTable.vue';
 import ListingBase from '@/components/ListingBase.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
+import BsLink from '@/components/bootstrap/BsLink.vue';
+import { RouteName } from '@/router/RouteName';
 import { useItems, type PatchItem } from '@/services/items';
+import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const patch = route.params.patch as string;
+
+document.title = `Patch #${patch} items - ROVis`;
 
 const {
 	state,
@@ -46,6 +51,14 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 				:key="val.current?.ItemId"
 				:title="`#${val.current?.ItemId} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
+				<p>
+					<BsLink
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						target="_blank"
+					>
+						View Item history <BIconBoxArrowUpRight />
+					</BsLink>
+				</p>
 				<ItemCompareTable :current="val.current" />
 			</BsAccordionItem>
 		</BsAccordion>
