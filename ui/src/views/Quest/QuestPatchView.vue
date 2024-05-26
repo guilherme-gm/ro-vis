@@ -53,7 +53,7 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 			>
 				<p>
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { id: val.current?.QuestId ?? val.previous?.QuestId } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />

@@ -43,14 +43,14 @@ const router = createRouter({
 			component: () => import("../views/Quest/QuestListView.vue"),
 		},
 		{
-			path: '/quests/:questId',
-			name: RouteName.QuestHistory,
-			component: () => import("../views/Quest/QuestHistoryView.vue"),
-		},
-		{
 			path: '/quests/patch/:patch',
 			name: RouteName.QuestPatch,
 			component: () => import("../views/Quest/QuestPatchView.vue"),
+		},
+		{
+			path: '/quests/:questId',
+			name: RouteName.QuestHistory,
+			component: () => import("../views/Quest/QuestHistoryView.vue"),
 		},
 	]
 })
