@@ -19,6 +19,8 @@ export type ItemMoveInfo = {
 };
 
 export type Item = {
+	patch: string;
+
 	_FileVersion: number;
 
 	ItemId: number;

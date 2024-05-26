@@ -22,7 +22,12 @@ const router = createRouter({
 			path: '/items/patch/:patch',
 			name: RouteName.ItemPatch,
 			component: () => import("../views/ItemPatchView.vue"),
-		}
+		},
+		{
+			path: '/items/:itemId',
+			name: RouteName.ItemHistory,
+			component: () => import("../views/ItemHistoryView.vue"),
+		},
 	]
 })
 
