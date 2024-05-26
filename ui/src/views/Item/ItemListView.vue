@@ -8,12 +8,8 @@ import { RouteName } from '@/router/RouteName';
 import { useItems } from '@/services/items';
 import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
-const itemId = route.params.itemId as string;
-
-document.title = `Item #${itemId} history - ROVis`;
+document.title = `Item list - ROVis`;
 
 const {
 	state,
