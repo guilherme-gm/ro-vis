@@ -21,17 +21,17 @@ const router = createRouter({
 		{
 			path: '/items/',
 			name: RouteName.ItemList,
-			component: () => import("../views/ItemListView.vue"),
+			component: () => import("../views/Item/ItemListView.vue"),
 		},
 		{
 			path: '/items/patch/:patch',
 			name: RouteName.ItemPatch,
-			component: () => import("../views/ItemPatchView.vue"),
+			component: () => import("../views/Item/ItemPatchView.vue"),
 		},
 		{
 			path: '/items/:itemId',
 			name: RouteName.ItemHistory,
-			component: () => import("../views/ItemHistoryView.vue"),
+			component: () => import("../views/Item/ItemHistoryView.vue"),
 		},
 	]
 })
