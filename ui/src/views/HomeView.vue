@@ -16,12 +16,13 @@ document.title = "ROVis";
 				See details of each update, along with the related patches and links for details
 			</div>
 		</BsListGroupItem>
-		<!-- <BsListGroupItem class="d-flex justify-content-between align-items-start">
+		<BsListGroupItem class="d-flex justify-content-between align-items-start">
 			<div class="ms-2 me-auto">
-				<div class="fw-bold"><BsLink>Items</BsLink></div>
+				<div class="fw-bold"><BsLink :to="{ name: RouteName.ItemList }">Items</BsLink></div>
 				Item information changes, like names, descriptions, slots, etc.
 			</div>
 		</BsListGroupItem>
+		<!--
 		<BsListGroupItem class="d-flex justify-content-between align-items-start">
 			<div class="ms-2 me-auto">
 				<div class="fw-bold"><BsLink>Quest Log</BsLink></div>

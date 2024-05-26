@@ -53,3 +53,11 @@ export type Item = {
 
 	MoveInfo: ItemMoveInfo;
 };
+
+export type MinItem = {
+	id: string;
+
+	patch: string;
+
+	IdentifiedName: string | null;
+};

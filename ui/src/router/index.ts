@@ -19,6 +19,11 @@ const router = createRouter({
 			component: () => import("../views/UpdatesView.vue"),
 		},
 		{
+			path: '/items/',
+			name: RouteName.ItemList,
+			component: () => import("../views/ItemListView.vue"),
+		},
+		{
 			path: '/items/patch/:patch',
 			name: RouteName.ItemPatch,
 			component: () => import("../views/ItemPatchView.vue"),
