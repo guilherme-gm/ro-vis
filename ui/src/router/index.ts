@@ -47,6 +47,11 @@ const router = createRouter({
 			name: RouteName.QuestHistory,
 			component: () => import("../views/Quest/QuestHistoryView.vue"),
 		},
+		{
+			path: '/quests/patch/:patch',
+			name: RouteName.QuestPatch,
+			component: () => import("../views/Quest/QuestPatchView.vue"),
+		},
 	]
 })
 

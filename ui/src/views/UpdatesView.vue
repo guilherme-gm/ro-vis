@@ -39,7 +39,13 @@ const itemTrackInfo: TrackInfo = {
 	label: 'Item',
 };
 
+const questTrackInfo: TrackInfo = {
+	route: RouteName.QuestPatch,
+	label: 'Quest',
+};
+
 const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
+	// ======= Item
 	["data/bookitemnametable.txt", itemTrackInfo],
 	["data/buyingstoreitemlist.txt", itemTrackInfo],
 	["data/cardpostfixnametable.txt", itemTrackInfo],
@@ -53,21 +59,25 @@ const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 	["data/num2itemdisplaynametable.txt", itemTrackInfo],
 	["data/num2itemresnametable.txt", itemTrackInfo],
 	// new on v2
-	["System/itemInfo.lub", itemTrackInfo],
+	["System/iteminfo.lub", itemTrackInfo],
 	// new on v3
 	["data/itemmoveinfov5.txt", itemTrackInfo],
-])
+
+	// ====== Quest
+	["data/questid2display.txt", questTrackInfo],
+	["system/ongoingquestinfolist_true.lub", questTrackInfo]
+]);
 
 function isTrackedFile(fileName: string): boolean {
-	return fileTrackInfo.has(fileName);
+	return fileTrackInfo.has(fileName.toLocaleLowerCase());
 }
 
 function patchRoute(fileName: string): RouteName {
-	return fileTrackInfo.get(fileName)!.route;
+	return fileTrackInfo.get(fileName.toLocaleLowerCase())!.route;
 }
 
 function trackLabel(fileName: string): string {
-	return fileTrackInfo.get(fileName)!.label;
+	return fileTrackInfo.get(fileName.toLocaleLowerCase())!.label;
 }
 </script>
 
