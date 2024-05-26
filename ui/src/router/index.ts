@@ -18,6 +18,8 @@ const router = createRouter({
 			// which is lazy-loaded when the route is visited.
 			component: () => import("../views/UpdatesView.vue"),
 		},
+
+		// Items
 		{
 			path: '/items/',
 			name: RouteName.ItemList,
@@ -32,6 +34,13 @@ const router = createRouter({
 			path: '/items/:itemId',
 			name: RouteName.ItemHistory,
 			component: () => import("../views/Item/ItemHistoryView.vue"),
+		},
+
+		// Quests
+		{
+			path: '/quests/',
+			name: RouteName.QuestList,
+			component: () => import("../views/Quest/QuestListView.vue"),
 		},
 	]
 })

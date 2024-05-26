@@ -22,12 +22,11 @@ document.title = "ROVis";
 				Item information changes, like names, descriptions, slots, etc.
 			</div>
 		</BsListGroupItem>
-		<!--
 		<BsListGroupItem class="d-flex justify-content-between align-items-start">
 			<div class="ms-2 me-auto">
-				<div class="fw-bold"><BsLink>Quest Log</BsLink></div>
+				<div class="fw-bold"><BsLink :to="{ name: RouteName.QuestList }">Quest Log</BsLink></div>
 				Quest log updates, for actual quest entries ("Recommended Quests" not included)
 			</div>
-		</BsListGroupItem> -->
+		</BsListGroupItem>
 	</BsListGroup>
 </template>
