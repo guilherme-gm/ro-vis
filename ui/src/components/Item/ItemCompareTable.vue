@@ -50,7 +50,7 @@ const showDiff = computed(() => props.previous && props.current);
 			<tr>
 				<th>Move Info</th>
 				<td v-if="showNew" ><MoveInfoCell :info="current?.MoveInfo ?? null" /></td>
-				<td v-if="showPrevious"><MoveInfoCell :info="current?.MoveInfo ?? null" /></td>
+				<td v-if="showPrevious"><MoveInfoCell :info="previous?.MoveInfo ?? null" /></td>
 				<td v-if="showDiff" ><MoveInfoDiffCell :from="previous?.MoveInfo ?? null" :to="current?.MoveInfo ?? null" /></td>
 			</tr>
 		</tbody>
