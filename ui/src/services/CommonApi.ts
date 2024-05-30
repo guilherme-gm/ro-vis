@@ -3,6 +3,7 @@ import { useApi } from "./api";
 import { LoadState } from "./LoadState";
 
 export type PatchItem<T> = {
+	lastUpdate: string;
 	previous: T | null;
 	current: T | null;
 };

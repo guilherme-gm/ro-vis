@@ -52,6 +52,7 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 				:title="`#${val.current?.QuestId} - ${val?.current?.Title}`"
 			>
 				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
 						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
 						target="_blank"
@@ -59,6 +60,7 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
+
 				<QuestCompareTable :current="val.current" />
 			</BsAccordionItem>
 		</BsAccordion>
@@ -71,6 +73,16 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 				:key="val.current?.QuestId ?? val.previous?.QuestId"
 				:title="`#${val.current?.QuestId ?? val.previous?.QuestId} - ${val?.current?.Title ?? val?.previous?.Title}`"
 			>
+				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<BsLink
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
+						target="_blank"
+					>
+						View Quest history <BIconBoxArrowUpRight />
+					</BsLink>
+				</p>
+
 				<QuestCompareTable :current="val.current" :previous="val.previous" />
 			</BsAccordionItem>
 		</BsAccordion>
@@ -83,6 +95,16 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 				:key="val.previous?.QuestId"
 				:title="`#${val.previous?.QuestId} - ${val?.previous?.Title}`"
 			>
+				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<BsLink
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
+						target="_blank"
+					>
+						View Quest history <BIconBoxArrowUpRight />
+					</BsLink>
+				</p>
+
 				<QuestCompareTable :previous="val.previous" />
 			</BsAccordionItem>
 		</BsAccordion>

@@ -52,6 +52,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 				:title="`#${val.current?.ItemId} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
 				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
 						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
 						target="_blank"
@@ -71,6 +72,15 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 				:key="val.current?.ItemId ?? val.previous?.ItemId"
 				:title="`#${val.current?.ItemId ?? val.previous?.ItemId} - ${val?.current?.IdentifiedName ?? val?.previous?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
+				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<BsLink
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						target="_blank"
+					>
+						View Item history <BIconBoxArrowUpRight />
+					</BsLink>
+				</p>
 				<ItemCompareTable :current="val.current" :previous="val.previous" />
 			</BsAccordionItem>
 		</BsAccordion>
@@ -83,6 +93,15 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 				:key="val.previous?.ItemId"
 				:title="`#${val.previous?.ItemId} - ${val?.previous?.IdentifiedName} (${val?.previous?.MoveInfo?.commentName ?? ''})`"
 			>
+				<p>
+					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<BsLink
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						target="_blank"
+					>
+						View Item history <BIconBoxArrowUpRight />
+					</BsLink>
+				</p>
 				<ItemCompareTable :previous="val.previous" />
 			</BsAccordionItem>
 		</BsAccordion>
