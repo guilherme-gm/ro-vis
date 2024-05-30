@@ -3,26 +3,13 @@ import BsPagination from '@/components/bootstrap/Pagination/BsPagination.vue';
 import BsBorderSpinner from '@/components/bootstrap/Spinner/BsBorderSpinner.vue';
 import { LoadState } from "@/services/LoadState";
 import { BIconXLg } from 'bootstrap-icons-vue';
-import { computed } from 'vue';
 
-const props = defineProps<{
+defineProps<{
 	title: string;
 	total: number;
 	state: LoadState;
 	currentPage: number;
 }>();
-
-const pages = computed(() => {
-	const nums = [];
-
-	let pageNum = 1;
-	for (let i = 0; i <= props.total; i += 100) {
-		nums.push(pageNum);
-		pageNum++;
-	}
-
-	return nums;
-});
 
 const emit = defineEmits(['page-changed']);
 </script>
@@ -35,9 +22,10 @@ const emit = defineEmits(['page-changed']);
 
 	<BsPagination
 		description="list page"
-		:pages="pages"
+		:numPages="Math.ceil(total / 100)"
 		:current-page="currentPage"
 		:center="true"
+		:group-size="20"
 		@changed="pageNum => emit('page-changed', pageNum)"
 		class="mt-3"
 	/>
@@ -56,9 +44,10 @@ const emit = defineEmits(['page-changed']);
 
 	<BsPagination
 		description="list page"
-		:pages="pages"
+		:numPages="Math.ceil(total / 100)"
 		:current-page="currentPage"
 		:center="true"
+		:group-size="20"
 		@changed="pageNum => emit('page-changed', pageNum)"
 		class="mt-3"
 	/>
