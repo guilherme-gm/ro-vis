@@ -20,6 +20,14 @@ type PatchList = {
  * This was a one time run to populate the db with initial data.
  */
 export class LoadBulkUpdateList {
+	private isSakrayFile(fileName: string): boolean {
+		return /^\d+-\d+-\d+rData/i.test(fileName) // 9999-12-31rData....
+			|| /_sak[_\.]/i.test(fileName) // 9999-12-31_foo_sak_a....
+			|| /_sakray/i.test(fileName) // 9999-12-31_foo_sakay....
+			|| /ragexeRE/i.test(fileName) // 9999-12-31_ragExeRE.rgz
+			;
+	}
+
 	private buildPatchList(): Patch[] {
 		const gpfPatch: PatchList = JSON.parse(fs.readFileSync('./raw/kro-rag-gpf-hash.json').toString());
 		const rgzPatch: PatchList = JSON.parse(fs.readFileSync('./raw/kro-rag-rgz-hash.json').toString());
@@ -31,12 +39,12 @@ export class LoadBulkUpdateList {
 		delete gpfPatch['ExMacro.gpf'];
 
 		const gpfList = Object.entries(gpfPatch)
-			.filter((entry) => entry[0].substring(0, 10).localeCompare('2012-01-01') >= 0)
-			.filter((entry) => !/^\d+-\d+-\d+rData/i.test(entry[0]) && !/_sakray_/i.test(entry[0]) && !/ragexeRE/i.test(entry[0]))
+			.filter((entry) => entry[0].substring(0, 4).localeCompare('2012') >= 0)
+			.filter((entry) => !this.isSakrayFile(entry[0]))
 			.sort((a, b) => a[0].substring(0, 10).localeCompare(b[0].substring(0, 10)));
 		const rgzList = Object.entries(rgzPatch)
-			.filter((entry) => entry[0].substring(0, 10).localeCompare('2012-01-01') >= 0)
-			.filter((entry) => !/^\d+-\d+-\d+rData/i.test(entry[0]) && !/_sakray_/i.test(entry[0]) && !/ragexeRE/i.test(entry[0]))
+			.filter((entry) => entry[0].substring(0, 4).localeCompare('2012') >= 0)
+			.filter((entry) => !this.isSakrayFile(entry[0]))
 			.sort((a, b) => a[0].substring(0, 10).localeCompare(b[0].substring(0, 10)));
 
 		const patchList: Patch[] = [];
@@ -159,5 +167,7 @@ export class LoadBulkUpdateList {
 		while (updateList.length > 0) {
 			await db.insertMany(updateList.splice(0, 500));
 		}
+
+		await db.createIndex({ order: 1 });
 	}
 }

@@ -7,6 +7,7 @@ import {
 	AnyBulkWriteOperation,
 	Filter,
 	Sort,
+	IndexSpecification,
 } from "mongodb";
 import { Config } from "../Config/config.js";
 
@@ -111,5 +112,11 @@ export class Db<T extends Document & { _id: string; }> {
 		}))
 
 		await col.bulkWrite(changes);
+	}
+
+	public async createIndex(specs: IndexSpecification): Promise<void> {
+		await this.client.db()
+			.collection<T>(this.collection)
+			.createIndex(specs);
 	}
 }
