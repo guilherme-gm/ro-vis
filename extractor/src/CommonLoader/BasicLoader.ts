@@ -72,10 +72,6 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 	}
 
 	public async load(update: Update): Promise<void> {
-		if (Cli.cli.dryRun) {
-			await this.entityDb.replicate();
-		}
-
 		this.existingRecords = (await this.entityDb.getAll()).reduce(
 			(memo, record) => {
 				memo.set(record._id, record);

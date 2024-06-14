@@ -9,30 +9,17 @@ import { LoadItem } from "./Item/LoadItems.js";
 import { Logger } from "./Logger.js";
 import chalk from "chalk";
 import * as fs from "fs";
-import { Config } from "./Config/config.js";
-import path from "path";
 import { Cli } from "./Cli.js";
-import { MongoMemoryServer } from 'mongodb-memory-server-core';
 import readline from 'readline';
 import { LoadBulkUpdateList } from "./Updates/LoadBulkPatchList.js";
-import { MemoryServerInstanceOpts } from "mongodb-memory-server-core/lib/MongoMemoryServer.js";
+import { MongoServer } from './Database/MongoServer.js';
 
 Cli.load();
 
-let mongod: MongoMemoryServer | null = null;
+await MongoServer.instance.init();
 const dryRun = Cli.cli.dryRun;
 const cleanRun = Cli.cli.cleanRun;
-if (true || dryRun || cleanRun) {
-	const opts: MemoryServerInstanceOpts = {};
-	if (Cli.cli.mongoPort) {
-		opts.port = Cli.cli.mongoPort;
-	}
-
-	mongod = await MongoMemoryServer.create({ instance: opts });
-
-	const uri = mongod.getUri('ro-vis');
-	Config.overrideMongo(uri);
-
+if (dryRun || cleanRun) {
 	fs.rmSync('out', { recursive: true, force: true });
 	fs.mkdirSync('out');
 }
@@ -47,9 +34,7 @@ try {
 	if (cleanRun) {
 		const updateListLoad = new LoadBulkUpdateList();
 		await updateListLoad.do();
-	}
-
-	if (!cleanRun) {
+	} else {
 		await Promise.all([
 			updateDb.restore(),
 			metadataDb.restore(),
@@ -135,9 +120,7 @@ try {
 } finally {
 	if (Cli.cli.holdProcess) {
 		Logger.status('Extraction ended. Press ENTER to finish.');
-		if (mongod) {
-			Logger.info(`Temporary DB is running at "${chalk.whiteBright(mongod.getUri())}"`);
-		}
+		Logger.info(`Temporary DB is running at "${chalk.whiteBright(MongoServer.instance.getUri())}"`);
 
 		const readlineInterface = readline.createInterface(process.stdin, process.stdout);
 		await new Promise<void>((resolve) => {
@@ -146,10 +129,8 @@ try {
 		readlineInterface.close();
 	}
 
-	if (mongod) {
-		Logger.status('Closing temporary database before ending...');
-		await mongod?.stop();
-	}
+	Logger.status('Closing temporary database before ending...');
+	await MongoServer.instance.shutdown();
 }
 
 process.exit(exitCode);

@@ -15,6 +15,7 @@ import fs from "fs";
 import readline from "readline";
 import { Logger } from "../Logger.js";
 import { Cli } from "../Cli.js";
+import { MongoServer } from "./MongoServer.js";
 
 export class Db<T extends Document & { _id: string; }> {
 	private collection: string;
@@ -22,17 +23,9 @@ export class Db<T extends Document & { _id: string; }> {
 	private client: MongoClient;
 
 	constructor(collection: string) {
-		const conf = Config.mainDb;
 		this.collection = collection;
 
-		let uri;
-		if (conf.uri) {
-			uri = conf.uri;
-		} else {
-			uri = `mongodb+srv://${conf.user}:${conf.pass}@${conf.host}/${conf.name}?retryWrites=true&w=majority`;
-		}
-
-		this.client = new MongoClient(uri, {
+		this.client = new MongoClient(MongoServer.instance.getUri(), {
 			serverApi: {
 				version: ServerApiVersion.v1,
 				strict: true,
@@ -98,31 +91,6 @@ export class Db<T extends Document & { _id: string; }> {
 		writeStream.close();
 
 		Logger.info(`Dumping "${this.getDumpPath()}"... Done`);
-	}
-
-	public async replicate(): Promise<void> {
-		const conf = Config.backupDb;
-		const backupClient = new MongoClient(`mongodb+srv://${conf.user}:${conf.pass}@${conf.host}/${conf.name}?retryWrites=true&w=majority`, {
-			serverApi: {
-				version: ServerApiVersion.v1,
-				strict: true,
-				deprecationErrors: true,
-			},
-		});
-
-		const conn = await backupClient.connect();
-		const data = await conn.db().collection(this.collection).find<T>({}).toArray();
-		await this.client.connect();
-		await this.client.db().collection<T>(this.collection).bulkWrite(
-			// @ts-ignore
-			data.map((d) => ({
-				replaceOne: {
-					filter: { _id: d._id },
-					replacement: d,
-					upsert: true,
-				}
-			}))
-		);
 	}
 
 	public async get(id: string): Promise<T | null> {
