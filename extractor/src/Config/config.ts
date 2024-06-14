@@ -23,6 +23,10 @@ export class Config {
 		return Config.config.backupDb;
 	}
 
+	public static get dbDir(): string {
+		return Config.config.dbDir;
+	}
+
 	public static overrideMongo(uri: string): void {
 		this.config.mainDb = { uri };
 	}
@@ -32,6 +36,8 @@ export class Config {
 	public mainDb: DbConfig;
 
 	public backupDb: DbConfig;
+
+	public dbDir: string;
 
 	constructor() {
 		config();
@@ -44,6 +50,7 @@ export class Config {
 			user: process.env['DB_USER'] ?? '',
 			pass: process.env['DB_PASS'] ?? '',
 		};
+		this.dbDir = process.env['DB_DIR'] ?? '';
 		this.validateConfigs();
 
 		this.backupDb = { ...this.mainDb };
@@ -52,6 +59,7 @@ export class Config {
 	private validateConfigs() {
 		[
 			{ key: 'patchesRootDir', env: 'PATCHES_DIR' },
+			{ key: 'dbDir', env: 'DB_DIR' },
 			...(this.mainDb.uri ? [
 				{ key: 'mainDb.uri', env: 'DB_URI' },
 			] : [

@@ -29,7 +29,7 @@ export class Cli {
 		this.program.name('RO Vis extractor');
 
 		this.program
-			.option("--dry-run", "Replicate data to an in-memory DB to execute the process")
+			.option("--dry-run", "Don't dump data to disk at the end")
 			.option("--clean-run", "Run everything from scratch in a in-memory DB")
 			.option("--change-dump", "Dump change logs as json files for debugging")
 			.option("--mongo-port <port>", "For dry-run and clean-run, defines the port where the in-memory MongoDB will run on. When not set, a random one is chosen.")

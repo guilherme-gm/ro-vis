@@ -10,6 +10,11 @@ import {
 	IndexSpecification,
 } from "mongodb";
 import { Config } from "../Config/config.js";
+import path from "path";
+import fs from "fs";
+import readline from "readline";
+import { Logger } from "../Logger.js";
+import { Cli } from "../Cli.js";
 
 export class Db<T extends Document & { _id: string; }> {
 	private collection: string;
@@ -34,6 +39,65 @@ export class Db<T extends Document & { _id: string; }> {
 				deprecationErrors: true,
 			},
 		});
+	}
+
+	private getDumpPath(): string {
+		return path.resolve(Config.dbDir, `${this.collection}.ndjson`);
+	}
+
+	public async restore(): Promise<void> {
+		const restoreFile = this.getDumpPath();
+		if (!fs.existsSync(restoreFile)) {
+			Logger.info(`Restoring "${restoreFile}"... Nothing to restore`);
+			return;
+		}
+
+		Logger.info(`Restoring "${restoreFile}"...`);
+		const fileStream = fs.createReadStream(restoreFile, { encoding: 'utf-8' });
+		const rl = readline.createInterface({
+			input: fileStream,
+			crlfDelay: Infinity
+		});
+
+		let itemsToInsert: T[] = [];
+		for await (const line of rl) {
+			const entry = JSON.parse(line);
+			itemsToInsert.push(entry);
+
+			if (itemsToInsert.length >= 1000) {
+				await this.insertMany(itemsToInsert);
+				itemsToInsert = [];
+			}
+		}
+
+		if (itemsToInsert.length > 0) {
+			await this.insertMany(itemsToInsert);
+		}
+
+		Logger.info(`Restoring "${restoreFile}"... Done`);
+	}
+
+	public async dump(): Promise<void> {
+		if (Cli.cli.dryRun) {
+			Logger.info(`Dumping "${this.getDumpPath()}"... Skipped due to Dry Run`);
+			return Promise.resolve();
+		}
+
+		Logger.info(`Dumping "${this.getDumpPath()}"...`);
+
+		fs.mkdirSync(Config.dbDir, { recursive: true });
+
+		const writeStream = fs.createWriteStream(this.getDumpPath(), { encoding: 'utf-8' });
+		const items = await this.getAll();
+
+		items.forEach((item) => {
+			writeStream.write(JSON.stringify(item));
+			writeStream.write('\n');
+		});
+
+		writeStream.close();
+
+		Logger.info(`Dumping "${this.getDumpPath()}"... Done`);
 	}
 
 	public async replicate(): Promise<void> {

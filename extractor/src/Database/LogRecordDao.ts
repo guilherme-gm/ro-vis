@@ -51,4 +51,12 @@ export abstract class LogRecordDao<T extends RecordObject> {
 	public async replicate(): Promise<void> {
 		await this.db.replicate();
 	}
+
+	public async dump(): Promise<void> {
+		await this.db.dump();
+	}
+
+	public async restore(): Promise<void> {
+		await this.db.restore();
+	}
 }

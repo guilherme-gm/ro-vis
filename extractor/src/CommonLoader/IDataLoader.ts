@@ -6,4 +6,8 @@ export interface IDataLoader {
 	hasFileOfInterest(patch: Update): boolean;
 
 	load(update: Update): Promise<void>;
+
+	restore(): Promise<void>;
+
+	dump(): Promise<void>;
 }

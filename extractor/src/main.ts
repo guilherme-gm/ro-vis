@@ -22,7 +22,7 @@ Cli.load();
 let mongod: MongoMemoryServer | null = null;
 const dryRun = Cli.cli.dryRun;
 const cleanRun = Cli.cli.cleanRun;
-if (dryRun || cleanRun) {
+if (true || dryRun || cleanRun) {
 	const opts: MemoryServerInstanceOpts = {};
 	if (Cli.cli.mongoPort) {
 		opts.port = Cli.cli.mongoPort;
@@ -42,13 +42,31 @@ let exitCode = 0;
 try {
 	const metadataDb = new MetadataDb();
 	const updateDb = new UpdateDb();
+
+	Logger.info('Loading MetadataDB and UpdateDB...');
 	if (cleanRun) {
 		const updateListLoad = new LoadBulkUpdateList();
 		await updateListLoad.do();
-	} else if (dryRun) {
-		await updateDb.replicate();
-		await metadataDb.replicate();
 	}
+
+	if (!cleanRun) {
+		await Promise.all([
+			updateDb.restore(),
+			metadataDb.restore(),
+		]);
+
+		const updates = await updateDb.getAll();
+		if (updates.length === 0) {
+			Logger.info('Loading initial update list...');
+
+			const updateListLoad = new LoadBulkUpdateList();
+			await updateListLoad.do();
+
+			Logger.info('Initial update list loaded.');
+		}
+	}
+
+	Logger.info('MetadataDB and UpdateDB loaded...');
 
 	let patchFilter = {};
 	if (Cli.cli.onlyPatches) {
@@ -68,6 +86,8 @@ try {
 		if (Cli.cli.only !== "" && Cli.cli.only !== metaType) {
 			continue;
 		}
+
+		await loader.restore();
 
 		let meta = await metadataDb.get(metaType);
 		if (meta == null) {
@@ -101,7 +121,14 @@ try {
 
 			await metadataDb.updateOrCreate(meta._id, meta);
 		}
+
+		await Promise.all([
+			await metadataDb.dump(),
+			await loader.dump(),
+		]);
 	}
+
+	await updateDb.dump();
 } catch (error) {
 	Logger.error('An unhandled error happened...', error);
 	exitCode = 1;

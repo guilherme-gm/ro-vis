@@ -134,4 +134,12 @@ export abstract class BasicLoader<T extends RecordObject, U extends IFileEntry<T
 			await this.entityDb.bulkWrite(updatedRecords);
 		}
 	}
+
+	public async restore(): Promise<void> {
+		await this.entityDb.restore();
+	}
+
+	public async dump(): Promise<void> {
+		await this.entityDb.dump();
+	}
 }
