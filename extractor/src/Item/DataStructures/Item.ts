@@ -20,7 +20,7 @@ export class Item implements RecordObject {
 	public Id: number = 0;
 
 	@Expose()
-	public IdentifiedName: string = "";
+	public IdentifiedName: string = "<<Incomplete Item>>";
 
 	@Expose()
 	public IdentifiedDescription: string[] = [];
@@ -38,7 +38,7 @@ export class Item implements RecordObject {
 	public UnidentifiedSprite: string = "";
 
 	@Expose()
-	public SlotCount: number = -1;
+	public SlotCount: number = 0;
 
 	@Expose()
 	public IsBook: boolean = false;

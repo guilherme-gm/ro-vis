@@ -8,12 +8,16 @@ export class BoolIdTableMerger<ItV extends ItemV> {
 
 	private newItemMap: Map<number, ItV>;
 
+	private itemClass: new () => ItV;
+
 	constructor(
 		itemDb: Map<number, Item>,
 		newItemMap: Map<number, ItV>,
+		itemClass: new () => ItV,
 	) {
 		this.itemDb = itemDb;
 		this.newItemMap = newItemMap;
+		this.itemClass = itemClass;
 	}
 
 	public loadBoolIdTable(
@@ -29,10 +33,13 @@ export class BoolIdTableMerger<ItV extends ItemV> {
 			}
 
 			for (let itemId of idTable) {
-				const item = this.newItemMap.get(itemId);
+				let item = this.newItemMap.get(itemId);
 				if (!item) {
-					Logger.warn(`${reference}: Item ${itemId} does not exists, could not set the flag.`);
-					continue;
+					item = new this.itemClass();
+					item.Id = itemId;
+					item.IdentifiedName = "<<Incomplete item>>";
+					this.newItemMap.set(itemId, item);
+					// Logger.warn(`${reference}: Item ${itemId} does not exists, could not set the flag.`);
 				}
 
 				// @ts-ignore -- too hard to type

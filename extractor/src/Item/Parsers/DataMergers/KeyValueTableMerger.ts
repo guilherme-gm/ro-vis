@@ -9,12 +9,16 @@ export class KeyValueTableMerger<ItV extends ItemV> {
 
 	private newItemMap: Map<number, ItV>;
 
+	private itemClass: new () => ItV;
+
 	constructor(
 		itemDb: Map<number, Item>,
 		newItemMap: Map<number, ItV>,
+		itemClass: new () => ItV
 	) {
 		this.itemDb = itemDb;
 		this.newItemMap = newItemMap;
+		this.itemClass = itemClass;
 	}
 
 	public loadTable<T>(
@@ -34,9 +38,14 @@ export class KeyValueTableMerger<ItV extends ItemV> {
 					// @ts-ignore -- too hard to type
 					item[v1Key] = val;
 				} else {
-					Logger.warn(`${chalk.whiteBright(reference)}: Item ${chalk.whiteBright(itemId)} does not exists.`);
+					// Logger.warn(`${chalk.whiteBright(reference)}: Item ${chalk.whiteBright(itemId)} does not exists.`);
+					const newItem = new this.itemClass();
+					newItem.Id = itemId;
+					newItem.IdentifiedName = "<<Incomplete item>>";
+					// @ts-ignore -- too hard to type
+					newItem[v1Key] = val;
+					this.newItemMap.set(itemId, newItem);
 				}
-
 			}
 		} else {
 			for (let item of this.newItemMap.values()) {

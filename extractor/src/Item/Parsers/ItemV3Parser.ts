@@ -128,17 +128,17 @@ export class ItemV3Parser {
 			}
 		}
 
-		const keyValueTableMerger = new KeyValueTableMerger(this.itemDb, this.newItemMap);
+		const keyValueTableMerger = new KeyValueTableMerger(this.itemDb, this.newItemMap, ItemV3);
 		keyValueTableMerger.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration", "");
 
-		const boolTableMerger = new BoolIdTableMerger<ItemV3>(this.itemDb, this.newItemMap);
+		const boolTableMerger = new BoolIdTableMerger<ItemV3>(this.itemDb, this.newItemMap, ItemV3);
 		boolTableMerger.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 		boolTableMerger.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
 
-		const cardFlavorMerger = new CardFlavorMerger(this.itemDb, this.newItemMap, this.cardPrefixNameTable, this.cardPostfixNameTable);
+		const cardFlavorMerger = new CardFlavorMerger(this.itemDb, this.newItemMap, this.cardPrefixNameTable, this.cardPostfixNameTable, ItemV3);
 		cardFlavorMerger.loadCardFlavor();
 
-		const moveInfoMerge = new ItemMoveInfoMerger(this.itemDb, this.newItemMap, this.moveInfoTable);
+		const moveInfoMerge = new ItemMoveInfoMerger(this.itemDb, this.newItemMap, this.moveInfoTable, ItemV3);
 		moveInfoMerge.mergeMoveInfo();
 
 		return {

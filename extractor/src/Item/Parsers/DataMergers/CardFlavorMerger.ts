@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import { Logger } from "../../../Logger.js";
 import { Item } from "../../DataStructures/Item.js";
 import { ItemV } from "../../DataStructures/ItemV.js";
@@ -9,6 +8,7 @@ export class CardFlavorMerger<ItV extends ItemV> {
 		private newItemMap: Map<number, ItV>,
 		private cardPrefixNameTable: Map<number, string> | null = null,
 		private cardPostfixNameTable: number[] | null = null,
+		private itemClass: new () => ItV,
 	) {}
 
 	public loadCardFlavor(): void {
@@ -39,10 +39,13 @@ export class CardFlavorMerger<ItV extends ItemV> {
 		// Update prefixes
 		if (this.cardPrefixNameTable) {
 			for (let [itemId, prefix] of this.cardPrefixNameTable) {
-				const item = this.newItemMap.get(itemId);
+				let item = this.newItemMap.get(itemId);
 				if (!item) {
-					Logger.warn(`${chalk.whiteBright('Card Prefix:')} Item ${itemId} doesn't exists, so we can't load its prefix.`);
-					continue;
+					// Logger.warn(`${chalk.whiteBright('Card Prefix:')} Item ${itemId} doesn't exists, so we can't load its prefix.`);
+					item = new this.itemClass();
+					item.Id = itemId;
+					item.IdentifiedName = "<<Incomplete item>>";
+					this.newItemMap.set(itemId, item);
 				}
 
 				item.CardPrefix = prefix;
@@ -52,10 +55,13 @@ export class CardFlavorMerger<ItV extends ItemV> {
 		// Update postfixes
 		if (this.cardPostfixNameTable) {
 			for (let itemId of this.cardPostfixNameTable) {
-				const item = this.newItemMap.get(itemId);
+				let item = this.newItemMap.get(itemId);
 				if (!item) {
-					Logger.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
-					continue;
+					// Logger.error(`Card Postfix: Item ${itemId} doesn't exists, so we can't load its postfix.`);
+					item = new this.itemClass();
+					item.Id = itemId;
+					item.IdentifiedName = "<<Incomplete item>>";
+					this.newItemMap.set(itemId, item);
 				}
 
 				if (item.CardPrefix !== "") {

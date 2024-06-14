@@ -178,7 +178,7 @@ export class ItemV1Parser {
 			}
 		}
 
-		const keyValueTableMerger = new KeyValueTableMerger(this.itemDb, this.newItemMap);
+		const keyValueTableMerger = new KeyValueTableMerger(this.itemDb, this.newItemMap, ItemV1);
 		keyValueTableMerger.loadTable("Identified Item Desc Table", this.idNum2ItemDescTable, "IdentifiedDescription", "IdentifiedDescription", []);
 		keyValueTableMerger.loadTable("Identified Item Res Table", this.idNum2ItemResNameTable, "IdentifiedSprite", "IdentifiedSprite", "");
 
@@ -189,11 +189,11 @@ export class ItemV1Parser {
 		keyValueTableMerger.loadTable("Slot table", this.slotTable, "SlotCount", "SlotCount", 0);
 		keyValueTableMerger.loadTable("Card illust", this.cardIllustTable, "CardIllustration", "CardIllustration", "");
 
-		const boolIdTableMerger = new BoolIdTableMerger(this.itemDb, this.newItemMap);
+		const boolIdTableMerger = new BoolIdTableMerger(this.itemDb, this.newItemMap, ItemV1);
 		boolIdTableMerger.loadBoolIdTable("Book", this.bookItemNameTable, "IsBook", "IsBook");
 		boolIdTableMerger.loadBoolIdTable("BuyingStore", this.buyingStoreItemList, "CanUseBuyingStore", "CanUseBuyingStore");
 
-		const cardFlavorMerger = new CardFlavorMerger(this.itemDb, this.newItemMap, this.cardPrefixNameTable, this.cardPostfixNameTable);
+		const cardFlavorMerger = new CardFlavorMerger(this.itemDb, this.newItemMap, this.cardPrefixNameTable, this.cardPostfixNameTable, ItemV1);
 		cardFlavorMerger.loadCardFlavor();
 
 		return {

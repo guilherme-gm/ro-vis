@@ -1,5 +1,3 @@
-import chalk from "chalk";
-import { Logger } from "../../../Logger.js";
 import { Item } from "../../DataStructures/Item.js";
 import { ItemMoveInfoV5 } from "../../DataStructures/ItemMoveInfoV5.js";
 import { ItemV3 } from "../../DataStructures/ItemV3.js";
@@ -9,6 +7,7 @@ export class ItemMoveInfoMerger<ItV extends ItemV3> {
 		private itemDb: Map<number, Item>,
 		private newItemMap: Map<number, ItV>,
 		private moveInfoTable: ItemMoveInfoV5[] | null,
+		private itemClass: new () => ItV,
 	) {}
 
 	public mergeMoveInfo(): void {
@@ -33,10 +32,13 @@ export class ItemMoveInfoMerger<ItV extends ItemV3> {
 		// Fill it
 		for (let moveInfo of this.moveInfoTable) {
 			const itemId = moveInfo.itemId
-			const item = this.newItemMap.get(itemId);
+			let item = this.newItemMap.get(itemId);
 			if (!item) {
-				Logger.warn(`${chalk.whiteBright("MoveInfo")}: Item "${itemId}" is in MoveInfo but not in DB. skipping...`);
-				continue;
+				// Logger.warn(`${chalk.whiteBright("MoveInfo")}: Item "${itemId}" is in MoveInfo but not in DB. skipping...`);
+				item = new this.itemClass();
+				item.Id = itemId;
+				item.IdentifiedName = "<<Incomplete item>>";
+				this.newItemMap.set(itemId, item);
 			}
 
 			item.MoveInfo = moveInfo;
