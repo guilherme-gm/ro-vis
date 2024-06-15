@@ -10,6 +10,7 @@ import { ItemDb } from "./ItemDb.js";
 import { ItemV2Parser } from "./Parsers/ItemV2Parser.js";
 import { ItemV3Parser } from "./Parsers/ItemV3Parser.js";
 import { Update } from "../Updates/Update.js";
+import { LogRecordSqlConverter } from "../SqlConverter/LogRecordSqlConverter.js";
 
 export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 	public name: string = LoadItem.name;
@@ -143,5 +144,14 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
 		}
+	}
+
+	public override async dump(): Promise<void> {
+		await super.dump();
+
+		const entries = await this.entityDb.getAll();
+
+		const sqlConverter = new LogRecordSqlConverter<Item>();
+		await sqlConverter.convert('items', entries);
 	}
 }

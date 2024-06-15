@@ -3,13 +3,13 @@ import { SqlFieldMetadata } from "./Decorators/SqlFieldMetadata.js";
 import path from "path";
 
 export class SqlConverter {
-	private valueToSql(value: unknown, type: unknown): string {
+	protected valueToSql(value: unknown, type: unknown): string {
 		if (type === Number) {
 			return `${value}`;
 		}
 
 		if (type === String) {
-			return `"${(value as string).replace(/"/g, '""')}"`;
+			return `"${(value as string).replace(/"/g, '""').replace(/\n/g, '\\n')}"`;
 		}
 
 		if (type === Boolean) {
@@ -19,7 +19,7 @@ export class SqlConverter {
 		throw new Error(`Can't convert value ${value} to type ${type}.`);
 	}
 
-	private convertInto(data: object, converted: [string, string][], prefix: string = ''): void {
+	protected convertInto(data: object, converted: [string, string][], prefix: string = ''): void {
 		const fields = Reflect.getMetadata('sql-field', data) as SqlFieldMetadata[] | undefined;
 		if (!fields) {
 			return;
@@ -47,7 +47,7 @@ export class SqlConverter {
 		});
 	}
 
-	private generateReplace(tableName: string, fields: [string, string][]): string {
+	protected generateReplace(tableName: string, fields: [string, string][]): string {
 		const fieldNames = fields
 			.map((field) => `\`${field[0]}\``)
 			.join(', ');

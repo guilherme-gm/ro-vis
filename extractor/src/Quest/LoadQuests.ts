@@ -9,6 +9,7 @@ import { QuestV3Parser } from "./Parsers/QuestV3Parser.js";
 import { QuestV4Parser } from "./Parsers/QuestV4Parser.js";
 import { QuestDb } from "./QuestDb.js";
 import { Update } from "../Updates/Update.js";
+import { LogRecordSqlConverter } from "../SqlConverter/LogRecordSqlConverter.js";
 
 export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -78,5 +79,14 @@ export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoade
 		} else {
 			throw new Error(`Unsupported quest version "${version}"`);
 		}
+	}
+
+	public override async dump(): Promise<void> {
+		await super.dump();
+
+		const entries = await this.entityDb.getAll();
+
+		const sqlConverter = new LogRecordSqlConverter<Quest>();
+		await sqlConverter.convert('quests', entries);
 	}
 }

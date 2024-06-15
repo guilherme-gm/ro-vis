@@ -2,6 +2,7 @@ import { Expose, Type } from "class-transformer";
 import { ArrayEqual } from "../../CompareUtils/ArrayEqual.js";
 import { RecordObject } from "../../Database/RecordObject.js";
 import { QuestRewardItem } from "./QuestRewardItem.js";
+import { SqlField } from "../../SqlConverter/Decorators/SqlField.js";
 
 /**
  * Represents a Quest in the tool.
@@ -11,30 +12,38 @@ export class Quest implements RecordObject {
 	 * The File Version that originated this object
 	 */
 	@Expose()
+	@SqlField()
 	public _FileVersion: number = -1;
 
 	/**
 	 * Quest ID
 	 */
 	@Expose()
+	@SqlField()
 	public Id: number = 0;
 
 	/**
 	 * Quest title ("yellow" title in side UI, or entry name in quest UI list)
 	 */
 	@Expose()
+	@SqlField()
 	public Title: string = "";
 
 	/**
 	 * Quest long description inside quest UI list
 	 */
 	@Expose()
+	@SqlField({
+		transform: (value: string[]) => value.join('\n'),
+		outType: () => String,
+	})
 	public Description: string[] = [];
 
 	/**
 	 * Short, one-line, mission description. Shown in side UI.
 	 */
 	@Expose()
+	@SqlField()
 	public Summary: string = "";
 
 	/**
@@ -42,6 +51,7 @@ export class Quest implements RecordObject {
 	 * but was not really used officially
 	 */
 	@Expose()
+	@SqlField()
 	public OldImage: string = "";
 
 	/**
@@ -50,42 +60,49 @@ export class Quest implements RecordObject {
 	 * In the new UI, this uses a few images that represents "type of quest"
 	 */
 	@Expose()
+	@SqlField()
 	public IconName: string = "";
 
 	/**
 	 * NPC Sprite
 	 */
 	@Expose()
+	@SqlField()
 	public NpcSpr: string = "";
 
 	/**
 	 * NPC Map
 	 */
 	@Expose()
+	@SqlField()
 	public NpcNavi: string = "";
 
 	/**
 	 * NPC X
 	 */
 	@Expose()
+	@SqlField()
 	public NpcPosX: number = -1;
 
 	/**
 	 * NPC Y
 	 */
 	@Expose()
+	@SqlField()
 	public NpcPosY: number = -1;
 
 	/**
 	 * Rewarded Base EXP
 	 */
 	@Expose()
+	@SqlField()
 	public RewardEXP: string = "";
 
 	/**
 	 * Rewarded Job EXP
 	 */
 	@Expose()
+	@SqlField()
 	public RewardJEXP: string = "";
 
 	/**
@@ -93,12 +110,17 @@ export class Quest implements RecordObject {
 	 */
 	@Expose()
 	@Type(() => QuestRewardItem)
+	@SqlField({
+		outType: () => String,
+		transform: (value: QuestRewardItem[]) => JSON.stringify(value),
+	})
 	public RewardItemList: QuestRewardItem[] = [];
 
 	/**
 	 * Is it a Cooldown quest (?)
 	 */
 	@Expose()
+	@SqlField()
 	public CoolTimeQuest: number = -1;
 
 	public getId(): string {
