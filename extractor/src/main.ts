@@ -13,6 +13,7 @@ import { Cli } from "./Cli.js";
 import readline from 'readline';
 import { LoadBulkUpdateList } from "./Updates/LoadBulkPatchList.js";
 import { MongoServer } from './Database/MongoServer.js';
+import { SqlConverter } from './SqlConverter/SqlConverter.js';
 
 Cli.load();
 
@@ -114,6 +115,10 @@ try {
 	}
 
 	await updateDb.dump();
+
+	const finalUpdate = await updateDb.getAll();
+	const sqlConverter = new SqlConverter();
+	await sqlConverter.convert('updates', finalUpdate);
 } catch (error) {
 	Logger.error('An unhandled error happened...', error);
 	exitCode = 1;
