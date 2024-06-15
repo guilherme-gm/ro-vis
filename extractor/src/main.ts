@@ -14,6 +14,7 @@ import readline from 'readline';
 import { LoadBulkUpdateList } from "./Updates/LoadBulkPatchList.js";
 import { MongoServer } from './Database/MongoServer.js';
 import { SqlConverter } from './SqlConverter/SqlConverter.js';
+import { UnsupportedVersionError } from './CommonLoader/UnsupportedVersionError.js';
 
 Cli.load();
 
@@ -73,45 +74,57 @@ try {
 			continue;
 		}
 
-		await loader.restore();
+		try {
+			await loader.restore();
 
-		let meta = await metadataDb.get(metaType);
-		if (meta == null) {
-			meta = new Metadata(metaType);
-		}
-
-		for (let i = 0; i < updateList.length; i++) {
-			const update = updateList[i]!;
-
-			// Skip initial patches -- for testing
-			// if (patch._id.localeCompare('2018-01') < 0)
-			// 	continue;
-
-			// if (patch._id.startsWith('2020-12')) {
-			// 	console.log('Reached breakpoint.');
-			// 	break;
-			// }
-
-			if (meta.appliedPatches.has(update._id)) {
-				continue;
+			let meta = await metadataDb.get(metaType);
+			if (meta == null) {
+				meta = new Metadata(metaType);
 			}
 
-			if (!loader.hasFileOfInterest(update)) {
-				continue;
+			for (let i = 0; i < updateList.length; i++) {
+				const update = updateList[i]!;
+
+				// Skip initial patches -- for testing
+				// if (patch._id.localeCompare('2018-01') < 0)
+				// 	continue;
+
+				// if (patch._id.startsWith('2020-12')) {
+				// 	console.log('Reached breakpoint.');
+				// 	break;
+				// }
+
+				if (meta.appliedPatches.has(update._id)) {
+					continue;
+				}
+
+				if (!loader.hasFileOfInterest(update)) {
+					continue;
+				}
+
+				Logger.status(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(update._id)}...`);
+				await loader.load(update);
+
+				meta.appliedPatches.add(update._id);
+
+				await metadataDb.updateOrCreate(meta._id, meta);
 			}
 
-			Logger.status(`Running ${chalk.whiteBright(loader.name)} for ${chalk.white(update._id)}...`);
-			await loader.load(update);
-
-			meta.appliedPatches.add(update._id);
-
-			await metadataDb.updateOrCreate(meta._id, meta);
+			await Promise.all([
+				await metadataDb.dump(),
+				await loader.dump(),
+			]);
+		} catch (error) {
+			if (error instanceof UnsupportedVersionError) {
+				Logger.error(error.message);
+				await Promise.all([
+					await metadataDb.dump(),
+					await loader.dump(),
+				]);
+			} else {
+				throw error;
+			}
 		}
-
-		await Promise.all([
-			await metadataDb.dump(),
-			await loader.dump(),
-		]);
 	}
 
 	await updateDb.dump();

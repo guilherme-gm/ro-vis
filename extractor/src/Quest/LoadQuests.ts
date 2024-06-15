@@ -10,6 +10,7 @@ import { QuestV4Parser } from "./Parsers/QuestV4Parser.js";
 import { QuestDb } from "./QuestDb.js";
 import { Update } from "../Updates/Update.js";
 import { LogRecordSqlConverter } from "../SqlConverter/LogRecordSqlConverter.js";
+import { UnsupportedVersionError } from "../CommonLoader/UnsupportedVersionError.js";
 
 export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoader {
 	public name: string = LoadQuests.name;
@@ -56,7 +57,7 @@ export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoade
 		} else if (version === 3 || version == 4) {
 			fileName = "system/ongoingquestinfolist_true.lub";
 		} else {
-			throw new Error(`Unsupported quest version "${version}"`);
+			throw new UnsupportedVersionError('quests', version);
 		}
 
 		const entry = update.updates.find((f) => f.file.toLocaleLowerCase().includes(fileName));
@@ -77,7 +78,7 @@ export class LoadQuests extends BasicLoader<Quest, QuestV> implements IDataLoade
 		} else if (version === 4) {
 			return QuestV4Parser.fromFile(this.getPath(update, 'System/OnGoingQuestInfoList_True.lub'));
 		} else {
-			throw new Error(`Unsupported quest version "${version}"`);
+			throw new UnsupportedVersionError('quest', version);
 		}
 	}
 

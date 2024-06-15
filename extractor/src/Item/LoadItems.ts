@@ -11,6 +11,7 @@ import { ItemV2Parser } from "./Parsers/ItemV2Parser.js";
 import { ItemV3Parser } from "./Parsers/ItemV3Parser.js";
 import { Update } from "../Updates/Update.js";
 import { LogRecordSqlConverter } from "../SqlConverter/LogRecordSqlConverter.js";
+import { UnsupportedVersionError } from "../CommonLoader/UnsupportedVersionError.js";
 
 export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 	public name: string = LoadItem.name;
@@ -84,7 +85,7 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 		} else if (version === 3) {
 			fileNames = this.v3FileNames;
 		} else {
-			throw new Error(`Unsupported item version "${version}"`);
+			throw new UnsupportedVersionError('item', version);
 		}
 
 		fileNames = fileNames.map((n) => n.toLocaleLowerCase());
@@ -142,7 +143,7 @@ export class LoadItem extends BasicLoader<Item, ItemV> implements IDataLoader {
 				num2CardIllustNameTable: this.getPathIfExists(update, "data/num2cardillustnametable.txt"),
 			});
 		} else {
-			throw new Error(`Unsupported quest version "${version}"`);
+			throw new UnsupportedVersionError('item', version);
 		}
 	}
 
