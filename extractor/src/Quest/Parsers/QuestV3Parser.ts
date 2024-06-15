@@ -56,7 +56,7 @@ export class QuestV3Parser extends LuaTableParser<QuestV3[]> {
 			const questv3 = new QuestV3();
 			questv3.Id = parseInt(questId, 10);
 			questv3.Title = questObj.Title ?? '';
-			questv3.Description = questObj.Description ?? '';
+			questv3.Description = this.fixArrayObjects(questObj.Description);
 			questv3.Summary = questObj.Summary ?? '';
 			questv3.IconName = questObj.IconName ?? '';
 			questv3.NpcSpr = questObj.NpcSpr ?? '';

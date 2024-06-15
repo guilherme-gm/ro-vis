@@ -33,4 +33,16 @@ export class LuaTableParser<T> {
 
 		return JSON.parse(result);
 	}
+
+	protected fixArrayObjects(data: any): any {
+		if (
+			!Array.isArray(data)
+			&& typeof(data) === 'object'
+			&& Object.keys(data).length === 0
+		) {
+			return [];
+		} else {
+			return data ?? [];
+		}
+	}
 }

@@ -57,7 +57,7 @@ export class QuestV4Parser extends LuaTableParser<QuestV4[]> {
 			const questv4 = new QuestV4();
 			questv4.Id = parseInt(questId, 10);
 			questv4.Title = questObj.Title ?? '';
-			questv4.Description = questObj.Description ?? '';
+			questv4.Description = this.fixArrayObjects(questObj.Description);
 			questv4.Summary = questObj.Summary ?? '';
 			questv4.IconName = questObj.IconName ?? '';
 			questv4.NpcSpr = questObj.NpcSpr ?? '';
