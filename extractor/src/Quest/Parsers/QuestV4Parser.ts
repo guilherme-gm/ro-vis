@@ -64,8 +64,8 @@ export class QuestV4Parser extends LuaTableParser<QuestV4[]> {
 			questv4.NpcNavi = questObj.NpcNavi ?? '';
 			questv4.NpcPosX = questObj.NpcPosX ?? -1;
 			questv4.NpcPosY = questObj.NpcPosY ?? -1;
-			questv4.RewardEXP = questObj.RewardEXP ?? '';
-			questv4.RewardJEXP = questObj.RewardJEXP ?? '';
+			questv4.RewardEXP = questObj.RewardEXP?.toString() ?? '';
+			questv4.RewardJEXP = questObj.RewardJEXP?.toString() ?? '';
 			questv4.CoolTimeQuest = questObj.CoolTimeQuest ?? 0;
 			questv4.RewardItemList = questObj.RewardItemList?.map((reward) => {
 				const r = new QuestV3RewardItem();
