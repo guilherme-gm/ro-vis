@@ -110,6 +110,12 @@ export class TokenTextTableParser {
 	}
 
 	public readMultilineCell(): Result<string> {
-		return this._readCell(true);
+		const result = this._readCell(true);
+		if (!result.isOk()) {
+			return result;
+		}
+
+		const text = result.unwrap().trim();
+		return Result.ok(text);
 	}
 }
