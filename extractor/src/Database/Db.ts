@@ -39,6 +39,11 @@ export class Db<T extends Document & { _id: string; }> {
 	}
 
 	public async restore(): Promise<void> {
+		if (Cli.cli.cleanRun) {
+			Logger.info(`Skipping restore due to Clean Run...`);
+			return;
+		}
+
 		const restoreFile = this.getDumpPath();
 		if (!fs.existsSync(restoreFile)) {
 			Logger.info(`Restoring "${restoreFile}"... Nothing to restore`);
