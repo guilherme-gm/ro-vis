@@ -28,7 +28,7 @@ export class SqlConverter {
 		fields.forEach((field) => {
 			if (field.type === 'simple') {
 				const fieldType = field.outType?.() ?? Reflect.getMetadata('design:type', data, field.key);
-				const fieldName = field.key.toString();
+				const fieldName = field.name ?? field.key.toString();
 
 				// @ts-expect-error -- too hard to type
 				let value = data[field.key];

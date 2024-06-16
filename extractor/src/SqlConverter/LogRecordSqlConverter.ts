@@ -17,7 +17,7 @@ export class LogRecordSqlConverter<T extends RecordObject> extends SqlConverter 
 				Logger.error('Unhandled null current element');
 			} else {
 				const convertedPairs: [string, string][] = [];
-				convertedPairs.push(['Patch', row.current.patch]);
+				convertedPairs.push(['Patch', `"${row.current.patch}"`]);
 				this.convertInto(row.current.value, convertedPairs);
 
 				const sql = this.generateReplace(table, convertedPairs);
@@ -43,7 +43,7 @@ export class LogRecordSqlConverter<T extends RecordObject> extends SqlConverter 
 
 				this.convertInto(previous.value, convertedPairs);
 
-				const sql = this.generateReplace(table, convertedPairs);
+				const sql = this.generateReplace(`${table}_history`, convertedPairs);
 				historyReplaces.push(sql);
 			});
 		});
