@@ -114,8 +114,8 @@ export class ItemV3Parser {
 		this.newItemMap = new Map<number, ItemV3>();
 
 		if (this.itemInfo) {
-			for (let [itemId, itemV3] of this.itemInfo.entries()) {
-				this.newItemMap.set(itemId, itemV3);
+			for (let itemV3 of this.itemInfo.values()) {
+				this.newItemMap.set(itemV3.Id, itemV3);
 			}
 		} else {
 			// Assume that initially no new items are being created and we can trust

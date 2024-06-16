@@ -99,8 +99,8 @@ export class ItemV2Parser {
 		this.newItemMap = new Map<number, ItemV2>();
 
 		if (this.itemInfo) {
-			for (let [itemId, itemV2] of this.itemInfo.entries()) {
-				this.newItemMap.set(itemId, itemV2);
+			for (let itemV2 of this.itemInfo.values()) {
+				this.newItemMap.set(itemV2.Id, itemV2);
 			}
 		} else {
 			// Assume that initially no new items are being created and we can trust
