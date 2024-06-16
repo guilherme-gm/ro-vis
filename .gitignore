@@ -10,3 +10,4 @@ extractor/raw
 
 # Output files
 extractor/out
+extractor/db
