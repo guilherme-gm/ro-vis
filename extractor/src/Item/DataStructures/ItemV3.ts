@@ -1,4 +1,4 @@
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 import { IFileEntry } from "../../CommonLoader/IFileEntry.js";
 import { Item } from "./Item.js";
 import { ItemMoveInfoV5 } from "./ItemMoveInfoV5.js";
@@ -21,6 +21,7 @@ export class ItemV3 implements IFileEntry<Item> {
 	}
 
 	@Expose()
+	@Exclude({ toClassOnly: true })
 	public readonly _FileVersion: number = 3;
 
 	/**
