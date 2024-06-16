@@ -11,7 +11,7 @@ class ListUpdates extends ApiRoute {
 
 		$data = $this->db->select(
 			"updates",
-			["id", "order", "updates", "tags"],
+			["id", "order", "updates"],
 			[
 				"ORDER" => "order",
 				"LIMIT" => [$start, 100],
@@ -24,7 +24,6 @@ class ListUpdates extends ApiRoute {
 				"id" => $value["id"],
 				"order" => $value["order"],
 				"updates" => json_decode($value["updates"], true),
-				"tags" => explode(",", $value["tags"]),
 			]);
 		}
 
