@@ -39,13 +39,13 @@ loadPage(1);
 		<BsListGroup :flush="true">
 			<BsListGroupItem
 				v-for="(item) in list"
-				:key="`${item.id}-${item.patch}`"
+				:key="`${item.Id}-${item.Patch}`"
 			>
 				<BsLink
-					:to="{ name: RouteName.ItemHistory, params: { itemId: item.id } }"
+					:to="{ name: RouteName.ItemHistory, params: { itemId: item.Id } }"
 					target="_blank"
 				>
-					#{{ item.id }} - {{ item.IdentifiedName }} (Last updated: {{ item.patch }})
+					#{{ item.Id }} - {{ item.IdentifiedName }} (Last updated: {{ item.Patch }})
 					<BIconBoxArrowUpRight />
 				</BsLink>
 			</BsListGroupItem>

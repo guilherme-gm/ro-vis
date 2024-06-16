@@ -48,13 +48,13 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="newItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newItems"
-				:key="val.current?.ItemId"
-				:title="`#${val.current?.ItemId} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
+				:key="val.current?.Id"
+				:title="`#${val.current?.Id} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />
@@ -69,13 +69,13 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="updatedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedItems"
-				:key="val.current?.ItemId ?? val.previous?.ItemId"
-				:title="`#${val.current?.ItemId ?? val.previous?.ItemId} - ${val?.current?.IdentifiedName ?? val?.previous?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
+				:key="val.current?.Id ?? val.previous?.Id"
+				:title="`#${val.current?.Id ?? val.previous?.Id} - ${val?.current?.IdentifiedName ?? val?.previous?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />
@@ -90,13 +90,13 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="deletedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedItems"
-				:key="val.previous?.ItemId"
-				:title="`#${val.previous?.ItemId} - ${val?.previous?.IdentifiedName} (${val?.previous?.MoveInfo?.commentName ?? ''})`"
+				:key="val.previous?.Id"
+				:title="`#${val.previous?.Id} - ${val?.previous?.IdentifiedName} (${val?.previous?.MoveInfo?.commentName ?? ''})`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.ItemId ?? val.previous?.ItemId } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />

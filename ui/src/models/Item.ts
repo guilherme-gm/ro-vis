@@ -19,11 +19,11 @@ export type ItemMoveInfo = {
 };
 
 export type Item = {
-	patch: string;
+	Patch: string;
 
 	_FileVersion: number;
 
-	ItemId: number;
+	Id: number;
 
 	IdentifiedName: string;
 
@@ -55,9 +55,9 @@ export type Item = {
 };
 
 export type MinItem = {
-	id: string;
+	Id: string;
 
-	patch: string;
+	Patch: string;
 
 	IdentifiedName: string | null;
 };

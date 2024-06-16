@@ -48,13 +48,13 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="newQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newQuests"
-				:key="val.current?.QuestId"
-				:title="`#${val.current?.QuestId} - ${val?.current?.Title}`"
+				:key="val.current?.Id"
+				:title="`#${val.current?.Id} - ${val?.current?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
@@ -70,13 +70,13 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="updatedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedQuests"
-				:key="val.current?.QuestId ?? val.previous?.QuestId"
-				:title="`#${val.current?.QuestId ?? val.previous?.QuestId} - ${val?.current?.Title ?? val?.previous?.Title}`"
+				:key="val.current?.Id ?? val.previous?.Id"
+				:title="`#${val.current?.Id ?? val.previous?.Id} - ${val?.current?.Title ?? val?.previous?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
@@ -92,13 +92,13 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="deletedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedQuests"
-				:key="val.previous?.QuestId"
-				:title="`#${val.previous?.QuestId} - ${val?.previous?.Title}`"
+				:key="val.previous?.Id"
+				:title="`#${val.previous?.Id} - ${val?.previous?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.QuestId ?? val.previous?.QuestId } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />

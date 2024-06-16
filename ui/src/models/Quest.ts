@@ -5,13 +5,13 @@ export type QuestRewardItem  = {
 }
 
 export type Quest = {
-	id: string;
+	HistoryId: string;
 
-	patch: string;
+	Patch: string;
 
 	_FileVersion: number;
 
-	QuestId: number;
+	Id: number;
 
 	Title: string;
 
@@ -41,9 +41,9 @@ export type Quest = {
 }
 
 export type MinQuest = {
-	id: number;
+	Id: number;
 
-	patch: string;
+	Patch: string;
 
 	Title: string;
 };
