@@ -1,9 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { RouteName } from './RouteName'
 
 const router = createRouter({
-	history: createWebHistory(import.meta.env.BASE_URL),
+	// We can't use webHistory or GH Pages will give us 404 whenever we go to sub pages.
+	history: createWebHashHistory(import.meta.env.BASE_URL),
 	routes: [
 		{
 			path: '/',
