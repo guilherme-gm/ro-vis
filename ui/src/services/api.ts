@@ -1,4 +1,4 @@
-const baseUrl = 'http://ro-viz.c1.is/rovis/';
+const baseUrl = 'https://ro-viz.c1.is/rovis/';
 
 function buildSearchParams(searchParams: URLSearchParams, params?: Record<string, string | number>): void {
 	if (!params) {
