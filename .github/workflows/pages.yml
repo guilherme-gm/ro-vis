@@ -14,9 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: cd ui
-      - run: npm ci
-      - run: npm run build
+      - run: cd ui && npm ci
+      - run: cd ui && npm run build
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v1.0.8
         with:
