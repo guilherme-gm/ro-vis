@@ -17,5 +17,8 @@ export default defineConfig({
 		watch: {
 			usePolling: true,
 		}
-	}
+	},
+	base: process.env.NODE_ENV === 'production'
+		? '/ro-vis/'
+		: '/'
 })
