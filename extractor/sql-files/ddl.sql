@@ -23,7 +23,8 @@ CREATE TABLE `items` (
 	`MoveInfo_canMail` tinyint DEFAULT NULL,
 	`MoveInfo_canAuction` tinyint DEFAULT NULL,
 	`MoveInfo_canMoveToGuildStorage` tinyint DEFAULT NULL,
-	`MoveInfo_commentName` tinytext DEFAULT NULL
+	`MoveInfo_commentName` tinytext DEFAULT NULL,
+	PRIMARY KEY `Id` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 CREATE TABLE `items_history` (
@@ -54,7 +55,7 @@ CREATE TABLE `items_history` (
 	`MoveInfo_canAuction` tinyint DEFAULT NULL,
 	`MoveInfo_canMoveToGuildStorage` tinyint DEFAULT NULL,
 	`MoveInfo_commentName` tinytext DEFAULT NULL,
-	UNIQUE KEY `HistoryId` (`HistoryId`)
+	PRIMARY KEY `HistoryId` (`HistoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 CREATE TABLE `quests` (
@@ -73,7 +74,8 @@ CREATE TABLE `quests` (
 	`RewardEXP` tinytext DEFAULT NULL,
 	`RewardJEXP` tinytext DEFAULT NULL,
 	`RewardItemList` text DEFAULT NULL,
-	`CoolTimeQuest` int(11) DEFAULT NULL
+	`CoolTimeQuest` int(11) DEFAULT NULL,
+	PRIMARY KEY `Id` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 CREATE TABLE `quests_history` (
@@ -95,7 +97,7 @@ CREATE TABLE `quests_history` (
 	`RewardJEXP` tinytext DEFAULT NULL,
 	`RewardItemList` text DEFAULT NULL,
 	`CoolTimeQuest` int(11) DEFAULT NULL,
-	UNIQUE KEY `HistoryId` (`HistoryId`)
+	PRIMARY KEY `HistoryId` (`HistoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 CREATE TABLE `updates` (
