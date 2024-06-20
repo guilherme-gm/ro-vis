@@ -15,6 +15,7 @@ import { LoadBulkUpdateList } from "./Updates/LoadBulkPatchList.js";
 import { MongoServer } from './Database/MongoServer.js';
 import { SqlConverter } from './SqlConverter/SqlConverter.js';
 import { UnsupportedVersionError } from './CommonLoader/UnsupportedVersionError.js';
+import { LoadState } from './State/LoadStates.js';
 
 Cli.load();
 
@@ -67,6 +68,7 @@ try {
 	const loaders = new Map<MetadataType, IDataLoader>([
 		[MetadataType.Quest, new LoadQuests()],
 		[MetadataType.Item, new LoadItem()],
+		[MetadataType.State, new LoadState()],
 	]);
 
 	for (const [metaType, loader] of loaders.entries()) {
