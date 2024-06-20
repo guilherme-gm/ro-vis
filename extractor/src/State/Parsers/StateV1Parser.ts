@@ -10,6 +10,7 @@ import { StateV1 } from "../DataStructures/StateV1.js";
 import { EfstIdsParser, EfstIdsV1 } from "./SubParsers/EfstIdsParser.js";
 import { StateIconImgInfoParser, StateIconImgInfoV1 } from "./SubParsers/StateIconImgInfoParser.js";
 import { StatePriority } from "../DataStructures/StatePriority.js";
+import { StateIconInfoParser, StateInfoV1 } from "./SubParsers/StateIconInfoParser.js";
 
 export type StateV1Files = {
 	stateIconIds: string | null;
@@ -28,6 +29,8 @@ export class StateV1Parser {
 	private stateIconIds: EfstIdsV1[] | null = null;
 
 	private stateImages: Map<number, StateIconImgInfoV1> | null = null;
+
+	private stateInfo: Map<number, StateInfoV1> | null = null;
 
 	constructor(stateDb: Map<number, State>, files: StateV1Files) {
 		this.stateDb = stateDb;
@@ -87,6 +90,11 @@ export class StateV1Parser {
 			const parser = await StateIconImgInfoParser.fromFile(efstIdsPath, this.files.stateIconImgInfo);
 			this.stateImages = await parser.parse();
 		}
+
+		if (this.fileExists(this.files.stateIconInfo)) {
+			const parser = await StateIconInfoParser.fromFile(efstIdsPath, this.files.stateIconInfo);
+			this.stateInfo = await parser.parse();
+		}
 	}
 
 	public async parse(): Promise<ParserResult<StateV1>> {
@@ -125,12 +133,32 @@ export class StateV1Parser {
 					state.IconPriority = StatePriority.None;
 				}
 			}
+
+			if (this.stateInfo) {
+				const stateInfo = this.stateInfo.get(state.Id);
+				if (stateInfo) {
+					state.Description = stateInfo.Descript;
+					state.HasTimeLimit = stateInfo.HaveTimeLimit;
+					state.TimeLineIndex = stateInfo.TimeLimitStrIndex;
+					this.stateInfo.delete(state.Id);
+				} else {
+					state.Description = [];
+					state.HasTimeLimit = false;
+					state.TimeLineIndex = -1;
+				}
+			}
 		}
 
 		// This should never happen, since not being in EFST_ID should automatically crash the process
 		// but just in case I forgot something..
 		for (let stateImage of this.stateImages?.values() ?? []) {
 			Logger.warn(`State "${stateImage.IconImage}" (ID: ${stateImage.EffectId}) does not exists in EFST_IDs.lua`);
+		}
+
+		// This should never happen, since not being in EFST_ID should automatically crash the process
+		// but just in case I forgot something..
+		for (let stateInfo of this.stateInfo?.values() ?? []) {
+			Logger.warn(`State Info for ID ${stateInfo.EffectId} does not exists in EFST_IDs.lua`);
 		}
 
 		return {
