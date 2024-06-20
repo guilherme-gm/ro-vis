@@ -68,7 +68,7 @@ export class LoadState extends BasicLoader<State, StateV> implements IDataLoader
 		if (version === 1) {
 			return new StateV1Parser(stateMap, {
 				stateIconIds: this.getPathIfExists(update, 'data/luafiles514/lua files/stateicon/efstids.lub'),
-				stateIconImgInfo: null, // this.getPathIfExists(update, 'data/luafiles514/lua files/stateicon/stateiconimginfo.lub'),
+				stateIconImgInfo: this.getPathIfExists(update, 'data/luafiles514/lua files/stateicon/stateiconimginfo.lub'),
 				stateIconInfo: null, // this.getPathIfExists(update, 'data/luafiles514/lua files/stateicon/stateiconinfo.lub'),
 				stateIconFunctions: null, // this.getPathIfExists(update, 'data/luafiles514/lua files/stateicon/stateiconinfo_f.lub'),
 			});

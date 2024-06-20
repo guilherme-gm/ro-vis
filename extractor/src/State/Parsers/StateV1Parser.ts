@@ -1,10 +1,15 @@
 import * as fs from "fs";
+import fsPromises from "fs/promises";
+import os from "os";
+import path from "path";
 import { ParserResult } from "../../CommonParser/IParser.js";
 import { ParsingResult } from "../../CommonParser/ParsingResult.js";
 import { Logger } from "../../Logger.js";
 import { State } from "../DataStructures/State.js";
 import { StateV1 } from "../DataStructures/StateV1.js";
 import { EfstIdsParser, EfstIdsV1 } from "./SubParsers/EfstIdsParser.js";
+import { StateIconImgInfoParser, StateIconImgInfoV1 } from "./SubParsers/StateIconImgInfoParser.js";
+import { StatePriority } from "../DataStructures/StatePriority.js";
 
 export type StateV1Files = {
 	stateIconIds: string | null;
@@ -21,6 +26,8 @@ export class StateV1Parser {
 	private files: StateV1Files;
 
 	private stateIconIds: EfstIdsV1[] | null = null;
+
+	private stateImages: Map<number, StateIconImgInfoV1> | null = null;
 
 	constructor(stateDb: Map<number, State>, files: StateV1Files) {
 		this.stateDb = stateDb;
@@ -40,10 +47,45 @@ export class StateV1Parser {
 		return exists;
 	}
 
+	private async createEfstIdsFile(): Promise<string> {
+		let idMap: EfstIdsV1[];
+		if (this.stateIconIds) {
+			idMap = this.stateIconIds;
+		} else {
+			idMap = [];
+			for (let state of this.stateDb.values()) {
+				idMap.push({
+					Id: state.Id,
+					Constant: state.Constant,
+				});
+			}
+		}
+
+		let efstIdFile = 'EFST_IDs = {';
+
+		for (let id of idMap) {
+			efstIdFile += `\n\t${id.Constant} = ${id.Id},`;
+		}
+
+		efstIdFile += '\n}';
+
+		const efstIdFilePath = path.join(os.tmpdir(), 'efstids.lua');
+		await fsPromises.writeFile(efstIdFilePath, efstIdFile, 'utf8');
+
+		return efstIdFilePath;
+	}
+
 	private async parseTables(): Promise<void> {
 		if (this.fileExists(this.files.stateIconIds)) {
 			const parser = await EfstIdsParser.fromFile(this.files.stateIconIds);
 			this.stateIconIds = await parser.parse();
+		}
+
+		const efstIdsPath = await this.createEfstIdsFile();
+
+		if (this.fileExists(this.files.stateIconImgInfo)) {
+			const parser = await StateIconImgInfoParser.fromFile(efstIdsPath, this.files.stateIconImgInfo);
+			this.stateImages = await parser.parse();
 		}
 	}
 
@@ -69,6 +111,26 @@ export class StateV1Parser {
 
 				this.newStatesMap.set(itemId, stateV1);
 			}
+		}
+
+		for (let state of this.newStatesMap.values()) {
+			if (this.stateImages) {
+				const stateImg = this.stateImages.get(state.Id);
+				if (stateImg) {
+					state.IconImage = stateImg.IconImage;
+					state.IconPriority = stateImg.IconPriority;
+					this.stateImages.delete(state.Id);
+				} else {
+					state.IconImage = '';
+					state.IconPriority = StatePriority.None;
+				}
+			}
+		}
+
+		// This should never happen, since not being in EFST_ID should automatically crash the process
+		// but just in case I forgot something..
+		for (let stateImage of this.stateImages?.values() ?? []) {
+			Logger.warn(`State "${stateImage.IconImage}" (ID: ${stateImage.EffectId}) does not exists in EFST_IDs.lua`);
 		}
 
 		return {
