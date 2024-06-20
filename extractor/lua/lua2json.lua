@@ -6,6 +6,10 @@ if arg[3] == 'true' then
 	forceTable = true;
 end
 
+for i = 4, #arg, 1 do
+	dofile(arg[i]);
+end
+
 JSON = (loadfile "lua/libs/json.lua")();
 dofile(inFile);
 

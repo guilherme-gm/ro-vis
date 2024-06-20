@@ -8,10 +8,19 @@ export class LuaTableParser<T> {
 		this.filePath = filePath;
 	}
 
-	protected async extractLuaTable(tableName: string, forceKeyToTable: boolean): Promise<T> {
+	protected async extractLuaTable(tableName: string, forceKeyToTable: boolean, extraFiles: string[] = []): Promise<T> {
 		const stdoutBuffers: any = [];
 		const readPromise = new Promise<string>((resolve, reject) => {
-			const process = childProcess.spawn('lua/lua54.exe', ['lua/lua2json.lua', tableName, this.filePath.replace(/lub$/i, "lua"), forceKeyToTable ? "true" : "false"]);
+			const process = childProcess.spawn(
+				'lua/lua54.exe',
+				[
+					'lua/lua2json.lua',
+					tableName,
+					this.filePath.replace(/lub$/i, "lua"),
+					forceKeyToTable ? "true" : "false",
+					...extraFiles
+				],
+			);
 			process.stdout.on('data', (chunk) => {
 				stdoutBuffers.push(chunk);
 			});
