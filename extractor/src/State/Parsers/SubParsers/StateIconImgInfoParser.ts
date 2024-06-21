@@ -39,8 +39,8 @@ export class StateIconImgInfoParser extends LuaTableParser<StateIconImgList> {
 
 		const result = await this.extractLuaTable('StateIconImgList', true, [this.efstIdPath]);
 		Object.entries(result).forEach(([priority, stateList]) => {
-			const IconPriority = this.statePriorityMap.get(priority);
-			if (!IconPriority) {
+			const IconPriority = this.statePriorityMap.get(priority) ?? StatePriority.None;
+			if (IconPriority === StatePriority.None) {
 				throw new Error(`Unknown priority: ${priority}`);
 			}
 
