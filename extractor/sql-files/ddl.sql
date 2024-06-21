@@ -107,3 +107,33 @@ CREATE TABLE `updates` (
 	`patches` mediumtext NOT NULL,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+CREATE TABLE `states` (
+	`Id` int NOT NULL,
+	`Patch` tinytext NOT NULL,
+	`_FileVersion` int DEFAULT NULL,
+	`Constant` tinytext DEFAULT NULL,
+	`Description` text DEFAULT NULL,
+	`HasTimeLimit` tinyint DEFAULT NULL,
+	`TimeLineIndex` tinyint DEFAULT NULL,
+	`HasEffectImage` tinyint DEFAULT NULL,
+	`IconImage` tinytext DEFAULT NULL,
+	`IconPriority` tinyint DEFAULT NULL,
+	PRIMARY KEY `Id` (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+CREATE TABLE `states_history` (
+	`HistoryId` varchar(100) NOT NULL,
+	`Patch` tinytext NOT NULL,
+	`PreviousId` varchar(100) DEFAULT NULL,
+	`Id` int NOT NULL,
+	`_FileVersion` int DEFAULT NULL,
+	`Constant` tinytext DEFAULT NULL,
+	`Description` text DEFAULT NULL,
+	`HasTimeLimit` tinyint DEFAULT NULL,
+	`TimeLineIndex` tinyint DEFAULT NULL,
+	`HasEffectImage` tinyint DEFAULT NULL,
+	`IconImage` tinytext DEFAULT NULL,
+	`IconPriority` tinyint DEFAULT NULL,
+	PRIMARY KEY `HistoryId` (`HistoryId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
