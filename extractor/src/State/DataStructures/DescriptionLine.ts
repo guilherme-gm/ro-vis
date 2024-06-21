@@ -4,30 +4,30 @@ import { assert } from "console";
 
 export class DescriptionLine {
 	@Expose()
-	public text: string = "";
+	public Text: string = "";
 
 	@Expose()
-	public color: number[] | null = null;
+	public Color: number[] | null = null;
 
 	constructor(text: string, color: number[] | null) {
-		this.text = text;
-		this.color = color;
+		this.Text = text;
+		this.Color = color;
 	}
 
 	equals(other: DescriptionLine): boolean {
-		if (this.text !== other.text) {
+		if (this.Text !== other.Text) {
 			return false;
 		}
 
-		if (!this.color && !other.color) {
+		if (!this.Color && !other.Color) {
 			return true;
 		}
 
-		if ((!this.color && other.color) || (this.color && !other.color)) {
+		if ((!this.Color && other.Color) || (this.Color && !other.Color)) {
 			return false;
 		}
 
-		assert(this.color && other.color);
-		return ArrayEqual.isEqual(this.color!, other.color!);
+		assert(this.Color && other.Color);
+		return ArrayEqual.isEqual(this.Color!, other.Color!);
 	}
 }
