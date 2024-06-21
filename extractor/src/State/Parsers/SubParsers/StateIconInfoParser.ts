@@ -9,7 +9,7 @@ export type StateInfoV1 = {
 };
 
 type StateIconInfo = {
-	[key: number]: {
+	[key: string]: {
 		haveTimeLimit?: number;
 		posTimeLimitStr?: number;
 		descript?: [string, number[]?][];
@@ -23,6 +23,8 @@ export class StateIconInfoParser extends LuaTableParser<StateIconInfo> {
 
 	private efstIdPath: string;
 
+	private expectedKeys = new Set(['haveTimeLimit', 'posTimeLimitStr', 'descript']);
+
 	constructor(efstIdPath: string, filePath: string) {
 		super(filePath);
 
@@ -34,6 +36,12 @@ export class StateIconInfoParser extends LuaTableParser<StateIconInfo> {
 
 		const result = await this.extractLuaTable('StateIconList', true, [this.efstIdPath]);
 		Object.entries(result).forEach(([scId, scInfo]) => {
+			Object.keys(scInfo).forEach((key) => {
+				if (!this.expectedKeys.has(key)) {
+					throw new Error(`Unexpected key found in StateIconInfo object. Unexpected key: ${key}`);
+				}
+			});
+
 			const scIdNum = Number(scId);
 			if (Number.isNaN(scIdNum)) {
 				throw new Error(`StateIconInfoParser: Can not convert ${scId} to number.`);
