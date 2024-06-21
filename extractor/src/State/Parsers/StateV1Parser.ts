@@ -11,6 +11,7 @@ import { EfstIdsParser, EfstIdsV1 } from "./SubParsers/EfstIdsParser.js";
 import { StateIconImgInfoParser, StateIconImgInfoV1 } from "./SubParsers/StateIconImgInfoParser.js";
 import { StatePriority } from "../DataStructures/StatePriority.js";
 import { StateIconInfoParser, StateInfoV1 } from "./SubParsers/StateIconInfoParser.js";
+import { EfstImageTableParser } from "./SubParsers/EfstImageTableParser.js";
 
 export type StateV1Files = {
 	stateIconIds: string | null;
@@ -31,6 +32,8 @@ export class StateV1Parser {
 	private stateImages: Map<number, StateIconImgInfoV1> | null = null;
 
 	private stateInfo: Map<number, StateInfoV1> | null = null;
+
+	private stateHasImageTable: Set<number> | null = null;
 
 	constructor(stateDb: Map<number, State>, files: StateV1Files) {
 		this.stateDb = stateDb;
@@ -95,6 +98,11 @@ export class StateV1Parser {
 			const parser = await StateIconInfoParser.fromFile(efstIdsPath, this.files.stateIconInfo);
 			this.stateInfo = await parser.parse();
 		}
+
+		if (this.fileExists(this.files.stateIconFunctions)) {
+			const parser = await EfstImageTableParser.fromFile(efstIdsPath, this.files.stateIconFunctions);
+			this.stateHasImageTable = await parser.parse();
+		}
 	}
 
 	public async parse(): Promise<ParserResult<StateV1>> {
@@ -147,6 +155,11 @@ export class StateV1Parser {
 					state.TimeLineIndex = -1;
 				}
 			}
+
+			if (this.stateHasImageTable) {
+				state.HasEffectImage = this.stateHasImageTable.has(state.Id);
+				this.stateHasImageTable.delete(state.Id);
+			}
 		}
 
 		// This should never happen, since not being in EFST_ID should automatically crash the process
@@ -159,6 +172,12 @@ export class StateV1Parser {
 		// but just in case I forgot something..
 		for (let stateInfo of this.stateInfo?.values() ?? []) {
 			Logger.warn(`State Info for ID ${stateInfo.EffectId} does not exists in EFST_IDs.lua`);
+		}
+
+		// This should never happen, since not being in EFST_ID should automatically crash the process
+		// but just in case I forgot something..
+		for (let stateId of this.stateHasImageTable?.values() ?? []) {
+			Logger.warn(`State ID ${stateId} has image but does not exists in EFST_IDs.lua`);
 		}
 
 		return {
