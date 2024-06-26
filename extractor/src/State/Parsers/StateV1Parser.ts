@@ -140,6 +140,10 @@ export class StateV1Parser {
 					state.IconImage = '';
 					state.IconPriority = StatePriority.None;
 				}
+			} else {
+				const oldState = this.stateDb.get(state.Id);
+				state.IconImage = oldState?.IconImage ?? '';
+				state.IconPriority = oldState?.IconPriority ?? StatePriority.None;
 			}
 
 			if (this.stateInfo) {
@@ -154,11 +158,19 @@ export class StateV1Parser {
 					state.HasTimeLimit = false;
 					state.TimeStrLineNum = -1;
 				}
+			} else {
+				const oldState = this.stateDb.get(state.Id);
+				state.Description = oldState?.Description ?? [];
+				state.HasTimeLimit = oldState?.HasTimeLimit ?? false;
+				state.TimeStrLineNum = oldState?.TimeStrLineNum ?? -1;
 			}
 
 			if (this.stateHasImageTable) {
 				state.HasEffectImage = this.stateHasImageTable.has(state.Id);
 				this.stateHasImageTable.delete(state.Id);
+			} else {
+				const oldState = this.stateDb.get(state.Id);
+				state.HasEffectImage = oldState?.HasEffectImage ?? false;
 			}
 		}
 
