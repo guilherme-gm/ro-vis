@@ -44,7 +44,7 @@ export class State implements RecordObject {
 
 	@Expose()
 	@SqlField()
-	public TimeLineIndex: number = -1;
+	public TimeStrLineNum: number = -1;
 
 	/**
 	 * Whether it has an effect image (HaveEfstImgTable)
@@ -76,7 +76,7 @@ export class State implements RecordObject {
 			&& other.Constant === this.Constant
 			&& ArrayEqual.isEqual(other.Description, this.Description, (a, b) => a.equals(b))
 			&& other.HasTimeLimit === this.HasTimeLimit
-			&& other.TimeLineIndex === this.TimeLineIndex
+			&& other.TimeStrLineNum === this.TimeStrLineNum
 			&& other.HasEffectImage === this.HasEffectImage
 			&& other.IconImage === this.IconImage
 			&& other.IconPriority === this.IconPriority

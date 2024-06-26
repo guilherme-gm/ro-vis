@@ -147,12 +147,12 @@ export class StateV1Parser {
 				if (stateInfo) {
 					state.Description = stateInfo.Descript;
 					state.HasTimeLimit = stateInfo.HaveTimeLimit;
-					state.TimeLineIndex = stateInfo.TimeLimitStrIndex;
+					state.TimeStrLineNum = stateInfo.TimeLimitStrLine;
 					this.stateInfo.delete(state.Id);
 				} else {
 					state.Description = [];
 					state.HasTimeLimit = false;
-					state.TimeLineIndex = -1;
+					state.TimeStrLineNum = -1;
 				}
 			}
 

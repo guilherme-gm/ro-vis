@@ -37,7 +37,7 @@ export class StateV1 implements IFileEntry<State> {
 	public HasTimeLimit: boolean = false;
 
 	@Expose()
-	public TimeLineIndex: number = -1;
+	public TimeStrLineNum: number = -1;
 
 	/**
 	 * Whether it has an effect image (HaveEfstImgTable)

@@ -4,7 +4,7 @@ import { DescriptionLine } from "../../DataStructures/DescriptionLine.js";
 export type StateInfoV1 = {
 	EffectId: number;
 	HaveTimeLimit: boolean;
-	TimeLimitStrIndex: number;
+	TimeLimitStrLine: number;
 	Descript: DescriptionLine[];
 };
 
@@ -50,7 +50,7 @@ export class StateIconInfoParser extends LuaTableParser<StateIconInfo> {
 			states.set(scIdNum, {
 				EffectId: scIdNum,
 				HaveTimeLimit: scInfo.haveTimeLimit === 1,
-				TimeLimitStrIndex: (scInfo.posTimeLimitStr ?? 0) - 1,
+				TimeLimitStrLine: (scInfo.posTimeLimitStr ?? -1),
 				Descript: (scInfo.descript ?? []).map((descript) => new DescriptionLine(descript[0], descript[1] ?? [])),
 			});
 		});
