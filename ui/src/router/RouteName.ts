@@ -11,4 +11,9 @@ export enum RouteName {
 	QuestList = "questList",
 	QuestHistory = "questHistory",
 	QuestPatch = "questPath",
+
+	// States
+	StateList = "stateList",
+	StateHistory = "stateHistory",
+	StatePatch = "statePath",
 }
