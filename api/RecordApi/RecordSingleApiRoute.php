@@ -46,7 +46,7 @@ class RecordSingleApiRoute extends ApiRoute {
 	public function main() {
 		$this->initDb();
 
-		if (!$_GET['id']) {
+		if (!isset($_GET['id'])) {
 			return ['error' => 'No id'];
 		}
 
@@ -73,9 +73,23 @@ class RecordSingleApiRoute extends ApiRoute {
 			];
 		}, $list);
 
-		return [
-			"total" => $count,
-			"list" => $list,
-		];
+		$current = $this->remap($this->db->first($this->table, [$this->idField => $id]));
+
+		if (count($list) > 0) {
+			$lastHistory = $list[count($list) - 1];
+			array_push($list, [
+				"previous" => $lastHistory["current"],
+				"current" => $current,
+			]);
+		}
+
+		$count++;
+
+		if (count($list) > 0) {
+			return [
+				"total" => $count,
+				"list" => $list,
+			];
+		}
 	}
 }
