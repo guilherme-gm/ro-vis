@@ -15,6 +15,21 @@ import (
 	"github.com/aarzilli/golua/lua"
 )
 
+type contextInfo struct {
+	tableIndex int
+}
+
+func newContextInfo() contextInfo {
+	return contextInfo{
+		tableIndex: -1,
+	}
+}
+
+func (c contextInfo) setTableIndex(index int) contextInfo {
+	c.tableIndex = index
+	return c
+}
+
 type QuestV1 struct {
 	QuestId     int `lua:"@index"`
 	Title       string
@@ -30,7 +45,7 @@ func convertToUTF8(str string) string {
 	return string(strBytes)
 }
 
-func decodeSlice(L *lua.State, slice reflect.Value) {
+func decodeSlice(L *lua.State, slice reflect.Value, ctx contextInfo) {
 	sliceType := slice.Type()
 	sliceItemType := sliceType.Elem()
 
@@ -40,7 +55,7 @@ func decodeSlice(L *lua.State, slice reflect.Value) {
 	for L.Next(-2) != 0 {
 		sliceItem := reflect.New(sliceItemType).Elem()
 
-		decode(L, sliceItem)
+		decode(L, sliceItem, newContextInfo().setTableIndex(L.ToInteger(-2)))
 		newSlice = reflect.Append(slice, sliceItem)
 
 		L.Pop(1)
@@ -49,14 +64,23 @@ func decodeSlice(L *lua.State, slice reflect.Value) {
 	slice.Set(newSlice)
 }
 
-func decodeStruct(L *lua.State, structObj reflect.Value) {
+func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
 	structType := structObj.Type()
 	for fldNum := range structType.NumField() {
 		fieldType := structType.Field(fldNum)
 		fieldValue := structObj.Field(fldNum)
 
 		if alias := fieldType.Tag.Get("lua"); alias != "" {
-			continue // @TODO:
+			if alias == "@index" {
+				if ctx.tableIndex == -1 {
+					panic("Trying to get index of non-table")
+				}
+
+				fieldValue.SetInt(int64(ctx.tableIndex))
+				continue
+			}
+
+			panic("Invalid lua alias: " + alias)
 		}
 
 		L.GetField(-1, fieldType.Name)
@@ -65,22 +89,22 @@ func decodeStruct(L *lua.State, structObj reflect.Value) {
 			continue
 		}
 
-		decode(L, fieldValue)
+		decode(L, fieldValue, newContextInfo())
 
 		L.Pop(1)
 	}
 }
 
-func decode(L *lua.State, dataValue reflect.Value) {
+func decode(L *lua.State, dataValue reflect.Value, ctx contextInfo) {
 	dataType := dataValue.Type()
 	dataKind := dataType.Kind()
 
 	switch dataKind {
 	case reflect.Slice:
-		decodeSlice(L, dataValue)
+		decodeSlice(L, dataValue, ctx)
 
 	case reflect.Struct:
-		decodeStruct(L, dataValue)
+		decodeStruct(L, dataValue, ctx)
 
 	case reflect.String:
 		str := L.ToString(-1)
@@ -103,5 +127,5 @@ func Decode(filePath string, tableName string, dst any) {
 
 	L.GetGlobal(tableName)
 	qv := reflect.ValueOf(dst)
-	decode(L, qv.Elem())
+	decode(L, qv.Elem(), newContextInfo())
 }
