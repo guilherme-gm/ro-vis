@@ -5,8 +5,19 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/guilherme-gm/ro-vis/extractor/internal/luaExtractor"
+)
 
 func main() {
 	fmt.Println("RO Vis extractor - DEV")
+
+	var quests []luaExtractor.QuestV1
+	luaExtractor.Decode("../patches/OngoingQuestInfoList_True.lub", "QuestInfoList", &quests)
+
+	fmt.Println(quests[0])
+
+	fmt.Println("Success")
 }
