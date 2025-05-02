@@ -32,8 +32,8 @@ func main() {
 	var quests []rostructs.QuestV1
 	luaExtractor.Decode("../patches/OngoingQuestInfoList_True.lub", "QuestInfoList", &quests)
 
-	var model = quests[0].ToModel()
-	err := repository.GetQuestRepository().AddQuestToHistory(&model)
+	var model = quests[0].ToDomain()
+	err := repository.GetQuestRepository().AddQuestToHistory("2024-01-01", nil, &model)
 	if err != nil {
 		panic(err)
 	}

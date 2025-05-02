@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
 type QuestV1 struct {
@@ -13,8 +14,8 @@ type QuestV1 struct {
 	Summary     string
 }
 
-func (q *QuestV1) ToModel() dao.QuestHistory {
-	return dao.QuestHistory{
+func (q *QuestV1) ToDomain() domain.Quest {
+	return domain.Quest{
 		QuestID:     int32(q.QuestId),
 		FileVersion: 1,
 		Title:       dao.ToNullString(q.Title),
