@@ -1,3 +1,8 @@
+-- name: GetCurrentQuests :many
+SELECT `quest_history`.*, `quests`.`deleted`
+FROM `quests`
+INNER JOIN `quest_history` ON `quests`.`latest_history_id` = `quest_history`.`history_id`;
+
 -- name: InsertQuestHistory :execresult
 INSERT INTO `quest_history` (
 	`previous_history_id`, -- 1

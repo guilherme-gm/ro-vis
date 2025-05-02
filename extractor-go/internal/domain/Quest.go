@@ -19,4 +19,5 @@ type Quest struct {
 	RewardJexp     sql.NullString
 	RewardItemList sql.NullString
 	CoolTimeQuest  sql.NullInt32
+	Deleted        bool
 }

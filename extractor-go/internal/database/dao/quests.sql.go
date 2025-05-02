@@ -10,6 +10,77 @@ import (
 	"database/sql"
 )
 
+const getCurrentQuests = `-- name: GetCurrentQuests :many
+SELECT quest_history.history_id, quest_history.previous_history_id, quest_history.quest_id, quest_history.file_version, quest_history.patch, quest_history.title, quest_history.description, quest_history.summary, quest_history.old_image, quest_history.icon_name, quest_history.npc_spr, quest_history.npc_navi, quest_history.npc_pos_x, quest_history.npc_pos_y, quest_history.reward_exp, quest_history.reward_jexp, quest_history.reward_item_list, quest_history.cool_time_quest, ` + "`" + `quests` + "`" + `.` + "`" + `deleted` + "`" + `
+FROM ` + "`" + `quests` + "`" + `
+INNER JOIN ` + "`" + `quest_history` + "`" + ` ON ` + "`" + `quests` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `
+`
+
+type GetCurrentQuestsRow struct {
+	HistoryID         int32
+	PreviousHistoryID sql.NullInt32
+	QuestID           int32
+	FileVersion       int32
+	Patch             string
+	Title             sql.NullString
+	Description       sql.NullString
+	Summary           sql.NullString
+	OldImage          sql.NullString
+	IconName          sql.NullString
+	NpcSpr            sql.NullString
+	NpcNavi           sql.NullString
+	NpcPosX           sql.NullInt32
+	NpcPosY           sql.NullInt32
+	RewardExp         sql.NullString
+	RewardJexp        sql.NullString
+	RewardItemList    sql.NullString
+	CoolTimeQuest     sql.NullInt32
+	Deleted           bool
+}
+
+func (q *Queries) GetCurrentQuests(ctx context.Context) ([]GetCurrentQuestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCurrentQuests)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCurrentQuestsRow
+	for rows.Next() {
+		var i GetCurrentQuestsRow
+		if err := rows.Scan(
+			&i.HistoryID,
+			&i.PreviousHistoryID,
+			&i.QuestID,
+			&i.FileVersion,
+			&i.Patch,
+			&i.Title,
+			&i.Description,
+			&i.Summary,
+			&i.OldImage,
+			&i.IconName,
+			&i.NpcSpr,
+			&i.NpcNavi,
+			&i.NpcPosX,
+			&i.NpcPosY,
+			&i.RewardExp,
+			&i.RewardJexp,
+			&i.RewardItemList,
+			&i.CoolTimeQuest,
+			&i.Deleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertQuestHistory = `-- name: InsertQuestHistory :execresult
 INSERT INTO ` + "`" + `quest_history` + "`" + ` (
 	` + "`" + `previous_history_id` + "`" + `, -- 1
@@ -78,14 +149,8 @@ func (q *Queries) InsertQuestHistory(ctx context.Context, arg InsertQuestHistory
 }
 
 const upsertQuest = `-- name: UpsertQuest :execresult
-INSERT INTO ` + "`" + `quests` + "`" + ` (
-	` + "`" + `quest_id` + "`" + `, -- 1
-	` + "`" + `latest_history_id` + "`" + `, -- 2
-	` + "`" + `deleted` + "`" + ` -- 3
-)
-VALUES (
-	?, ?, ?
-)
+INSERT INTO ` + "`" + `quests` + "`" + ` (` + "`" + `quest_id` + "`" + `, ` + "`" + `latest_history_id` + "`" + `, ` + "`" + `deleted` + "`" + `)
+VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE
 	latest_history_id = VALUES(latest_history_id),
 	deleted = VALUES(deleted)

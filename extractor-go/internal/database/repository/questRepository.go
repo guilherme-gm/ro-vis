@@ -25,6 +25,24 @@ func GetQuestRepository() *QuestRepository {
 	return repositoriesCache.questRepository
 }
 
+func (r *QuestRepository) GetCurrentQuests() (*[]domain.Quest, error) {
+	res, err := r.queries.GetCurrentQuests(context.Background())
+	if err == sql.ErrNoRows {
+		return &[]domain.Quest{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	quests := make([]domain.Quest, len(res))
+	for idx, qmodel := range res {
+		quests[idx] = qmodel.ToDomain()
+	}
+
+	return &quests, nil
+}
+
 func (r *QuestRepository) AddQuestToHistory(patch string, fromQuest *domain.Quest, toQuest *domain.Quest) error {
 	var previousId sql.NullInt32 = sql.NullInt32{Valid: false}
 	if fromQuest != nil {
