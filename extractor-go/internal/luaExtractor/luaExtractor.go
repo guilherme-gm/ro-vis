@@ -30,13 +30,6 @@ func (c contextInfo) setTableIndex(index int) contextInfo {
 	return c
 }
 
-type QuestV1 struct {
-	QuestId     int `lua:"@index"`
-	Title       string
-	Description []string
-	Summary     string
-}
-
 func convertToUTF8(str string) string {
 	strBytes := []byte(str)
 	byteReader := bytes.NewReader(strBytes)
