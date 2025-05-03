@@ -47,9 +47,8 @@ func decodeSlice(L *lua.State, slice reflect.Value, ctx contextInfo) {
 	L.PushNil()
 	for L.Next(-2) != 0 {
 		sliceItem := reflect.New(sliceItemType).Elem()
-
 		decode(L, sliceItem, newContextInfo().setTableIndex(L.ToInteger(-2)))
-		newSlice = reflect.Append(slice, sliceItem)
+		newSlice = reflect.Append(newSlice, sliceItem)
 
 		L.Pop(1)
 	}
