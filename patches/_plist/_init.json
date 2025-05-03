@@ -1,0 +1,68 @@
+[
+	{
+		"name": "2012-01-01_dummy_init",
+		"patchDate": "2012-01-01T00:00:00.000Z",
+		"files": [
+			{
+				"name": "data\\bookitemnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\buyingstoreitemlist.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\cardpostfixnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\cardprefixnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\idnum2itemdesctable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\idnum2itemdisplaynametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\idnum2itemresnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\itemslotcounttable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\num2cardillustnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\num2itemdesctable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\num2itemdisplaynametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\num2itemresnametable.txt",
+				"size": 9999,
+				"hash": "dummy"
+			}
+		]
+	}
+]

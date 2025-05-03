@@ -1,6 +1,7 @@
 package repository
 
 type repositories struct {
+	patchRepository *PatchRepository
 	questRepository *QuestRepository
 }
 

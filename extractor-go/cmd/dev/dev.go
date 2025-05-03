@@ -27,7 +27,8 @@ func main() {
 	conf.Load()
 	dbCheck()
 
-	extractor.ExtractQuest()
+	// extractor.ExtractQuest()
+	extractor.ExtractInitialPatchList()
 
 	fmt.Println("Success")
 }

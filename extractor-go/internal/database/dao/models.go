@@ -6,7 +6,16 @@ package dao
 
 import (
 	"database/sql"
+	"encoding/json"
+	"time"
 )
+
+type Patch struct {
+	ID    int32
+	Name  string
+	Date  time.Time
+	Files json.RawMessage
+}
 
 type Quest struct {
 	QuestID         int32
