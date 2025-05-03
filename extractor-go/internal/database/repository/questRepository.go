@@ -88,3 +88,31 @@ func (r *QuestRepository) AddQuestToHistory(patch string, fromQuest *domain.Ques
 
 	return err
 }
+
+func (r *QuestRepository) AddDeletedQuest(patch string, quest *domain.Quest) error {
+	res, err := r.queries.InsertQuestHistory(context.Background(), dao.InsertQuestHistoryParams{
+		PreviousHistoryID: quest.HistoryID,
+		QuestID:           quest.QuestID,
+		FileVersion:       quest.FileVersion,
+		Patch:             patch,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	historyId, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	quest.HistoryID = dao.ToNullInt32(int32(historyId))
+
+	_, err = r.queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
+		QuestID:         quest.QuestID,
+		LatestHistoryID: quest.HistoryID.Int32,
+		Deleted:         true,
+	})
+
+	return err
+}

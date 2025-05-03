@@ -10,9 +10,7 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/luaExtractor"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/extractor"
 )
 
 func dbCheck() {
@@ -29,16 +27,7 @@ func main() {
 	conf.Load()
 	dbCheck()
 
-	var quests []rostructs.QuestV1
-	luaExtractor.Decode("../patches/OngoingQuestInfoList_True.lub", "QuestInfoList", &quests)
-
-	var model = quests[0].ToDomain()
-	err := repository.GetQuestRepository().AddQuestToHistory("2024-01-01", nil, &model)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(quests[0])
+	extractor.ExtractQuest()
 
 	fmt.Println("Success")
 }
