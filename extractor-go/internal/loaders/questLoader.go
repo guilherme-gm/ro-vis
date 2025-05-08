@@ -1,4 +1,4 @@
-package extractor
+package loaders
 
 import (
 	"fmt"

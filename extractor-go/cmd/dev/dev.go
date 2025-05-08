@@ -11,7 +11,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/extractor"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 )
 
 func dbCheck() {
@@ -35,8 +35,8 @@ func main() {
 
 	for _, patch := range *patches {
 		fmt.Println("Extracting " + patch.Name + "...")
-		if extractor.HasQuestFiles(patch) {
-			extractor.ExtractQuests(patch)
+		if loaders.HasQuestFiles(patch) {
+			loaders.ExtractQuests(patch)
 			fmt.Println("Done")
 		} else {
 			fmt.Println("Skipped")
