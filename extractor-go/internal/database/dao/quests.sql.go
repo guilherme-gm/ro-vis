@@ -81,71 +81,38 @@ func (q *Queries) GetCurrentQuests(ctx context.Context) ([]GetCurrentQuestsRow, 
 	return items, nil
 }
 
-const insertQuestHistory = `-- name: InsertQuestHistory :execresult
-INSERT INTO ` + "`" + `quest_history` + "`" + ` (
-	` + "`" + `previous_history_id` + "`" + `, -- 1
-	` + "`" + `quest_id` + "`" + `, -- 2
-	` + "`" + `file_version` + "`" + `, -- 3
-	` + "`" + `patch` + "`" + `, -- 4
-	` + "`" + `title` + "`" + `, -- 5
-	` + "`" + `description` + "`" + `, -- 6
-	` + "`" + `summary` + "`" + `, -- 7
-	` + "`" + `old_image` + "`" + `, -- 8
-	` + "`" + `icon_name` + "`" + `, -- 9
-	` + "`" + `npc_spr` + "`" + `, -- 10
-	` + "`" + `npc_navi` + "`" + `, -- 11
-	` + "`" + `npc_pos_x` + "`" + `, -- 12
-	` + "`" + `npc_pos_y` + "`" + `, -- 13
-	` + "`" + `reward_exp` + "`" + `, -- 14
-	` + "`" + `reward_jexp` + "`" + `, -- 15
-	` + "`" + `reward_item_list` + "`" + `, -- 16
-	` + "`" + `cool_time_quest` + "`" + ` -- 17
-)
-VALUES (
-	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-)
+const getQuestsIdsInPatch = `-- name: GetQuestsIdsInPatch :many
+SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + `
+FROM ` + "`" + `quest_history` + "`" + `
+WHERE ` + "`" + `quest_history` + "`" + `.` + "`" + `patch` + "`" + ` = ?
 `
 
-type InsertQuestHistoryParams struct {
-	PreviousHistoryID sql.NullInt32
-	QuestID           int32
-	FileVersion       int32
-	Patch             string
-	Title             sql.NullString
-	Description       sql.NullString
-	Summary           sql.NullString
-	OldImage          sql.NullString
-	IconName          sql.NullString
-	NpcSpr            sql.NullString
-	NpcNavi           sql.NullString
-	NpcPosX           sql.NullInt32
-	NpcPosY           sql.NullInt32
-	RewardExp         sql.NullString
-	RewardJexp        sql.NullString
-	RewardItemList    sql.NullString
-	CoolTimeQuest     sql.NullInt32
+type GetQuestsIdsInPatchRow struct {
+	HistoryID int32
+	QuestID   int32
 }
 
-func (q *Queries) InsertQuestHistory(ctx context.Context, arg InsertQuestHistoryParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertQuestHistory,
-		arg.PreviousHistoryID,
-		arg.QuestID,
-		arg.FileVersion,
-		arg.Patch,
-		arg.Title,
-		arg.Description,
-		arg.Summary,
-		arg.OldImage,
-		arg.IconName,
-		arg.NpcSpr,
-		arg.NpcNavi,
-		arg.NpcPosX,
-		arg.NpcPosY,
-		arg.RewardExp,
-		arg.RewardJexp,
-		arg.RewardItemList,
-		arg.CoolTimeQuest,
-	)
+func (q *Queries) GetQuestsIdsInPatch(ctx context.Context, patch string) ([]GetQuestsIdsInPatchRow, error) {
+	rows, err := q.db.QueryContext(ctx, getQuestsIdsInPatch, patch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetQuestsIdsInPatchRow
+	for rows.Next() {
+		var i GetQuestsIdsInPatchRow
+		if err := rows.Scan(&i.HistoryID, &i.QuestID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const upsertQuest = `-- name: UpsertQuest :execresult

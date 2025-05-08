@@ -10,6 +10,7 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/extractor"
 )
 
@@ -27,8 +28,22 @@ func main() {
 	conf.Load()
 	dbCheck()
 
+	patches, err := repository.GetPatchRepository().ListPatches()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, patch := range *patches {
+		fmt.Println("Extracting " + patch.Name + "...")
+		if extractor.HasQuestFiles(patch) {
+			extractor.ExtractQuests(patch)
+			fmt.Println("Done")
+		} else {
+			fmt.Println("Skipped")
+		}
+	}
 	// extractor.ExtractQuest()
-	extractor.ExtractInitialPatchList()
+	// extractor.ExtractInitialPatchList()
 
 	fmt.Println("Success")
 }
