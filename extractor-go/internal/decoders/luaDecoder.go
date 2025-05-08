@@ -1,4 +1,4 @@
-package luaExtractor
+package decoders
 
 // statically linking liblua 5.1 x86 (because RO LUBs use this exact version)
 
@@ -6,71 +6,63 @@ package luaExtractor
 //#cgo LDFLAGS: -L${SRCDIR}/../../../libs/liblua5.1 -llua5.1 -lm
 import "C"
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"reflect"
-
-	"golang.org/x/net/html/charset"
 
 	"github.com/aarzilli/golua/lua"
 )
 
-type contextInfo struct {
+type luaDecoder struct {
+	L *lua.State
+}
+
+type luaDecContextInfo struct {
 	tableIndex int
 }
 
-func newContextInfo() contextInfo {
-	return contextInfo{
+func newLuaDecContextInfo() luaDecContextInfo {
+	return luaDecContextInfo{
 		tableIndex: -1,
 	}
 }
 
-func (c contextInfo) setTableIndex(index int) contextInfo {
+func (c luaDecContextInfo) setTableIndex(index int) luaDecContextInfo {
 	c.tableIndex = index
 	return c
 }
 
-func convertToUTF8(str string) string {
-	strBytes := []byte(str)
-	byteReader := bytes.NewReader(strBytes)
-	reader, _ := charset.NewReaderLabel("euc-kr", byteReader)
-	strBytes, _ = io.ReadAll(reader)
-	return string(strBytes)
-}
-
-func decodeSlice(L *lua.State, slice reflect.Value, ctx contextInfo) {
+func (d *luaDecoder) decodeSlice(slice reflect.Value, ctx luaDecContextInfo) {
 	sliceType := slice.Type()
 	sliceItemType := sliceType.Elem()
 
 	newSlice := reflect.MakeSlice(sliceType, 0, 0)
 
-	L.PushNil()
-	for L.Next(-2) != 0 {
+	d.L.PushNil()
+	for d.L.Next(-2) != 0 {
 		sliceItem := reflect.New(sliceItemType).Elem()
-		decode(L, sliceItem, newContextInfo().setTableIndex(L.ToInteger(-2)))
+		d.decode(sliceItem, newLuaDecContextInfo().setTableIndex(d.L.ToInteger(-2)))
 		newSlice = reflect.Append(newSlice, sliceItem)
 
-		L.Pop(1)
+		d.L.Pop(1)
 	}
 
 	slice.Set(newSlice)
 }
 
-func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
+func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo) {
 	structType := structObj.Type()
 
 	fieldList := make(map[string]bool)
-	L.PushNil()
-	for L.Next(-2) != 0 {
-		if L.Type(-2) != lua.LUA_TSTRING {
+	d.L.PushNil()
+	for d.L.Next(-2) != 0 {
+		if d.L.Type(-2) != lua.LUA_TSTRING {
 			panic("Object key is not string")
 		}
 
-		fieldName := L.ToString(-2)
+		fieldName := d.L.ToString(-2)
 		fieldList[fieldName] = true
 
-		L.Pop(1)
+		d.L.Pop(1)
 	}
 
 	for fldNum := range structType.NumField() {
@@ -92,15 +84,15 @@ func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
 			panic("Invalid lua alias: " + alias)
 		}
 
-		L.GetField(-1, fieldType.Name)
-		if L.IsNil(-1) {
-			L.Pop(1)
+		d.L.GetField(-1, fieldType.Name)
+		if d.L.IsNil(-1) {
+			d.L.Pop(1)
 			continue
 		}
 
-		decode(L, fieldValue, newContextInfo())
+		d.decode(fieldValue, newLuaDecContextInfo())
 
-		L.Pop(1)
+		d.L.Pop(1)
 	}
 
 	if len(fieldList) > 0 {
@@ -109,19 +101,19 @@ func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
 	}
 }
 
-func decode(L *lua.State, dataValue reflect.Value, ctx contextInfo) {
+func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	dataType := dataValue.Type()
 	dataKind := dataType.Kind()
 
 	switch dataKind {
 	case reflect.Slice:
-		decodeSlice(L, dataValue, ctx)
+		d.decodeSlice(dataValue, ctx)
 
 	case reflect.Struct:
-		decodeStruct(L, dataValue, ctx)
+		d.decodeStruct(dataValue, ctx)
 
 	case reflect.String:
-		str := L.ToString(-1)
+		str := d.L.ToString(-1)
 		dataValue.SetString(convertToUTF8(str))
 
 	case reflect.Int8:
@@ -132,7 +124,7 @@ func decode(L *lua.State, dataValue reflect.Value, ctx contextInfo) {
 	case reflect.Uint32:
 	case reflect.Int64:
 	case reflect.Uint64:
-		val := L.ToInteger(-1)
+		val := d.L.ToInteger(-1)
 		dataValue.SetInt(int64(val))
 
 	default:
@@ -140,17 +132,19 @@ func decode(L *lua.State, dataValue reflect.Value, ctx contextInfo) {
 	}
 }
 
-func Decode(filePath string, tableName string, dst any) {
-	L := lua.NewState()
-	L.OpenLibs()
-	defer L.Close()
+func DecodeLuaTable(filePath string, tableName string, dst any) {
+	decoder := luaDecoder{
+		L: lua.NewState(),
+	}
+	decoder.L.OpenLibs()
+	defer decoder.L.Close()
 
-	err := L.DoFile(filePath)
+	err := decoder.L.DoFile(filePath)
 	if err != nil {
 		panic(err)
 	}
 
-	L.GetGlobal(tableName)
+	decoder.L.GetGlobal(tableName)
 	qv := reflect.ValueOf(dst)
-	decode(L, qv.Elem(), newContextInfo())
+	decoder.decode(qv.Elem(), newLuaDecContextInfo())
 }

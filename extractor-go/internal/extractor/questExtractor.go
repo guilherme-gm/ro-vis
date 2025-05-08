@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/luaExtractor"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
@@ -31,7 +31,7 @@ func ExtractQuests(patch domain.Patch) {
 
 	fmt.Println("> Decoding...")
 	var fileQuests []rostructs.QuestV3
-	luaExtractor.Decode(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	decoders.DecodeLuaTable(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
 
 	fmt.Println("> Fetching current list...")
 	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests()
