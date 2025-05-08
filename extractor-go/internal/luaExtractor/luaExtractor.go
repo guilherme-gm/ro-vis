@@ -102,8 +102,19 @@ func decode(L *lua.State, dataValue reflect.Value, ctx contextInfo) {
 		str := L.ToString(-1)
 		dataValue.SetString(convertToUTF8(str))
 
+	case reflect.Int8:
+	case reflect.Uint8:
+	case reflect.Int16:
+	case reflect.Uint16:
+	case reflect.Int32:
+	case reflect.Uint32:
+	case reflect.Int64:
+	case reflect.Uint64:
+		val := L.ToInteger(-1)
+		dataValue.SetInt(int64(val))
+
 	default:
-		panic("decode default")
+		panic("decode default - " + dataValue.String())
 	}
 }
 
