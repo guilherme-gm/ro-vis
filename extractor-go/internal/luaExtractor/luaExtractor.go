@@ -7,6 +7,7 @@ package luaExtractor
 import "C"
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"reflect"
 
@@ -58,9 +59,25 @@ func decodeSlice(L *lua.State, slice reflect.Value, ctx contextInfo) {
 
 func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
 	structType := structObj.Type()
+
+	fieldList := make(map[string]bool)
+	L.PushNil()
+	for L.Next(-2) != 0 {
+		if L.Type(-2) != lua.LUA_TSTRING {
+			panic("Object key is not string")
+		}
+
+		fieldName := L.ToString(-2)
+		fieldList[fieldName] = true
+
+		L.Pop(1)
+	}
+
 	for fldNum := range structType.NumField() {
 		fieldType := structType.Field(fldNum)
 		fieldValue := structObj.Field(fldNum)
+
+		delete(fieldList, fieldType.Name)
 
 		if alias := fieldType.Tag.Get("lua"); alias != "" {
 			if alias == "@index" {
@@ -84,6 +101,11 @@ func decodeStruct(L *lua.State, structObj reflect.Value, ctx contextInfo) {
 		decode(L, fieldValue, newContextInfo())
 
 		L.Pop(1)
+	}
+
+	if len(fieldList) > 0 {
+		fmt.Println("Not all keys were consumed.", fieldList)
+		panic("Not all keys were consumed.")
 	}
 }
 
