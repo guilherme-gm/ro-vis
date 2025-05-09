@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+type LoaderController struct {
+	Name            string
+	LatestPatchID   int32
+	LatestPatchName string
+}
+
 type Patch struct {
 	ID    int32
 	Name  string

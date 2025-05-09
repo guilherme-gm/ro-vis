@@ -33,10 +33,21 @@ func main() {
 		panic(err)
 	}
 
+	latest, err := repository.GetLoaderControllerRepository().GetLatestPatch("quest")
+	if err != nil {
+		panic(err)
+	}
+
 	loader := loaders.NewQuestLoader()
 	for _, patch := range *patches {
+		if patch.Id <= latest {
+			continue
+		}
+
 		fmt.Println("Extracting " + patch.Name + "...")
 		loader.LoadPatch(patch)
+
+		repository.GetLoaderControllerRepository().SetLatestPatch("quest", patch.Id, patch.Name)
 	}
 
 	fmt.Println("Success")
