@@ -33,17 +33,11 @@ func main() {
 		panic(err)
 	}
 
+	loader := loaders.NewQuestLoader()
 	for _, patch := range *patches {
 		fmt.Println("Extracting " + patch.Name + "...")
-		if loaders.HasQuestFiles(patch) {
-			loaders.ExtractQuests(patch)
-			fmt.Println("Done")
-		} else {
-			fmt.Println("Skipped")
-		}
+		loader.LoadPatch(patch)
 	}
-	// extractor.ExtractQuest()
-	// extractor.ExtractInitialPatchList()
 
 	fmt.Println("Success")
 }

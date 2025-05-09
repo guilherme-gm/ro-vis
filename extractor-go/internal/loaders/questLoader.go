@@ -2,36 +2,48 @@ package loaders
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/questParsers"
 )
 
-func HasQuestFiles(patch domain.Patch) bool {
-	for _, fname := range patch.Files {
-		if fname == "System/OngoingQuestInfoList_True.lub" {
-			return true
-		}
-
-		lowerName := strings.ToLower(fname)
-		if lowerName == "system/ongoingquestinfolist_true.lub" {
-			fmt.Println("FOUND on lower -- " + fname)
-			return true
-		}
-	}
-
-	return false
+type QuestLoader struct {
+	parsers []questParsers.QuestParser
 }
 
-func ExtractQuests(patch domain.Patch) {
+func NewQuestLoader() *QuestLoader {
+	parserV3 := questParsers.QuestV3Parser{}
+	return &QuestLoader{
+		parsers: []questParsers.QuestParser{
+			&parserV3,
+		},
+	}
+}
+
+func (l *QuestLoader) LoadPatch(patch domain.Patch) {
 	patchPath := "../patches/" + patch.Name + "/"
 
 	fmt.Println("> Decoding...")
-	var fileQuests []rostructs.QuestV3
-	decoders.DecodeLuaTable(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	var targetParser questParsers.QuestParser = nil
+	for _, parser := range l.parsers {
+		if parser.IsPatchInRange(&patch) {
+			targetParser = parser
+			break
+		}
+	}
+
+	if targetParser == nil {
+		panic("Could not find a parser for Quest patch " + patch.Name)
+	}
+
+	if !targetParser.HasFiles(&patch) {
+		fmt.Println("Skipped - No meaningful file")
+		return
+	}
+
+	parser := questParsers.QuestV3Parser{}
+	fileQuests := parser.Parse(patchPath)
 
 	fmt.Println("> Fetching current list...")
 	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests()
@@ -53,10 +65,9 @@ func ExtractQuests(patch domain.Patch) {
 	var newQuests []domain.Quest
 	var updatedQuests []domain.Quest
 
-	for _, roQuest := range fileQuests {
-		delete(deletedIds, roQuest.QuestId)
-		fileQuest := roQuest.ToDomain()
-		existingQuest := questMap[roQuest.QuestId]
+	for _, fileQuest := range *fileQuests {
+		delete(deletedIds, fileQuest.QuestID)
+		existingQuest := questMap[fileQuest.QuestID]
 		if existingQuest == nil {
 			newQuests = append(newQuests, fileQuest)
 			continue
