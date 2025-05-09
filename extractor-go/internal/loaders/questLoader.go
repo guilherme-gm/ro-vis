@@ -13,10 +13,10 @@ type QuestLoader struct {
 }
 
 func NewQuestLoader() *QuestLoader {
-	parserV3 := questParsers.QuestV3Parser{}
 	return &QuestLoader{
 		parsers: []questParsers.QuestParser{
-			&parserV3,
+			questParsers.QuestV3Parser{},
+			questParsers.QuestV4Parser{},
 		},
 	}
 }
@@ -42,8 +42,7 @@ func (l *QuestLoader) LoadPatch(patch domain.Patch) {
 		return
 	}
 
-	parser := questParsers.QuestV3Parser{}
-	fileQuests := parser.Parse(patchPath)
+	fileQuests := targetParser.Parse(patchPath)
 
 	fmt.Println("> Fetching current list...")
 	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests()

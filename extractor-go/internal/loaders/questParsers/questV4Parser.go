@@ -14,14 +14,14 @@ import (
  * 2018-03-21 was introduced "System/OnGoingQuestInfoList_True.lub" and "System/RecommendedQuestInfoList_True.lub".
  * This marks the end of "questid2display.txt" and lua files/quest/*.lua
  */
-type QuestV3Parser struct{}
+type QuestV4Parser struct{}
 
-func (p QuestV3Parser) IsPatchInRange(patch *domain.Patch) bool {
-	return (patch.Date.After(time.Date(2018, time.March, 20, 0, 0, 0, 0, time.UTC)) &&
-		patch.Date.Before(time.Date(2020, time.August, 4, 0, 0, 0, 0, time.UTC)))
+func (p QuestV4Parser) IsPatchInRange(patch *domain.Patch) bool {
+	return (patch.Date.After(time.Date(2020, time.August, 4, 0, 0, 0, 0, time.UTC)) &&
+		patch.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC)))
 }
 
-func (p QuestV3Parser) HasFiles(patch *domain.Patch) bool {
+func (p QuestV4Parser) HasFiles(patch *domain.Patch) bool {
 	for _, fname := range patch.Files {
 		if fname == "System/OngoingQuestInfoList_True.lub" {
 			return true
@@ -37,8 +37,8 @@ func (p QuestV3Parser) HasFiles(patch *domain.Patch) bool {
 	return false
 }
 
-func (p QuestV3Parser) Parse(patchPath string) *[]domain.Quest {
-	var fileQuests []rostructs.QuestV3
+func (p QuestV4Parser) Parse(patchPath string) *[]domain.Quest {
+	var fileQuests []rostructs.QuestV4
 	decoders.DecodeLuaTable(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
 
 	quests := make([]domain.Quest, len(fileQuests))
