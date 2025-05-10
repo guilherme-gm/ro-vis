@@ -7,5 +7,5 @@ import (
 type QuestParser interface {
 	IsPatchInRange(patch *domain.Patch) bool
 	HasFiles(patch *domain.Patch) bool
-	Parse(patchPath string) *[]domain.Quest
+	Parse(patchPath string) []domain.Quest
 }

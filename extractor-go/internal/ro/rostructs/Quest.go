@@ -8,9 +8,11 @@ import (
 )
 
 type QuestV1 struct {
-	QuestId     int32 `lua:"@index"`
+	QuestId     int32
 	Title       string
-	Description []string
+	Icon        string
+	Image       string
+	Description string
 	Summary     string
 }
 
@@ -19,8 +21,10 @@ func (q *QuestV1) ToDomain() domain.Quest {
 		QuestID:     int32(q.QuestId),
 		FileVersion: 1,
 		Title:       dao.ToNullString(q.Title),
+		IconName:    dao.ToNullString(q.Icon),
+		OldImage:    dao.ToNullString(q.Image),
 		Summary:     dao.ToNullString(q.Summary),
-		Description: dao.ToNullString(strings.Join(q.Description, "\n")),
+		Description: dao.ToNullString(q.Description),
 	}
 }
 

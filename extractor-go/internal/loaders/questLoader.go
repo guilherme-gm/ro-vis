@@ -15,6 +15,8 @@ type QuestLoader struct {
 func NewQuestLoader() *QuestLoader {
 	return &QuestLoader{
 		parsers: []questParsers.QuestParser{
+			questParsers.QuestV1Parser{},
+			// questParsers.QuestV2Parser{}, -- Not implemented (uses v1 instead)
 			questParsers.QuestV3Parser{},
 			questParsers.QuestV4Parser{},
 		},
@@ -64,7 +66,7 @@ func (l *QuestLoader) LoadPatch(patch domain.Patch) {
 	var newQuests []domain.Quest
 	var updatedQuests []domain.Quest
 
-	for _, fileQuest := range *fileQuests {
+	for _, fileQuest := range fileQuests {
 		delete(deletedIds, fileQuest.QuestID)
 		existingQuest := questMap[fileQuest.QuestID]
 		if existingQuest == nil {

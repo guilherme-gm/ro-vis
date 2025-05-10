@@ -37,7 +37,7 @@ func (p QuestV4Parser) HasFiles(patch *domain.Patch) bool {
 	return false
 }
 
-func (p QuestV4Parser) Parse(patchPath string) *[]domain.Quest {
+func (p QuestV4Parser) Parse(patchPath string) []domain.Quest {
 	var fileQuests []rostructs.QuestV4
 	decoders.DecodeLuaTable(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
 
@@ -46,5 +46,5 @@ func (p QuestV4Parser) Parse(patchPath string) *[]domain.Quest {
 		quests[idx] = val.ToDomain()
 	}
 
-	return &quests
+	return quests
 }

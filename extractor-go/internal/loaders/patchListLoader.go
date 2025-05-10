@@ -50,11 +50,6 @@ func shouldSkipPatch(rawPatch PatchFile) bool {
 		}
 	}
 
-	// TODO: Remove this -- temporary logic for testing
-	if rawPatch.PatchDate.Before(time.Date(2018, time.March, 21, 0, 0, 0, 0, time.UTC)) {
-		return true
-	}
-
 	return false
 }
 

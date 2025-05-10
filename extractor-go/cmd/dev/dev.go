@@ -28,6 +28,8 @@ func main() {
 	conf.Load()
 	dbCheck()
 
+	// loaders.ExtractInitialPatchList()
+
 	patches, err := repository.GetPatchRepository().ListPatches()
 	if err != nil {
 		panic(err)
