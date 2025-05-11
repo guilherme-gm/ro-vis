@@ -69,8 +69,7 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 		fieldType := structType.Field(fldNum)
 		fieldValue := structObj.Field(fldNum)
 
-		delete(fieldList, fieldType.Name)
-
+		fieldName := fieldType.Name
 		if alias := fieldType.Tag.Get("lua"); alias != "" {
 			if alias == "@index" {
 				if ctx.tableIndex == -1 {
@@ -81,10 +80,12 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 				continue
 			}
 
-			panic("Invalid lua alias: " + alias)
+			fieldName = alias
 		}
 
-		d.L.GetField(-1, fieldType.Name)
+		delete(fieldList, fieldName)
+
+		d.L.GetField(-1, fieldName)
 		if d.L.IsNil(-1) {
 			d.L.Pop(1)
 			continue
