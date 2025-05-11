@@ -65,7 +65,7 @@ func (p QuestV1Parser) Parse(basePath string, update *domain.Update) []domain.Qu
 		}
 
 		qv1 := rostructs.QuestV1{
-			QuestId:     int32(questId),
+			QuestId:     questId,
 			Title:       stringList[1],
 			Icon:        stringList[2],
 			Image:       stringList[3],

@@ -8,7 +8,7 @@ import (
 )
 
 type QuestV1 struct {
-	QuestId     int32
+	QuestId     int
 	Title       string
 	Icon        string
 	Image       string
@@ -29,20 +29,20 @@ func (q *QuestV1) ToDomain() domain.Quest {
 }
 
 type QuestV3RewardItem struct {
-	ItemID  int32
-	ItemNum int32
+	ItemID  int
+	ItemNum int
 }
 
 type QuestV3 struct {
-	QuestId        int32 `lua:"@index"`
+	QuestId        int `lua:"@index"`
 	Title          string
 	Description    []string
 	Summary        string
 	IconName       string
 	NpcSpr         string
 	NpcNavi        string
-	NpcPosX        int32
-	NpcPosY        int32
+	NpcPosX        int
+	NpcPosY        int
 	RewardEXP      string
 	RewardJEXP     string
 	RewardItemList []QuestV3RewardItem
@@ -58,8 +58,8 @@ func (q *QuestV3) ToDomain() domain.Quest {
 		IconName:    dao.ToNullString(q.IconName),
 		NpcSpr:      dao.ToNullString(q.NpcSpr),
 		NpcNavi:     dao.ToNullString(q.NpcNavi),
-		NpcPosX:     dao.ToNullInt32(q.NpcPosX),
-		NpcPosY:     dao.ToNullInt32(q.NpcPosY),
+		NpcPosX:     dao.ToNullInt32(int32(q.NpcPosX)),
+		NpcPosY:     dao.ToNullInt32(int32(q.NpcPosY)),
 		RewardExp:   dao.ToNullString(q.RewardEXP),
 		RewardJexp:  dao.ToNullString(q.RewardJEXP),
 		// TODO:
@@ -68,25 +68,25 @@ func (q *QuestV3) ToDomain() domain.Quest {
 }
 
 type QuestV4 struct {
-	QuestId        int32 `lua:"@index"`
+	QuestId        int `lua:"@index"`
 	Title          string
 	Description    []string
 	Summary        string
 	IconName       string
 	NpcSpr         string
 	NpcNavi        string
-	NpcPosX        int32
-	NpcPosY        int32
+	NpcPosX        int
+	NpcPosY        int
 	RewardEXP      string
 	RewardJEXP     string
 	RewardItemList []QuestV4RewardItem
 	// New in V4
-	CoolTimeQuest int32
+	CoolTimeQuest int
 }
 
 type QuestV4RewardItem struct {
-	ItemID  int32
-	ItemNum int32
+	ItemID  int
+	ItemNum int
 }
 
 func (q *QuestV4) ToDomain() domain.Quest {
@@ -99,8 +99,8 @@ func (q *QuestV4) ToDomain() domain.Quest {
 		IconName:    dao.ToNullString(q.IconName),
 		NpcSpr:      dao.ToNullString(q.NpcSpr),
 		NpcNavi:     dao.ToNullString(q.NpcNavi),
-		NpcPosX:     dao.ToNullInt32(q.NpcPosX),
-		NpcPosY:     dao.ToNullInt32(q.NpcPosY),
+		NpcPosX:     dao.ToNullInt32(int32(q.NpcPosX)),
+		NpcPosY:     dao.ToNullInt32(int32(q.NpcPosY)),
 		RewardExp:   dao.ToNullString(q.RewardEXP),
 		RewardJexp:  dao.ToNullString(q.RewardJEXP),
 		// TODO:

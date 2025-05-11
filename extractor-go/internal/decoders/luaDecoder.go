@@ -116,6 +116,10 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 		str := d.L.ToString(-1)
 		dataValue.SetString(convertToUTF8(str))
 
+	case reflect.Int:
+		val := d.L.ToInteger(-1)
+		dataValue.SetInt(int64(val))
+
 	case reflect.Int8:
 	case reflect.Uint8:
 	case reflect.Int16:
@@ -124,8 +128,7 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	case reflect.Uint32:
 	case reflect.Int64:
 	case reflect.Uint64:
-		val := d.L.ToInteger(-1)
-		dataValue.SetInt(int64(val))
+		panic("LuaDecoder doesn't handle sized int fields properly. use int. Found: " + dataValue.String())
 
 	default:
 		panic("decode default - " + dataValue.String())
