@@ -1,6 +1,7 @@
 package itemParsers
 
 import (
+	"database/sql"
 	"strconv"
 	"time"
 
@@ -39,21 +40,23 @@ type txtEntry interface {
 	GetItemID() int32
 }
 
-func loadTxtSubTable[T txtEntry](basePath string, update *domain.Update, newDB map[int32]*domain.Item, fileName string, parser func(string) ([]T, error), mapper func(*domain.Item, T)) {
+func loadTxtSubTable[T txtEntry](basePath string, update *domain.Update, newDB map[int32]*domain.Item, fileName string, parser func(string) (map[int32]T, error), mapper func(*domain.Item, *T)) {
 	change, err := update.GetChangeForFile(fileName)
 	if err != nil {
 		// @TODO: Check if the error was actually the not found one
 		return
 	}
 
-	itemDesc, err := parser(basePath + "/" + change.Patch + "/" + fileName)
+	itemVal, err := parser(basePath + "/" + change.Patch + "/" + fileName)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, entry := range itemDesc {
-		if item, ok := newDB[entry.GetItemID()]; ok {
-			mapper(item, entry)
+	for _, item := range newDB {
+		if val, ok := itemVal[item.ItemID]; ok {
+			mapper(item, &val)
+		} else {
+			mapper(item, nil)
 		}
 	}
 }
@@ -91,22 +94,52 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 	}
 
 	// ID#Value# tables
-	loadTxtSubTable(basePath, update, newDB, "data/num2itemdisplaynametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/num2itemdisplaynametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.UnidentifiedName = sql.NullString{}
+			return
+		}
+
 		item.UnidentifiedName = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.IdentifiedSprite = sql.NullString{}
+			return
+		}
+
 		item.IdentifiedSprite = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/num2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/num2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.UnidentifiedSprite = sql.NullString{}
+			return
+		}
+
 		item.UnidentifiedSprite = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/cardprefixnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/cardprefixnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.CardPrefix = sql.NullString{}
+			return
+		}
+
 		item.CardPrefix = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/num2cardillustnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/num2cardillustnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.CardIllustration = sql.NullString{}
+			return
+		}
+
 		item.CardIllustration = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/itemslotcounttable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry subparsers.ItemValueTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/itemslotcounttable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
+		if entry == nil {
+			item.SlotCount = sql.NullInt16{}
+			return
+		}
+
 		slots, err := strconv.Atoi(entry.Value)
 		if err != nil {
 			panic("slots for item " + strconv.Itoa(int(entry.ItemID)) + " is not int. (Value: " + entry.Value + ")")
@@ -116,21 +149,46 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 	})
 
 	// ID#Multiline description# tables
-	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry subparsers.ItemDescTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry *subparsers.ItemDescTableEntry) {
+		if entry == nil {
+			item.IdentifiedDescription = sql.NullString{}
+			return
+		}
+
 		item.IdentifiedDescription = dao.ToNullString(entry.Description)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/num2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry subparsers.ItemDescTableEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/num2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry *subparsers.ItemDescTableEntry) {
+		if entry == nil {
+			item.UnidentifiedDescription = sql.NullString{}
+			return
+		}
+
 		item.UnidentifiedDescription = dao.ToNullString(entry.Description)
 	})
 
 	// ID# tables
-	loadTxtSubTable(basePath, update, newDB, "data/bookitemnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry subparsers.ItemListEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/bookitemnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
+		if entry == nil {
+			item.IsBook = false
+			return
+		}
+
 		item.IsBook = true
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/buyingstoreitemlist.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry subparsers.ItemListEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/buyingstoreitemlist.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
+		if entry == nil {
+			item.CanUseBuyingStore = false
+			return
+		}
+
 		item.CanUseBuyingStore = true
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/cardpostfixnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry subparsers.ItemListEntry) {
+	loadTxtSubTable(basePath, update, newDB, "data/cardpostfixnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
+		if entry == nil {
+			item.CardIsPostfix = false
+			return
+		}
+
 		item.CardIsPostfix = true
 	})
 

@@ -16,8 +16,8 @@ func (d ItemDescTableEntry) GetItemID() int32 {
 	return d.ItemID
 }
 
-func ParseItemDescTable(filePath string) ([]ItemDescTableEntry, error) {
-	itemDescriptions := []ItemDescTableEntry{}
+func ParseItemDescTable(filePath string) (map[int32]ItemDescTableEntry, error) {
+	itemDescriptions := make(map[int32]ItemDescTableEntry)
 
 	lines, err := decoders.DecodeTokenTextTable(filePath, 1)
 	if err != nil {
@@ -43,10 +43,10 @@ func ParseItemDescTable(filePath string) ([]ItemDescTableEntry, error) {
 			idx++
 		}
 
-		itemDescriptions = append(itemDescriptions, ItemDescTableEntry{
+		itemDescriptions[int32(itemID)] = ItemDescTableEntry{
 			ItemID:      int32(itemID),
 			Description: desc,
-		})
+		}
 	}
 
 	return itemDescriptions, nil
