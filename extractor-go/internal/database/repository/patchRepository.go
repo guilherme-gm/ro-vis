@@ -82,7 +82,7 @@ func (r *PatchRepository) ListUpdates() ([]domain.Update, error) {
 				}
 
 				update.Changes = append(update.Changes, change)
-				fileMap[file] = &change
+				fileMap[file] = &update.Changes[len(update.Changes)-1]
 			}
 		}
 	}
