@@ -10,6 +10,34 @@ import (
 	"time"
 )
 
+type Item struct {
+	ItemID          int32
+	LatestHistoryID int32
+	Deleted         bool
+}
+
+type ItemHistory struct {
+	HistoryID               int32
+	PreviousHistoryID       sql.NullInt32
+	ItemID                  int32
+	FileVersion             int32
+	Update                  string
+	IdentifiedName          sql.NullString
+	IdentifiedDescription   sql.NullString
+	IdentifiedSprite        sql.NullString
+	UnidentifiedName        sql.NullString
+	UnidentifiedDescription sql.NullString
+	UnidentifiedSprite      sql.NullString
+	SlotCount               sql.NullInt16
+	IsBook                  bool
+	CanUseBuyingStore       bool
+	CardPrefix              sql.NullString
+	CardIsPostfix           bool
+	CardIllustration        sql.NullString
+	ClassNum                sql.NullInt32
+	MoveInfo                json.RawMessage
+}
+
 type LoaderController struct {
 	Name           string
 	LastUpdateDate time.Time

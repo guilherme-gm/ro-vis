@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS `item_history`;
+DROP TABLE IF EXISTS `items`;

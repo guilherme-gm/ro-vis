@@ -11,6 +11,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 )
 
@@ -21,6 +22,28 @@ func dbCheck() {
 	}
 
 	migTool.UpdateCheck()
+}
+
+type loader interface {
+	LoadPatch(basePath string, update domain.Update)
+}
+
+func load(updates []domain.Update, loaderName string, loaderInstance loader) {
+	latest, err := repository.GetLoaderControllerRepository().GetLatestUpdate(loaderName)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, update := range updates {
+		if update.Date.Compare(latest) <= 0 {
+			continue
+		}
+
+		fmt.Println("Extracting " + update.Name() + "...")
+		loaderInstance.LoadPatch("../patches/", update)
+
+		repository.GetLoaderControllerRepository().SetLatestPatch(loaderName, update.Date)
+	}
 }
 
 func main() {
@@ -35,22 +58,8 @@ func main() {
 		panic(err)
 	}
 
-	latest, err := repository.GetLoaderControllerRepository().GetLatestUpdate("quest")
-	if err != nil {
-		panic(err)
-	}
-
-	loader := loaders.NewQuestLoader()
-	for _, update := range updates {
-		if update.Date.Compare(latest) <= 0 {
-			continue
-		}
-
-		fmt.Println("Extracting " + update.Name() + "...")
-		loader.LoadPatch("../patches/", update)
-
-		repository.GetLoaderControllerRepository().SetLatestPatch("quest", update.Date)
-	}
+	// load(updates, "quest", loaders.NewQuestLoader())
+	load(updates, "items", loaders.NewItemLoader())
 
 	fmt.Println("Success")
 }
