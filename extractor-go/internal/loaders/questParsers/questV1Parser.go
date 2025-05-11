@@ -19,24 +19,24 @@ import (
  */
 type QuestV1Parser struct{}
 
-func (p QuestV1Parser) IsPatchInRange(patch *domain.Patch) bool {
+func (p QuestV1Parser) IsUpdateInRange(update *domain.Update) bool {
 	/**
 	 * Notes:
 	 * 1) I don't know the real start date (probably ~2007-08-29), but it is older than RO Vis covers
 	 * 2) This is also including QuestV2, because RO Vis is not supporting the extra files (at least for now)
 	 */
-	return patch.Date.Before(time.Date(2018, time.March, 20, 0, 0, 0, 0, time.UTC))
+	return update.Date.Before(time.Date(2018, time.March, 20, 0, 0, 0, 0, time.UTC))
 }
 
-func (p QuestV1Parser) HasFiles(patch *domain.Patch) bool {
-	for _, fname := range patch.Files {
-		if fname == "data/questid2display.txt" {
+func (p QuestV1Parser) HasFiles(update *domain.Update) bool {
+	for _, change := range update.Changes {
+		if change.File == "data/questid2display.txt" {
 			return true
 		}
 
-		lowerName := strings.ToLower(fname)
+		lowerName := strings.ToLower(change.File)
 		if lowerName == "data/questid2display.txt" {
-			fmt.Println("FOUND on lower -- " + fname)
+			fmt.Println("FOUND on lower -- " + change.File)
 			return true
 		}
 	}
@@ -44,8 +44,13 @@ func (p QuestV1Parser) HasFiles(patch *domain.Patch) bool {
 	return false
 }
 
-func (p QuestV1Parser) Parse(patchPath string) []domain.Quest {
-	stringList, err := decoders.DecodeTokenTextTable(patchPath+"data/questid2display.txt", 0)
+func (p QuestV1Parser) Parse(basePath string, update *domain.Update) []domain.Quest {
+	change, err := update.GetChangeForFile("data/questid2display.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	stringList, err := decoders.DecodeTokenTextTable(basePath+"/"+change.Patch+"/data/questid2display.txt", 0)
 	if err != nil {
 		panic(err)
 	}

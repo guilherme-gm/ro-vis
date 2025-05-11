@@ -2,4 +2,4 @@
 INSERT INTO `patches` (`name`, `date`, `files`) VALUES (?, ?, ?);
 
 -- name: ListPatches :many
-SELECT * FROM `patches`;
+SELECT * FROM `patches` ORDER BY `id` ASC;

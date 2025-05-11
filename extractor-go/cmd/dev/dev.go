@@ -30,26 +30,26 @@ func main() {
 
 	// loaders.ExtractInitialPatchList()
 
-	patches, err := repository.GetPatchRepository().ListPatches()
+	updates, err := repository.GetPatchRepository().ListUpdates()
 	if err != nil {
 		panic(err)
 	}
 
-	latest, err := repository.GetLoaderControllerRepository().GetLatestPatch("quest")
+	latest, err := repository.GetLoaderControllerRepository().GetLatestUpdate("quest")
 	if err != nil {
 		panic(err)
 	}
 
 	loader := loaders.NewQuestLoader()
-	for _, patch := range *patches {
-		if patch.Id <= latest {
+	for _, update := range updates {
+		if update.Date.Compare(latest) <= 0 {
 			continue
 		}
 
-		fmt.Println("Extracting " + patch.Name + "...")
-		loader.LoadPatch(patch)
+		fmt.Println("Extracting " + update.Name() + "...")
+		loader.LoadPatch("../patches/", update)
 
-		repository.GetLoaderControllerRepository().SetLatestPatch("quest", patch.Id, patch.Name)
+		repository.GetLoaderControllerRepository().SetLatestPatch("quest", update.Date)
 	}
 
 	fmt.Println("Success")

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
@@ -24,24 +25,23 @@ func GetLoaderControllerRepository() *LoaderControllerRepository {
 	return repositoriesCache.LoaderControllerRepository
 }
 
-func (r *LoaderControllerRepository) GetLatestPatch(name string) (int32, error) {
-	res, err := r.queries.GetLatestPatch(context.Background(), name)
+func (r *LoaderControllerRepository) GetLatestUpdate(name string) (time.Time, error) {
+	res, err := r.queries.GetLatestUpdate(context.Background(), name)
 	if err == sql.ErrNoRows {
-		return 0, nil
+		return time.Time{}, nil
 	}
 
 	if err != nil {
-		return 0, err
+		return time.Time{}, err
 	}
 
 	return res, nil
 }
 
-func (r *LoaderControllerRepository) SetLatestPatch(name string, patchId int32, patchName string) error {
-	err := r.queries.UpsertLatestPatch(context.Background(), dao.UpsertLatestPatchParams{
-		Name:            name,
-		LatestPatchID:   patchId,
-		LatestPatchName: patchName,
+func (r *LoaderControllerRepository) SetLatestPatch(name string, date time.Time) error {
+	err := r.queries.UpsertLatestUpdate(context.Background(), dao.UpsertLatestUpdateParams{
+		Name:           name,
+		LastUpdateDate: date,
 	})
 	if err != nil {
 		return err

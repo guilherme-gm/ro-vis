@@ -16,20 +16,20 @@ import (
  */
 type QuestV4Parser struct{}
 
-func (p QuestV4Parser) IsPatchInRange(patch *domain.Patch) bool {
-	return (patch.Date.After(time.Date(2020, time.August, 4, 0, 0, 0, 0, time.UTC)) &&
-		patch.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC)))
+func (p QuestV4Parser) IsUpdateInRange(update *domain.Update) bool {
+	return (update.Date.After(time.Date(2020, time.August, 4, 0, 0, 0, 0, time.UTC)) &&
+		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC)))
 }
 
-func (p QuestV4Parser) HasFiles(patch *domain.Patch) bool {
-	for _, fname := range patch.Files {
-		if fname == "System/OngoingQuestInfoList_True.lub" {
+func (p QuestV4Parser) HasFiles(update *domain.Update) bool {
+	for _, change := range update.Changes {
+		if change.File == "System/OngoingQuestInfoList_True.lub" {
 			return true
 		}
 
-		lowerName := strings.ToLower(fname)
+		lowerName := strings.ToLower(change.File)
 		if lowerName == "system/ongoingquestinfolist_true.lub" {
-			fmt.Println("FOUND on lower -- " + fname)
+			fmt.Println("FOUND on lower -- " + change.File)
 			return true
 		}
 	}
@@ -37,9 +37,14 @@ func (p QuestV4Parser) HasFiles(patch *domain.Patch) bool {
 	return false
 }
 
-func (p QuestV4Parser) Parse(patchPath string) []domain.Quest {
+func (p QuestV4Parser) Parse(basePath string, update *domain.Update) []domain.Quest {
+	change, err := update.GetChangeForFile("System/OngoingQuestInfoList_True.lub")
+	if err != nil {
+		panic(err)
+	}
+
 	var fileQuests []rostructs.QuestV4
-	decoders.DecodeLuaTable(patchPath+"System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
 
 	quests := make([]domain.Quest, len(fileQuests))
 	for idx, val := range fileQuests {

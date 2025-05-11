@@ -23,28 +23,26 @@ func NewQuestLoader() *QuestLoader {
 	}
 }
 
-func (l *QuestLoader) LoadPatch(patch domain.Patch) {
-	patchPath := "../patches/" + patch.Name + "/"
-
+func (l *QuestLoader) LoadPatch(basePath string, update domain.Update) {
 	fmt.Println("> Decoding...")
 	var targetParser questParsers.QuestParser = nil
 	for _, parser := range l.parsers {
-		if parser.IsPatchInRange(&patch) {
+		if parser.IsUpdateInRange(&update) {
 			targetParser = parser
 			break
 		}
 	}
 
 	if targetParser == nil {
-		panic("Could not find a parser for Quest patch " + patch.Name)
+		panic("Could not find a parser for Quest patch " + update.Name())
 	}
 
-	if !targetParser.HasFiles(&patch) {
+	if !targetParser.HasFiles(&update) {
 		fmt.Println("Skipped - No meaningful file")
 		return
 	}
 
-	fileQuests := targetParser.Parse(patchPath)
+	fileQuests := targetParser.Parse(basePath, &update)
 
 	fmt.Println("> Fetching current list...")
 	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests()
@@ -81,20 +79,20 @@ func (l *QuestLoader) LoadPatch(patch domain.Patch) {
 	}
 
 	fmt.Printf("> Saving new records... (%d records to save)\n", len(newQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(patch.Name, &newQuests)
+	err = repository.GetQuestRepository().AddQuestsToHistory(update.Name(), &newQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(patch.Name, &updatedQuests)
+	err = repository.GetQuestRepository().AddQuestsToHistory(update.Name(), &updatedQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Deleting records... (%d records to delete)\n", len(deletedIds))
 	for deletedId := range deletedIds {
-		err := repository.GetQuestRepository().AddDeletedQuest(patch.Name, questMap[deletedId])
+		err := repository.GetQuestRepository().AddDeletedQuest(update.Name(), questMap[deletedId])
 		if err != nil {
 			panic(err)
 		}

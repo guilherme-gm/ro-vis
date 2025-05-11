@@ -11,9 +11,8 @@ import (
 )
 
 type LoaderController struct {
-	Name            string
-	LatestPatchID   int32
-	LatestPatchName string
+	Name           string
+	LastUpdateDate time.Time
 }
 
 type Patch struct {

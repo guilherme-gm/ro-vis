@@ -27,7 +27,7 @@ func (q *Queries) InsertPatch(ctx context.Context, arg InsertPatchParams) error 
 }
 
 const listPatches = `-- name: ListPatches :many
-SELECT id, name, date, files FROM ` + "`" + `patches` + "`" + `
+SELECT id, name, date, files FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` ASC
 `
 
 func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {

@@ -7,34 +7,33 @@ package dao
 
 import (
 	"context"
+	"time"
 )
 
-const getLatestPatch = `-- name: GetLatestPatch :one
-SELECT ` + "`" + `latest_patch_id` + "`" + ` FROM ` + "`" + `loader_controller` + "`" + ` WHERE ` + "`" + `name` + "`" + ` = ?
+const getLatestUpdate = `-- name: GetLatestUpdate :one
+SELECT ` + "`" + `last_update_date` + "`" + ` FROM ` + "`" + `loader_controller` + "`" + ` WHERE ` + "`" + `name` + "`" + ` = ?
 `
 
-func (q *Queries) GetLatestPatch(ctx context.Context, name string) (int32, error) {
-	row := q.db.QueryRowContext(ctx, getLatestPatch, name)
-	var latest_patch_id int32
-	err := row.Scan(&latest_patch_id)
-	return latest_patch_id, err
+func (q *Queries) GetLatestUpdate(ctx context.Context, name string) (time.Time, error) {
+	row := q.db.QueryRowContext(ctx, getLatestUpdate, name)
+	var last_update_date time.Time
+	err := row.Scan(&last_update_date)
+	return last_update_date, err
 }
 
-const upsertLatestPatch = `-- name: UpsertLatestPatch :exec
-INSERT INTO ` + "`" + `loader_controller` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `latest_patch_id` + "`" + `, ` + "`" + `latest_patch_name` + "`" + `)
-VALUES (?, ?, ?)
+const upsertLatestUpdate = `-- name: UpsertLatestUpdate :exec
+INSERT INTO ` + "`" + `loader_controller` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `last_update_date` + "`" + `)
+VALUES (?, ?)
 ON DUPLICATE KEY UPDATE
-	latest_patch_id = VALUES(latest_patch_id),
-	latest_patch_name = VALUES(latest_patch_name)
+	last_update_date = VALUES(last_update_date)
 `
 
-type UpsertLatestPatchParams struct {
-	Name            string
-	LatestPatchID   int32
-	LatestPatchName string
+type UpsertLatestUpdateParams struct {
+	Name           string
+	LastUpdateDate time.Time
 }
 
-func (q *Queries) UpsertLatestPatch(ctx context.Context, arg UpsertLatestPatchParams) error {
-	_, err := q.db.ExecContext(ctx, upsertLatestPatch, arg.Name, arg.LatestPatchID, arg.LatestPatchName)
+func (q *Queries) UpsertLatestUpdate(ctx context.Context, arg UpsertLatestUpdateParams) error {
+	_, err := q.db.ExecContext(ctx, upsertLatestUpdate, arg.Name, arg.LastUpdateDate)
 	return err
 }
