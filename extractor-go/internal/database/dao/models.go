@@ -35,7 +35,7 @@ type ItemHistory struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
-	MoveInfo                json.RawMessage
+	MoveInfo                []byte
 }
 
 type LoaderController struct {

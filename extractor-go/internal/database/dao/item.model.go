@@ -8,8 +8,10 @@ import (
 
 func (i *GetCurrentItemsRow) ToDomain() domain.Item {
 	var moveInfo domain.ItemMoveInfo
-	if err := json.Unmarshal(i.MoveInfo, &moveInfo); err != nil {
-		panic(err)
+	if i.MoveInfo != nil {
+		if err := json.Unmarshal(i.MoveInfo, &moveInfo); err != nil {
+			panic(err)
+		}
 	}
 
 	return domain.Item{

@@ -8,7 +8,6 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 )
 
 const getCurrentItems = `-- name: GetCurrentItems :many
@@ -36,7 +35,7 @@ type GetCurrentItemsRow struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
-	MoveInfo                json.RawMessage
+	MoveInfo                []byte
 	Deleted                 bool
 }
 

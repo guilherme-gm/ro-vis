@@ -60,7 +60,8 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 				newDB[entry.ItemID] = &newItem
 			} else {
 				newDB[entry.ItemID] = &domain.Item{
-					ItemID: int32(entry.ItemID),
+					ItemID:      int32(entry.ItemID),
+					FileVersion: 1,
 				}
 			}
 

@@ -7,3 +7,10 @@ sql:
       go:
         package: "dao"
         out: "internal/database/dao"
+        overrides:
+          # Due to a bug in SQLC - https://github.com/sqlc-dev/sqlc/issues/129
+          # This PR should fix it: https://github.com/sqlc-dev/sqlc/pull/3356
+          - db_type: "json"
+            go_type:
+              type: "[]byte"  # workaround sqlc bug when reading null json columns
+            nullable: true
