@@ -10,7 +10,7 @@ CREATE TABLE `item_history` (
 	`unidentified_name` varchar(255),
 	`unidentified_description` text,
 	`unidentified_sprite` varchar(255),
-	`slot_count` tinyint,
+	`slot_count` tinyint NOT NULL default 0,
 	`is_book` boolean NOT NULL default false,
 	`can_use_buying_store` boolean NOT NULL default false,
 	`card_prefix` varchar(255),

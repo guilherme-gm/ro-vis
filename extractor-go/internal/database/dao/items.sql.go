@@ -28,7 +28,7 @@ type GetCurrentItemsRow struct {
 	UnidentifiedName        sql.NullString
 	UnidentifiedDescription sql.NullString
 	UnidentifiedSprite      sql.NullString
-	SlotCount               sql.NullInt16
+	SlotCount               int8
 	IsBook                  bool
 	CanUseBuyingStore       bool
 	CardPrefix              sql.NullString

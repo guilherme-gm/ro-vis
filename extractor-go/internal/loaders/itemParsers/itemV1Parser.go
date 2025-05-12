@@ -59,10 +59,8 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 				newItem := *existingItem
 				newDB[entry.ItemID] = &newItem
 			} else {
-				newDB[entry.ItemID] = &domain.Item{
-					ItemID:      int32(entry.ItemID),
-					FileVersion: 1,
-				}
+				newItem := domain.NewItem(int32(entry.ItemID), 1)
+				newDB[entry.ItemID] = &newItem
 			}
 
 			newDB[entry.ItemID].IdentifiedName = dao.ToNullString(entry.Value)
@@ -112,7 +110,7 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 	})
 	loadTxtSubTable(basePath, update, newDB, "data/itemslotcounttable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.SlotCount = sql.NullInt16{}
+			item.SlotCount = 0
 			return
 		}
 
@@ -121,7 +119,7 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 			panic("slots for item " + strconv.Itoa(int(entry.ItemID)) + " is not int. (Value: " + entry.Value + ")")
 		}
 
-		item.SlotCount = dao.ToNullInt16(int16(slots))
+		item.SlotCount = int8(slots)
 	})
 
 	// ID#Multiline description# tables

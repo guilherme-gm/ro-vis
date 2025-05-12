@@ -52,7 +52,7 @@ type Item struct {
 	UnidentifiedName        sql.NullString
 	UnidentifiedDescription sql.NullString
 	UnidentifiedSprite      sql.NullString
-	SlotCount               sql.NullInt16
+	SlotCount               int8
 	IsBook                  bool
 	CanUseBuyingStore       bool
 	CardPrefix              sql.NullString
@@ -61,6 +61,14 @@ type Item struct {
 	ClassNum                sql.NullInt32
 	MoveInfo                ItemMoveInfo
 	Deleted                 bool
+}
+
+func NewItem(itemID int32, fileVersion int32) Item {
+	return Item{
+		ItemID:      itemID,
+		FileVersion: fileVersion,
+		MoveInfo:    NewItemMoveInfo(),
+	}
 }
 
 func (i *Item) Equals(otherItem Item) bool {

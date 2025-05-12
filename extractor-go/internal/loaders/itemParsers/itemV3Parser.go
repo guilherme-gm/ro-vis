@@ -56,10 +56,8 @@ func (p ItemV3Parser) Parse(basePath string, update *domain.Update, existingDB m
 				newItem := *existingItem
 				newDB[itemID] = &newItem
 			} else {
-				newDB[itemID] = &domain.Item{
-					ItemID:      int32(itemID),
-					FileVersion: 2,
-				}
+				newItem := domain.NewItem(int32(entry.ItemID), 3)
+				newDB[itemID] = &newItem
 			}
 
 			newDB[itemID].UnidentifiedName = dao.ToNullString(entry.UnidentifiedDisplayName)
@@ -68,7 +66,7 @@ func (p ItemV3Parser) Parse(basePath string, update *domain.Update, existingDB m
 			newDB[itemID].IdentifiedName = dao.ToNullString(entry.IdentifiedDisplayName)
 			newDB[itemID].IdentifiedSprite = dao.ToNullString(entry.IdentifiedResourceName)
 			newDB[itemID].IdentifiedDescription = dao.ToNullString(strings.Join(entry.IdentifiedDescriptionName, "\n"))
-			newDB[itemID].SlotCount = dao.ToNullInt16(int16(entry.SlotCount))
+			newDB[itemID].SlotCount = int8(entry.SlotCount)
 			newDB[itemID].ClassNum = dao.ToNullInt32(int32(entry.ClassNum))
 		}
 	}
