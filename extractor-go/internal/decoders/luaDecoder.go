@@ -115,7 +115,7 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 
 	case reflect.String:
 		str := d.L.ToString(-1)
-		dataValue.SetString(convertToUTF8(str))
+		dataValue.SetString(ConvertToUTF8(str))
 
 	case reflect.Int:
 		val := d.L.ToInteger(-1)

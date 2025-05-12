@@ -1,6 +1,8 @@
 package domain
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type ItemMoveInfo struct {
 	CanDrop               bool
@@ -12,6 +14,19 @@ type ItemMoveInfo struct {
 	CanAuction            bool
 	CanMoveToGuildStorage bool
 	CommentName           string
+}
+
+func NewItemMoveInfo() ItemMoveInfo {
+	return ItemMoveInfo{
+		CanDrop:               true,
+		CanTrade:              true,
+		CanMoveToStorage:      true,
+		CanMoveToCart:         true,
+		CanSellToNpc:          true,
+		CanMail:               true,
+		CanAuction:            true,
+		CanMoveToGuildStorage: true,
+	}
 }
 
 func (i *ItemMoveInfo) Equals(other ItemMoveInfo) bool {

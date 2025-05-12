@@ -17,6 +17,7 @@ func NewItemLoader() *ItemLoader {
 		parsers: []itemParsers.ItemParser{
 			itemParsers.ItemV1Parser{},
 			itemParsers.ItemV2Parser{},
+			itemParsers.ItemV3Parser{},
 		},
 	}
 }
