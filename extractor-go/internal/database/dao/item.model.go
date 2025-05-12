@@ -32,6 +32,9 @@ func (i *GetCurrentItemsRow) ToDomain() domain.Item {
 		CardIsPostfix:           i.CardIsPostfix,
 		CardIllustration:        i.CardIllustration,
 		ClassNum:                i.ClassNum,
+		IsCostume:               i.IsCostume,
+		EffectID:                i.EffectID,
+		PackageID:               i.PackageID,
 		MoveInfo:                moveInfo,
 		Deleted:                 i.Deleted,
 	}

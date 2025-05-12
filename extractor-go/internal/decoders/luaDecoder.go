@@ -121,6 +121,10 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 		val := d.L.ToInteger(-1)
 		dataValue.SetInt(int64(val))
 
+	case reflect.Bool:
+		val := d.L.ToBoolean(-1)
+		dataValue.SetBool(val)
+
 	case reflect.Int8:
 	case reflect.Uint8:
 	case reflect.Int16:

@@ -35,6 +35,9 @@ type ItemHistory struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
+	IsCostume               bool
+	EffectID                int32
+	PackageID               int32
 	MoveInfo                []byte
 }
 

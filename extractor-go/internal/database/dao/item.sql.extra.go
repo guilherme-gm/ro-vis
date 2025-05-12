@@ -27,12 +27,15 @@ INSERT INTO ` + "`" + `item_history` + "`" + ` (
 	` + "`" + `card_is_postfix` + "`" + `,
 	` + "`" + `card_illustration` + "`" + `,
 	` + "`" + `class_num` + "`" + `,
+	` + "`" + `is_costume` + "`" + `,
+	` + "`" + `effect_id` + "`" + `,
+	` + "`" + `package_id` + "`" + `,
 	` + "`" + `move_info` + "`" + `
 )
 VALUES
 `
 
-const bulkInsertItemHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+const bulkInsertItemHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 
 type BulkInsertItemHistoryParams struct {
 	PreviousHistoryID       sql.NullInt32
@@ -52,6 +55,9 @@ type BulkInsertItemHistoryParams struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
+	IsCostume               bool
+	EffectID                int32
+	PackageID               int32
 	MoveInfo                json.RawMessage
 }
 
@@ -82,6 +88,9 @@ func (q *Queries) BulkInsertItemHistory(ctx context.Context, arg []BulkInsertIte
 			data.CardIsPostfix,
 			data.CardIllustration,
 			data.ClassNum,
+			data.IsCostume,
+			data.EffectID,
+			data.PackageID,
 			data.MoveInfo)
 	}
 	query = strings.TrimRight(query, ",")

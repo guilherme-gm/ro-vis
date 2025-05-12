@@ -17,6 +17,9 @@ CREATE TABLE `item_history` (
 	`card_is_postfix` boolean NOT NULL default false,
 	`card_illustration` varchar(255),
 	`class_num` int,
+	`is_costume` boolean NOT NULL default false,
+	`effect_id` int NOT NULL default 0,
+	`package_id` int NOT NULL default 0,
 	`move_info` json
 );
 

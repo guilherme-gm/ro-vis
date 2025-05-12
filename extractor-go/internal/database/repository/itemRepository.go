@@ -72,6 +72,9 @@ func (r *ItemRepository) addItemsToHistory_sub(update string, newHistories *[]do
 			CardIsPostfix:           it.CardIsPostfix,
 			CardIllustration:        it.CardIllustration,
 			ClassNum:                it.ClassNum,
+			IsCostume:               it.IsCostume,
+			EffectID:                it.EffectID,
+			PackageID:               it.PackageID,
 			MoveInfo:                moveInfoJson,
 		})
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 const getCurrentItems = `-- name: GetCurrentItems :many
-SELECT item_history.history_id, item_history.previous_history_id, item_history.item_id, item_history.file_version, item_history.` + "`" + `update` + "`" + `, item_history.identified_name, item_history.identified_description, item_history.identified_sprite, item_history.unidentified_name, item_history.unidentified_description, item_history.unidentified_sprite, item_history.slot_count, item_history.is_book, item_history.can_use_buying_store, item_history.card_prefix, item_history.card_is_postfix, item_history.card_illustration, item_history.class_num, item_history.move_info, ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT item_history.history_id, item_history.previous_history_id, item_history.item_id, item_history.file_version, item_history.` + "`" + `update` + "`" + `, item_history.identified_name, item_history.identified_description, item_history.identified_sprite, item_history.unidentified_name, item_history.unidentified_description, item_history.unidentified_sprite, item_history.slot_count, item_history.is_book, item_history.can_use_buying_store, item_history.card_prefix, item_history.card_is_postfix, item_history.card_illustration, item_history.class_num, item_history.is_costume, item_history.effect_id, item_history.package_id, item_history.move_info, ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `items` + "`" + `
 INNER JOIN ` + "`" + `item_history` + "`" + ` ON ` + "`" + `items` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -35,6 +35,9 @@ type GetCurrentItemsRow struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
+	IsCostume               bool
+	EffectID                int32
+	PackageID               int32
 	MoveInfo                []byte
 	Deleted                 bool
 }
@@ -67,6 +70,9 @@ func (q *Queries) GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, er
 			&i.CardIsPostfix,
 			&i.CardIllustration,
 			&i.ClassNum,
+			&i.IsCostume,
+			&i.EffectID,
+			&i.PackageID,
 			&i.MoveInfo,
 			&i.Deleted,
 		); err != nil {

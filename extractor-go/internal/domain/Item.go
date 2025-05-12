@@ -59,6 +59,9 @@ type Item struct {
 	CardIsPostfix           bool
 	CardIllustration        sql.NullString
 	ClassNum                sql.NullInt32
+	IsCostume               bool
+	EffectID                int32
+	PackageID               int32
 	MoveInfo                ItemMoveInfo
 	Deleted                 bool
 }
@@ -86,6 +89,9 @@ func (i *Item) Equals(otherItem Item) bool {
 		i.CardPrefix == otherItem.CardPrefix &&
 		i.CardIsPostfix == otherItem.CardIsPostfix &&
 		i.CardIllustration == otherItem.CardIllustration &&
-		i.ClassNum == otherItem.ClassNum &&
+		i.ClassNum.Int32 == otherItem.ClassNum.Int32 &&
+		i.IsCostume == otherItem.IsCostume &&
+		i.EffectID == otherItem.EffectID &&
+		i.PackageID == otherItem.PackageID &&
 		i.MoveInfo.Equals(otherItem.MoveInfo))
 }

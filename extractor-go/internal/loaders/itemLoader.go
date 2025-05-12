@@ -18,6 +18,10 @@ func NewItemLoader() *ItemLoader {
 			itemParsers.ItemV1Parser{},
 			itemParsers.ItemV2Parser{},
 			itemParsers.ItemV3Parser{},
+			itemParsers.ItemV4Parser{},
+			itemParsers.ItemV5Parser{},
+			itemParsers.ItemV6Parser{},
+			itemParsers.ItemV7Parser{},
 		},
 	}
 }
