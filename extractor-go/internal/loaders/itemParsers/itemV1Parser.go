@@ -92,22 +92,6 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 
 		item.UnidentifiedSprite = dao.ToNullString(entry.Value)
 	})
-	loadTxtSubTable(basePath, update, newDB, "data/cardprefixnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
-		if entry == nil {
-			item.CardPrefix = sql.NullString{}
-			return
-		}
-
-		item.CardPrefix = dao.ToNullString(entry.Value)
-	})
-	loadTxtSubTable(basePath, update, newDB, "data/num2cardillustnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
-		if entry == nil {
-			item.CardIllustration = sql.NullString{}
-			return
-		}
-
-		item.CardIllustration = dao.ToNullString(entry.Value)
-	})
 	loadTxtSubTable(basePath, update, newDB, "data/itemslotcounttable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
 			item.SlotCount = 0
@@ -121,6 +105,8 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 
 		item.SlotCount = int8(slots)
 	})
+	loadCardPrefix(basePath, update, newDB)
+	loadCardIllustName(basePath, update, newDB)
 
 	// ID#Multiline description# tables
 	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry *subparsers.ItemDescTableEntry) {
@@ -141,30 +127,9 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 	})
 
 	// ID# tables
-	loadTxtSubTable(basePath, update, newDB, "data/bookitemnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
-		if entry == nil {
-			item.IsBook = false
-			return
-		}
-
-		item.IsBook = true
-	})
-	loadTxtSubTable(basePath, update, newDB, "data/buyingstoreitemlist.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
-		if entry == nil {
-			item.CanUseBuyingStore = false
-			return
-		}
-
-		item.CanUseBuyingStore = true
-	})
-	loadTxtSubTable(basePath, update, newDB, "data/cardpostfixnametable.txt", subparsers.ParseItemListTable, func(item *domain.Item, entry *subparsers.ItemListEntry) {
-		if entry == nil {
-			item.CardIsPostfix = false
-			return
-		}
-
-		item.CardIsPostfix = true
-	})
+	loadBookItems(basePath, update, newDB)
+	loadBuyingStoreItems(basePath, update, newDB)
+	loadCardPostfix(basePath, update, newDB)
 
 	itemList := make([]domain.Item, len(newDB))
 	idx := 0
