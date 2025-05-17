@@ -2,8 +2,8 @@ package decoders
 
 // statically linking liblua 5.1 x86 (because RO LUBs use this exact version)
 
-//#cgo CFLAGS: -I${SRCDIR}/../../../libs/liblua5.1/include
-//#cgo LDFLAGS: -L${SRCDIR}/../../../libs/liblua5.1 -llua5.1 -lm
+//#cgo CFLAGS: -I${SRCDIR}/../../lua514/src
+//#cgo LDFLAGS: -L${SRCDIR}/../../lua514/src -llua -lm
 import "C"
 import (
 	"fmt"
