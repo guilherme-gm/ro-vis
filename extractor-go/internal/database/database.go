@@ -9,18 +9,31 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 )
 
-var queries *dao.Queries = nil
+var db *sql.DB = nil
 
-func GetQueries() *dao.Queries {
-	if queries != nil {
-		return queries
+func GetDB() *sql.DB {
+	if db == nil {
+		dbConn, err := sql.Open("mysql", conf.Config.DbUrl)
+		if err != nil {
+			panic(err)
+		}
+
+		db = dbConn
 	}
 
-	db, err := sql.Open("mysql", conf.Config.DbUrl)
-	if err != nil {
-		panic(err)
+	return db
+}
+
+func GetQueries(tx *sql.Tx) *dao.Queries {
+	conn := GetDB()
+	queries := dao.New(conn)
+	if tx != nil {
+		queries = queries.WithTx(tx)
 	}
 
-	queries = dao.New(db)
 	return queries
+}
+
+func BeginTx() (*sql.Tx, error) {
+	return GetDB().Begin()
 }

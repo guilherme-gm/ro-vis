@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
@@ -26,7 +27,7 @@ func NewItemLoader() *ItemLoader {
 	}
 }
 
-func (l *ItemLoader) LoadPatch(basePath string, update domain.Update) {
+func (l *ItemLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update) {
 	fmt.Println("> Decoding...")
 	var targetParser itemParsers.ItemParser = nil
 	for _, parser := range l.parsers {
@@ -46,7 +47,7 @@ func (l *ItemLoader) LoadPatch(basePath string, update domain.Update) {
 	}
 
 	fmt.Println("> Fetching current list...")
-	currentItems, err := repository.GetItemRepository().GetCurrentItems()
+	currentItems, err := repository.GetItemRepository().GetCurrentItems(tx)
 	if err != nil {
 		panic(err)
 	}
@@ -83,20 +84,20 @@ func (l *ItemLoader) LoadPatch(basePath string, update domain.Update) {
 	}
 
 	fmt.Printf("> Saving new records... (%d records to save)\n", len(newItems))
-	err = repository.GetItemRepository().AddItemsToHistory(update.Name(), &newItems)
+	err = repository.GetItemRepository().AddItemsToHistory(tx, update.Name(), &newItems)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedItems))
-	err = repository.GetItemRepository().AddItemsToHistory(update.Name(), &updatedItems)
+	err = repository.GetItemRepository().AddItemsToHistory(tx, update.Name(), &updatedItems)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Deleting records... (%d records to delete)\n", len(idsToBeDeleted))
 	for deletedId := range idsToBeDeleted {
-		err := repository.GetItemRepository().AddDeletedItem(update.Name(), itemMap[deletedId])
+		err := repository.GetItemRepository().AddDeletedItem(tx, update.Name(), itemMap[deletedId])
 		if err != nil {
 			panic(err)
 		}

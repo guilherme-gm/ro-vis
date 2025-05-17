@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"database/sql"
 	"encoding/json"
 	"os"
 	"regexp"
@@ -53,7 +54,7 @@ func shouldSkipPatch(rawPatch PatchFile) bool {
 	return false
 }
 
-func loadFromJson(filePath string) error {
+func loadFromJson(tx *sql.Tx, filePath string) error {
 	var patchList []PatchFile
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -74,7 +75,7 @@ func loadFromJson(filePath string) error {
 		}
 		patch := rawPatch.ToDomain()
 
-		err = patchRepository.InsertPatch(&patch)
+		err = patchRepository.InsertPatch(tx, &patch)
 		if err != nil {
 			return err
 		}
@@ -90,7 +91,7 @@ func loadFromJson(filePath string) error {
  *
  * This should only be used once, to populate the initial patch list.
  */
-func ExtractInitialPatchList() {
+func ExtractInitialPatchList(tx *sql.Tx) {
 	files := [...]string{
 		"../patches/_plist/_init.json",
 		"../patches/_plist/2012.json",
@@ -109,7 +110,7 @@ func ExtractInitialPatchList() {
 	}
 
 	for _, file := range files {
-		err := loadFromJson(file)
+		err := loadFromJson(tx, file)
 		if err != nil {
 			panic(err)
 		}

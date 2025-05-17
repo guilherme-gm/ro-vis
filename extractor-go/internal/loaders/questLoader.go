@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
@@ -23,7 +24,7 @@ func NewQuestLoader() *QuestLoader {
 	}
 }
 
-func (l *QuestLoader) LoadPatch(basePath string, update domain.Update) {
+func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update) {
 	fmt.Println("> Decoding...")
 	var targetParser questParsers.QuestParser = nil
 	for _, parser := range l.parsers {
@@ -45,7 +46,7 @@ func (l *QuestLoader) LoadPatch(basePath string, update domain.Update) {
 	fileQuests := targetParser.Parse(basePath, &update)
 
 	fmt.Println("> Fetching current list...")
-	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests()
+	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests(tx)
 	if err != nil {
 		panic(err)
 	}
@@ -79,20 +80,20 @@ func (l *QuestLoader) LoadPatch(basePath string, update domain.Update) {
 	}
 
 	fmt.Printf("> Saving new records... (%d records to save)\n", len(newQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(update.Name(), &newQuests)
+	err = repository.GetQuestRepository().AddQuestsToHistory(tx, update.Name(), &newQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(update.Name(), &updatedQuests)
+	err = repository.GetQuestRepository().AddQuestsToHistory(tx, update.Name(), &updatedQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Deleting records... (%d records to delete)\n", len(deletedIds))
 	for deletedId := range deletedIds {
-		err := repository.GetQuestRepository().AddDeletedQuest(update.Name(), questMap[deletedId])
+		err := repository.GetQuestRepository().AddDeletedQuest(tx, update.Name(), questMap[deletedId])
 		if err != nil {
 			panic(err)
 		}

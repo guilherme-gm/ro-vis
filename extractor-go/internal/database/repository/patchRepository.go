@@ -11,24 +11,23 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
-type PatchRepository struct {
-	queries *dao.Queries
-}
+type PatchRepository struct{}
 
-func newPatchRepository(queries *dao.Queries) *PatchRepository {
-	return &PatchRepository{queries: queries}
+func newPatchRepository() *PatchRepository {
+	return &PatchRepository{}
 }
 
 func GetPatchRepository() *PatchRepository {
 	if repositoriesCache.patchRepository == nil {
-		repositoriesCache.patchRepository = newPatchRepository(database.GetQueries())
+		repositoriesCache.patchRepository = newPatchRepository()
 	}
 
 	return repositoriesCache.patchRepository
 }
 
-func (r *PatchRepository) ListPatches() ([]domain.Patch, error) {
-	res, err := r.queries.ListPatches(context.Background())
+func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.ListPatches(context.Background())
 	if err == sql.ErrNoRows {
 		return []domain.Patch{}, nil
 	}
@@ -45,8 +44,8 @@ func (r *PatchRepository) ListPatches() ([]domain.Patch, error) {
 	return patches, nil
 }
 
-func (r *PatchRepository) ListUpdates() ([]domain.Update, error) {
-	patches, err := r.ListPatches()
+func (r *PatchRepository) ListUpdates(tx *sql.Tx) ([]domain.Update, error) {
+	patches, err := r.ListPatches(tx)
 	if err != nil || len(patches) == 0 {
 		return []domain.Update{}, err
 	}
@@ -90,13 +89,14 @@ func (r *PatchRepository) ListUpdates() ([]domain.Update, error) {
 	return updates, nil
 }
 
-func (r *PatchRepository) InsertPatch(patch *domain.Patch) error {
+func (r *PatchRepository) InsertPatch(tx *sql.Tx, patch *domain.Patch) error {
+	queries := database.GetQueries(tx)
 	jsonMsg, err := json.Marshal(patch.Files)
 	if err != nil {
 		return err
 	}
 
-	return r.queries.InsertPatch(context.Background(), dao.InsertPatchParams{
+	return queries.InsertPatch(context.Background(), dao.InsertPatchParams{
 		Name:  patch.Name,
 		Date:  patch.Date,
 		Files: jsonMsg,

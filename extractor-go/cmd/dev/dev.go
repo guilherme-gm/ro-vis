@@ -6,6 +6,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
@@ -25,11 +26,11 @@ func dbCheck() {
 }
 
 type loader interface {
-	LoadPatch(basePath string, update domain.Update)
+	LoadPatch(tx *sql.Tx, basePath string, update domain.Update)
 }
 
 func load(updates []domain.Update, loaderName string, loaderInstance loader) {
-	latest, err := repository.GetLoaderControllerRepository().GetLatestUpdate(loaderName)
+	latest, err := repository.GetLoaderControllerRepository().GetLatestUpdate(nil, loaderName)
 	if err != nil {
 		panic(err)
 	}
@@ -39,10 +40,20 @@ func load(updates []domain.Update, loaderName string, loaderInstance loader) {
 			continue
 		}
 
-		fmt.Println("Extracting " + update.Name() + "...")
-		loaderInstance.LoadPatch("../patches/", update)
+		tx, err := database.BeginTx()
+		if err != nil {
+			panic(err)
+		}
+		defer tx.Rollback()
 
-		repository.GetLoaderControllerRepository().SetLatestPatch(loaderName, update.Date)
+		fmt.Println("Extracting " + update.Name() + "...")
+		loaderInstance.LoadPatch(tx, "../patches/", update)
+
+		repository.GetLoaderControllerRepository().SetLatestPatch(tx, loaderName, update.Date)
+
+		if err := tx.Commit(); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -53,7 +64,7 @@ func main() {
 
 	// loaders.ExtractInitialPatchList()
 
-	updates, err := repository.GetPatchRepository().ListUpdates()
+	updates, err := repository.GetPatchRepository().ListUpdates(nil)
 	if err != nil {
 		panic(err)
 	}

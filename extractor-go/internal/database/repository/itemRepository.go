@@ -11,23 +11,23 @@ import (
 )
 
 type ItemRepository struct {
-	queries *dao.Queries
 }
 
-func newItemRepository(queries *dao.Queries) *ItemRepository {
-	return &ItemRepository{queries: queries}
+func newItemRepository() *ItemRepository {
+	return &ItemRepository{}
 }
 
 func GetItemRepository() *ItemRepository {
 	if repositoriesCache.ItemRepository == nil {
-		repositoriesCache.ItemRepository = newItemRepository(database.GetQueries())
+		repositoriesCache.ItemRepository = newItemRepository()
 	}
 
 	return repositoriesCache.ItemRepository
 }
 
-func (r *ItemRepository) GetCurrentItems() (*[]domain.Item, error) {
-	res, err := r.queries.GetCurrentItems(context.Background())
+func (r *ItemRepository) GetCurrentItems(tx *sql.Tx) (*[]domain.Item, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetCurrentItems(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Item{}, nil
 	}
@@ -44,7 +44,8 @@ func (r *ItemRepository) GetCurrentItems() (*[]domain.Item, error) {
 	return &Items, nil
 }
 
-func (r *ItemRepository) addItemsToHistory_sub(update string, newHistories *[]domain.Item) error {
+func (r *ItemRepository) addItemsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.Item) error {
+	queries := database.GetQueries(tx)
 	bulkParams := []dao.BulkInsertItemHistoryParams{}
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
 	for _, it := range *newHistories {
@@ -79,12 +80,12 @@ func (r *ItemRepository) addItemsToHistory_sub(update string, newHistories *[]do
 		})
 	}
 
-	_, err := r.queries.BulkInsertItemHistory(context.Background(), bulkParams)
+	_, err := queries.BulkInsertItemHistory(context.Background(), bulkParams)
 	if err != nil {
 		return err
 	}
 
-	res, err := r.queries.GetItemIdsInUpdate(context.Background(), update)
+	res, err := queries.GetItemIdsInUpdate(context.Background(), update)
 	if err != nil {
 		return err
 	}
@@ -102,7 +103,7 @@ func (r *ItemRepository) addItemsToHistory_sub(update string, newHistories *[]do
 		})
 	}
 
-	_, err = r.queries.BulkUpsertItems(context.Background(), upsertParams)
+	_, err = queries.BulkUpsertItems(context.Background(), upsertParams)
 	if err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func (r *ItemRepository) addItemsToHistory_sub(update string, newHistories *[]do
 	return err
 }
 
-func (r *ItemRepository) AddItemsToHistory(patch string, newHistories *[]domain.Item) error {
+func (r *ItemRepository) AddItemsToHistory(tx *sql.Tx, patch string, newHistories *[]domain.Item) error {
 	if len(*newHistories) == 0 {
 		return nil
 	}
@@ -120,21 +121,22 @@ func (r *ItemRepository) AddItemsToHistory(patch string, newHistories *[]domain.
 	i := 0
 	for ; i < steps; i++ {
 		slice := (*newHistories)[i*500 : (i+1)*500]
-		if err := r.addItemsToHistory_sub(patch, &slice); err != nil {
+		if err := r.addItemsToHistory_sub(tx, patch, &slice); err != nil {
 			return err
 		}
 	}
 
 	slice := (*newHistories)[i*500 : len(*newHistories)]
-	if err := r.addItemsToHistory_sub(patch, &slice); err != nil {
+	if err := r.addItemsToHistory_sub(tx, patch, &slice); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ItemRepository) AddDeletedItem(patch string, Item *domain.Item) error {
-	res, err := r.queries.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
+func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.Item) error {
+	queries := database.GetQueries(tx)
+	res, err := queries.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
 		PreviousHistoryID: Item.HistoryID,
 		ItemID:            Item.ItemID,
 		FileVersion:       Item.FileVersion,
@@ -152,7 +154,7 @@ func (r *ItemRepository) AddDeletedItem(patch string, Item *domain.Item) error {
 
 	Item.HistoryID = dao.ToNullInt32(int32(historyId))
 
-	_, err = r.queries.UpsertItem(context.Background(), dao.UpsertItemParams{
+	_, err = queries.UpsertItem(context.Background(), dao.UpsertItemParams{
 		ItemID:          Item.ItemID,
 		LatestHistoryID: Item.HistoryID.Int32,
 		Deleted:         true,

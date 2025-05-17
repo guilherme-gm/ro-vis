@@ -9,24 +9,23 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
-type QuestRepository struct {
-	queries *dao.Queries
-}
+type QuestRepository struct{}
 
-func newQuestRepository(queries *dao.Queries) *QuestRepository {
-	return &QuestRepository{queries: queries}
+func newQuestRepository() *QuestRepository {
+	return &QuestRepository{}
 }
 
 func GetQuestRepository() *QuestRepository {
 	if repositoriesCache.questRepository == nil {
-		repositoriesCache.questRepository = newQuestRepository(database.GetQueries())
+		repositoriesCache.questRepository = newQuestRepository()
 	}
 
 	return repositoriesCache.questRepository
 }
 
-func (r *QuestRepository) GetCurrentQuests() (*[]domain.Quest, error) {
-	res, err := r.queries.GetCurrentQuests(context.Background())
+func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetCurrentQuests(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Quest{}, nil
 	}
@@ -43,7 +42,8 @@ func (r *QuestRepository) GetCurrentQuests() (*[]domain.Quest, error) {
 	return &quests, nil
 }
 
-func (r *QuestRepository) addQuestsToHistory_sub(patch string, newHistories *[]domain.Quest) error {
+func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHistories *[]domain.Quest) error {
+	queries := database.GetQueries(tx)
 	bulkParams := []dao.BulkInsertQuestHistoryParams{}
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
 	for _, it := range *newHistories {
@@ -69,12 +69,12 @@ func (r *QuestRepository) addQuestsToHistory_sub(patch string, newHistories *[]d
 		})
 	}
 
-	_, err := r.queries.BulkInsertQuestHistory(context.Background(), bulkParams)
+	_, err := queries.BulkInsertQuestHistory(context.Background(), bulkParams)
 	if err != nil {
 		return err
 	}
 
-	res, err := r.queries.GetQuestsIdsInPatch(context.Background(), patch)
+	res, err := queries.GetQuestsIdsInPatch(context.Background(), patch)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(patch string, newHistories *[]d
 		})
 	}
 
-	_, err = r.queries.BulkUpsertQuests(context.Background(), upsertParams)
+	_, err = queries.BulkUpsertQuests(context.Background(), upsertParams)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(patch string, newHistories *[]d
 	return err
 }
 
-func (r *QuestRepository) AddQuestsToHistory(patch string, newHistories *[]domain.Quest) error {
+func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, patch string, newHistories *[]domain.Quest) error {
 	if len(*newHistories) == 0 {
 		return nil
 	}
@@ -110,21 +110,22 @@ func (r *QuestRepository) AddQuestsToHistory(patch string, newHistories *[]domai
 	i := 0
 	for ; i < steps; i++ {
 		slice := (*newHistories)[i*500 : (i+1)*500]
-		if err := r.addQuestsToHistory_sub(patch, &slice); err != nil {
+		if err := r.addQuestsToHistory_sub(tx, patch, &slice); err != nil {
 			return err
 		}
 	}
 
 	slice := (*newHistories)[i*500 : len(*newHistories)]
-	if err := r.addQuestsToHistory_sub(patch, &slice); err != nil {
+	if err := r.addQuestsToHistory_sub(tx, patch, &slice); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *QuestRepository) AddDeletedQuest(patch string, quest *domain.Quest) error {
-	res, err := r.queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
+func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, patch string, quest *domain.Quest) error {
+	queries := database.GetQueries(tx)
+	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
 		PreviousHistoryID: quest.HistoryID,
 		QuestID:           quest.QuestID,
 		FileVersion:       quest.FileVersion,
@@ -142,7 +143,7 @@ func (r *QuestRepository) AddDeletedQuest(patch string, quest *domain.Quest) err
 
 	quest.HistoryID = dao.ToNullInt32(int32(historyId))
 
-	_, err = r.queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
+	_, err = queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
 		QuestID:         quest.QuestID,
 		LatestHistoryID: quest.HistoryID.Int32,
 		Deleted:         true,
