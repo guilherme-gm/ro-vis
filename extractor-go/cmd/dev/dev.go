@@ -59,7 +59,7 @@ func load(updates []domain.Update, loaderName string, loaderInstance loader) {
 
 func main() {
 	fmt.Println("RO Vis extractor - DEV")
-	conf.Load()
+	conf.LoadExtractor()
 	dbCheck()
 
 	// loaders.ExtractInitialPatchList()

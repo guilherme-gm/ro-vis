@@ -14,7 +14,7 @@ import (
 
 func main() {
 	fmt.Println("RO Vis extractor - Migrate")
-	conf.Load()
+	conf.LoadExtractor()
 
 	migTool, err := database.NewMigrationTool()
 	if err != nil {

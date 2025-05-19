@@ -2,6 +2,7 @@ package conf
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -12,13 +13,47 @@ type config struct {
 
 var Config config
 
-func Load() {
+type apiConfig struct {
+	Port uint16
+}
+
+var ApiConfig apiConfig
+
+func loadEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		panic("Error loading .env file")
 	}
+}
 
+func loadConfig() {
 	Config = config{
 		DbUrl: os.Getenv("DB_URL"),
 	}
+}
+
+func getIntEnv(name string) int {
+	val, err := strconv.Atoi(os.Getenv(name))
+	if err != nil {
+		panic(err)
+	}
+
+	return val
+}
+
+func loadApiConfig() {
+	ApiConfig = apiConfig{
+		Port: uint16(getIntEnv("API_PORT")),
+	}
+}
+
+func LoadApi() {
+	loadEnv()
+	loadConfig()
+	loadApiConfig()
+}
+
+func LoadExtractor() {
+	loadEnv()
+	loadConfig()
 }
