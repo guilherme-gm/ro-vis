@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const getUpdatesCount = `-- name: GetUpdatesCount :one
+SELECT COUNT(*) FROM (SELECT ` + "`" + `date` + "`" + ` FROM ` + "`" + `patches` + "`" + ` GROUP BY ` + "`" + `date` + "`" + `) updates
+`
+
+func (q *Queries) GetUpdatesCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUpdatesCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const insertPatch = `-- name: InsertPatch :exec
 INSERT INTO ` + "`" + `patches` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `date` + "`" + `, ` + "`" + `files` + "`" + `) VALUES (?, ?, ?)
 `
@@ -32,6 +43,52 @@ SELECT id, name, date, files FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`"
 
 func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
 	rows, err := q.db.QueryContext(ctx, listPatches)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Patch
+	for rows.Next() {
+		var i Patch
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Date,
+			&i.Files,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUpdatesPatches = `-- name: ListUpdatesPatches :many
+SELECT patches.id, patches.name, patches.date, patches.files
+FROM (
+	SELECT ` + "`" + `date` + "`" + `
+	FROM ` + "`" + `patches` + "`" + `
+	GROUP BY ` + "`" + `date` + "`" + `
+	ORDER BY ` + "`" + `date` + "`" + ` ASC
+	LIMIT ?, ?
+) dates
+INNER JOIN ` + "`" + `patches` + "`" + ` ON ` + "`" + `patches` + "`" + `.` + "`" + `date` + "`" + ` = dates.` + "`" + `date` + "`" + `
+ORDER BY patches.` + "`" + `id` + "`" + ` ASC
+`
+
+type ListUpdatesPatchesParams struct {
+	Offset int32
+	Limit  int32
+}
+
+func (q *Queries) ListUpdatesPatches(ctx context.Context, arg ListUpdatesPatchesParams) ([]Patch, error) {
+	rows, err := q.db.QueryContext(ctx, listUpdatesPatches, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

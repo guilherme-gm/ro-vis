@@ -64,7 +64,7 @@ func main() {
 
 	// loaders.ExtractInitialPatchList()
 
-	updates, err := repository.GetPatchRepository().ListUpdates(nil)
+	updates, err := repository.GetPatchRepository().ListUpdates(nil, repository.PaginateAll)
 	if err != nil {
 		panic(err)
 	}

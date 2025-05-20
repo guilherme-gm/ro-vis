@@ -44,8 +44,46 @@ func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
 	return patches, nil
 }
 
-func (r *PatchRepository) ListUpdates(tx *sql.Tx) ([]domain.Update, error) {
-	patches, err := r.ListPatches(tx)
+func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) ([]domain.Patch, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.ListUpdatesPatches(context.Background(), dao.ListUpdatesPatchesParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []domain.Patch{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	patches := make([]domain.Patch, len(res))
+	for idx, pmodel := range res {
+		patches[idx] = pmodel.ToDomain()
+	}
+
+	return patches, nil
+}
+
+func (r *PatchRepository) GetUpdateCount(tx *sql.Tx) (int32, error) {
+	count, err := database.GetQueries(tx).GetUpdatesCount(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(count), nil
+}
+
+func (r *PatchRepository) ListUpdates(tx *sql.Tx, pagination Pagination) ([]domain.Update, error) {
+	var patches []domain.Patch
+	var err error
+	if pagination == PaginateAll {
+		patches, err = r.ListPatches(tx)
+	} else {
+		patches, err = r.listUpdatesPatches(tx, pagination)
+	}
+
 	if err != nil || len(patches) == 0 {
 		return []domain.Update{}, err
 	}

@@ -1,5 +1,5 @@
 // const baseUrl = 'https://ro-viz.c1.is/rovis/';
-const baseUrl = 'http://localhost/rovis/api/';
+const baseUrl = 'http://localhost:5173/api/';
 
 function buildSearchParams(searchParams: URLSearchParams, params?: Record<string, string | number>): void {
 	if (!params) {

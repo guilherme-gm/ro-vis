@@ -20,7 +20,8 @@ async function getUpdates(page: number): Promise<Update[]> {
 		const list = await api.get<GetUpdatesResponse>('updates/', { start: ((page - 1) * 100) });
 
 		const updateList = list.list.map((item) => {
-			item.updates = item.updates.sort((a, b) => a.file.localeCompare(b.file));
+			item.date = new Date(item.date).toISOString().substring(0, 10);
+			item.changes = item.changes.sort((a, b) => a.file.localeCompare(b.file));
 			return item;
 		});
 		total.value = list.total;

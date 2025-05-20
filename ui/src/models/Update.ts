@@ -1,18 +1,10 @@
-import type { Patch } from "./Patch";
-
-export type UpdateItem = {
+export type UpdateChange = {
 	file: string;
 	patch: string;
 };
 
 export type Update = {
-	id: string;
+	date: string;
 
-	order: number
-
-	updates: UpdateItem[];
-
-	patches: Patch[] | null;
-
-	tags: string[];
+	changes: UpdateChange[];
 }

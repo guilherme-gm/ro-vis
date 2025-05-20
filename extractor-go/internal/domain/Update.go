@@ -7,13 +7,13 @@ import (
 )
 
 type UpdateChange struct {
-	Patch string
-	File  string
+	Patch string `json:"patch"`
+	File  string `json:"file"`
 }
 
 type Update struct {
-	Date    time.Time
-	Changes []UpdateChange
+	Date    time.Time      `json:"date"`
+	Changes []UpdateChange `json:"changes"`
 }
 
 func (u Update) GetChangeForFile(file string) (UpdateChange, error) {

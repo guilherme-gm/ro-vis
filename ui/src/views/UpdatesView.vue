@@ -92,18 +92,18 @@ function trackLabel(fileName: string): string {
 		<BsAccordion>
 			<BsAccordionItem
 				v-for="(val) in list"
-				:key="val.id"
-				:title="val.id"
+				:key="val.date"
+				:title="val.date"
 			>
 				<h5>Changed files:</h5>
 				<BsListGroup :flush="true">
 					<BsListGroupItem
-						v-for="(update) in val.updates"
-						:key="`${val.id}-${update.file}`"
+						v-for="(update) in val.changes"
+						:key="`${val.date}-${update.file}`"
 					>
 						<BsLink
 							v-if="isTrackedFile(update.file)"
-							:to="{ name: patchRoute(update.file), params: { patch: val.id } }"
+							:to="{ name: patchRoute(update.file), params: { patch: val.date } }"
 							target="_blank"
 						>
 							({{ trackLabel(update.file) }}) {{ update.file }}&nbsp;&nbsp;
