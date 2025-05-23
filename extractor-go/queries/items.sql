@@ -14,3 +14,16 @@ VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE
 	latest_history_id = VALUES(latest_history_id),
 	deleted = VALUES(deleted);
+
+-- name: GetChangedItems :many
+SELECT sqlc.embed(current), sqlc.embed(previous)
+FROM `item_history` current
+LEFT JOIN `previous_item_history_vw` previous ON `previous`.`history_id` = `current`.`previous_history_id`
+WHERE `current`.`update` = ?
+ORDER BY `current`.`history_id`
+LIMIT ?, ?;
+
+-- name: CountChangedItemsInPatch :one
+SELECT COUNT(*)
+FROM `item_history`
+WHERE `update` = ?;

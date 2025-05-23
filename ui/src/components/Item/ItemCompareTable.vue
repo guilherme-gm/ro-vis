@@ -21,7 +21,7 @@ const fields = ref<[string, keyof Item][]>([
 	['Is book', 'IsBook'],
 	['Can use buying store', 'CanUseBuyingStore'],
 	['Card prefix', 'CardPrefix'],
-	['Card postfix', 'CardPostfix'],
+	['Card postfix', 'CardIsPostfix'],
 	['Card illustration', 'CardIllustration'],
 	['Class num', 'ClassNum'],
 ]);

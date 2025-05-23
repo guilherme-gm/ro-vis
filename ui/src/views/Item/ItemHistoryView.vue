@@ -40,11 +40,11 @@ loadPage(1);
 		<BsAccordion v-if="list.length > 0">
 			<BsAccordionItem
 				v-for="(val) in list"
-				:key="val.current?.Id ?? val.previous?.Id"
-				:title="`Patch ${val.current?.Patch ?? '[unknown]'}`"
+				:key="val.To?.Id ?? val.From?.Id"
+				:title="`Patch ${val.To?.Patch ?? '[unknown]'}`"
 				:expanded="true"
 			>
-				<ItemCompareTable :current="val.current" :previous="val.previous" />
+				<ItemCompareTable :current="val.To" :previous="val.From" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<span v-else>Item not found.</span>

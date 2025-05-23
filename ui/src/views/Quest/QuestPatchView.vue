@@ -31,9 +31,9 @@ async function loadPage(page: number): Promise<void> {
 
 loadPage(1);
 
-const newQuests = computed(() => list.value.filter((v) => v.previous === null));
-const updatedQuests = computed(() => list.value.filter((v) => v.previous !== null && v.current !== null));
-const deletedQuests = computed(() => list.value.filter((v) => v.previous !== null && v.current === null));
+const newQuests = computed(() => list.value.filter((v) => v.From === null));
+const updatedQuests = computed(() => list.value.filter((v) => v.From !== null && v.To !== null));
+const deletedQuests = computed(() => list.value.filter((v) => v.From !== null && v.To === null));
 </script>
 
 <template>
@@ -48,20 +48,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="newQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newQuests"
-				:key="val.current?.Id"
-				:title="`#${val.current?.Id} - ${val?.current?.Title}`"
+				:key="val.To?.Id"
+				:title="`#${val.To?.Id} - ${val?.To?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :current="val.current" />
+				<QuestCompareTable :current="val.To" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No new quests in this page</p>
@@ -70,20 +70,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="updatedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedQuests"
-				:key="val.current?.Id ?? val.previous?.Id"
-				:title="`#${val.current?.Id ?? val.previous?.Id} - ${val?.current?.Title ?? val?.previous?.Title}`"
+				:key="val.To?.Id ?? val.From?.Id"
+				:title="`#${val.To?.Id ?? val.From?.Id} - ${val?.To?.Title ?? val?.From?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :current="val.current" :previous="val.previous" />
+				<QuestCompareTable :current="val.To" :previous="val.From" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No updated quests in this page</p>
@@ -92,20 +92,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.previous !== nul
 		<BsAccordion v-if="deletedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedQuests"
-				:key="val.previous?.Id"
-				:title="`#${val.previous?.Id} - ${val?.previous?.Title}`"
+				:key="val.From?.Id"
+				:title="`#${val.From?.Id} - ${val?.From?.Title}`"
 			>
 				<p>
 					<strong>Last update:</strong> {{ val.lastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :previous="val.previous" />
+				<QuestCompareTable :previous="val.From" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No deleted quests in this page</p>

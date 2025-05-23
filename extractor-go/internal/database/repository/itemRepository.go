@@ -162,3 +162,56 @@ func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.I
 
 	return err
 }
+
+func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.CountChangedItemsInPatch(context.Background(), update)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
+}
+
+func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Item], error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetChangedItems(context.Background(), dao.GetChangedItemsParams{
+		Update: update,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Item]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Item], len(res))
+	for idx, qmodel := range res {
+		var from *domain.Record[domain.Item] = nil
+		var to *domain.Record[domain.Item] = nil
+
+		if qmodel.PreviousItemHistoryVw.HistoryID.Valid {
+			from = &domain.Record[domain.Item]{
+				Update: qmodel.PreviousItemHistoryVw.Update.String,
+				Data:   qmodel.PreviousItemHistoryVw.ToDomain(),
+			}
+		}
+
+		if qmodel.ItemHistory.HistoryID != 0 {
+			to = &domain.Record[domain.Item]{
+				Update: qmodel.ItemHistory.Update,
+				Data:   qmodel.ItemHistory.ToDomain(),
+			}
+		}
+
+		records[idx] = FromToRecord[domain.Item]{
+			From: from,
+			To:   to,
+		}
+	}
+
+	return records, nil
+}

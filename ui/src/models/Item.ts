@@ -1,29 +1,27 @@
 export type ItemMoveInfo = {
-	canDrop: boolean;
+	CanDrop: boolean;
 
-	canTrade: boolean;
+	CanTrade: boolean;
 
-	canMoveToStorage: boolean;
+	CanMoveToStorage: boolean;
 
-	canMoveToCart: boolean;
+	CanMoveToCart: boolean;
 
-	canSellToNpc: boolean;
+	CanSellToNpc: boolean;
 
-	canMail: boolean;
+	CanMail: boolean;
 
-	canAuction: boolean;
+	CanAuction: boolean;
 
-	canMoveToGuildStorage: boolean;
+	CanMoveToGuildStorage: boolean;
 
-	commentName: string;
+	CommentName: string;
 };
 
 export type Item = {
-	Patch: string;
+	FileVersion: number;
 
-	_FileVersion: number;
-
-	Id: number;
+	ItemID: number;
 
 	IdentifiedName: string;
 
@@ -45,19 +43,23 @@ export type Item = {
 
 	CardPrefix: string;
 
-	CardPostfix: string;
+	CardIsPostfix: boolean;
 
 	CardIllustration: string;
 
 	ClassNum: number;
 
+	IsCostume: boolean;
+
+	EffectID: number;
+
+	PackageID: number;
+
 	MoveInfo: ItemMoveInfo;
 };
 
 export type MinItem = {
-	Id: string;
-
-	Patch: string;
+	ItemID: string;
 
 	IdentifiedName: string | null;
 };

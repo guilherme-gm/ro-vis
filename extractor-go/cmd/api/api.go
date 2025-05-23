@@ -15,7 +15,10 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default()) // @TODO: Review CORS config
 
+	itemsController := controllers.ItemsController{}
 	updatesController := controllers.UpdatesController{}
+	router.Group("api/items/").
+		GET("/update/:update", itemsController.ListForUpdate)
 	router.Group("api/updates/").
 		GET("/", updatesController.List)
 

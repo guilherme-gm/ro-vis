@@ -2,10 +2,14 @@ import { ref } from "vue";
 import { useApi } from "./api";
 import { LoadState } from "./LoadState";
 
+export type Record<T> = {
+	Update: string;
+	Data: T;
+}
+
 export type PatchItem<T> = {
-	lastUpdate: string;
-	previous: T | null;
-	current: T | null;
+	From: Record<T> | null;
+	To: Record<T> | null;
 };
 
 export type PaginatedResponse<T> = {
@@ -71,7 +75,7 @@ export class CommonApi<Entity, MinEntity> {
 		try {
 			this.state.value = LoadState.Loading;
 
-			const items = await this.api.get<PaginatedResponse<PatchItem<Entity>>>(`${this.path}patch.php`, { patch, start: ((page - 1) * 100) });
+			const items = await this.api.get<PaginatedResponse<PatchItem<Entity>>>(`${this.path}update/${patch}`, { start: ((page - 1) * 100) });
 
 			this.total.value = items.total;
 

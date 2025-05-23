@@ -10,8 +10,8 @@ const props = defineProps<{
 const diffSlot = ref<HTMLPreElement | null>(null);
 
 function reDiff() {
-	const fromText = (props.from as string)?.toString();
-	const toText = (props.to as string)?.toString();
+	const fromText = (props.from as string)?.toString() ?? '-';
+	const toText = (props.to as string)?.toString() ?? '-';
 
 	const fragment = diffText(fromText, toText);
 

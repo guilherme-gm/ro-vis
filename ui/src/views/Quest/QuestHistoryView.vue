@@ -40,11 +40,11 @@ loadPage(1);
 		<BsAccordion v-if="list.length > 0">
 			<BsAccordionItem
 				v-for="(val) in list"
-				:key="val.current?.Id ?? val.previous?.Id"
-				:title="`Patch ${val.current?.Patch ?? '[unknown]'}`"
+				:key="val.To?.Id ?? val.From?.Id"
+				:title="`Patch ${val.To?.Patch ?? '[unknown]'}`"
 				:expanded="true"
 			>
-				<QuestCompareTable :current="val.current" :previous="val.previous" />
+				<QuestCompareTable :current="val.To" :previous="val.From" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<span v-else>Quest not found.</span>

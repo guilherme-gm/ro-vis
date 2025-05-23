@@ -53,6 +53,31 @@ type Patch struct {
 	Files json.RawMessage
 }
 
+type PreviousItemHistoryVw struct {
+	HistoryID               sql.NullInt32
+	PreviousHistoryID       sql.NullInt32
+	ItemID                  sql.NullInt32
+	FileVersion             sql.NullInt32
+	Update                  sql.NullString
+	IdentifiedName          sql.NullString
+	IdentifiedDescription   sql.NullString
+	IdentifiedSprite        sql.NullString
+	UnidentifiedName        sql.NullString
+	UnidentifiedDescription sql.NullString
+	UnidentifiedSprite      sql.NullString
+	SlotCount               sql.NullInt16
+	IsBook                  sql.NullBool
+	CanUseBuyingStore       sql.NullBool
+	CardPrefix              sql.NullString
+	CardIsPostfix           sql.NullBool
+	CardIllustration        sql.NullString
+	ClassNum                sql.NullInt32
+	IsCostume               sql.NullBool
+	EffectID                sql.NullInt32
+	PackageID               sql.NullInt32
+	MoveInfo                []byte
+}
+
 type Quest struct {
 	QuestID         int32
 	LatestHistoryID int32

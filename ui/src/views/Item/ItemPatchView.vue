@@ -31,9 +31,9 @@ async function loadPage(page: number): Promise<void> {
 
 loadPage(1);
 
-const newItems = computed(() => list.value.filter((v) => v.previous === null));
-const updatedItems = computed(() => list.value.filter((v) => v.previous !== null && v.current !== null));
-const deletedItems = computed(() => list.value.filter((v) => v.previous !== null && v.current === null));
+const newItems = computed(() => list.value.filter((v) => v.From === null));
+const updatedItems = computed(() => list.value.filter((v) => v.From !== null && v.To !== null));
+const deletedItems = computed(() => list.value.filter((v) => v.From !== null && v.To === null));
 </script>
 
 <template>
@@ -48,19 +48,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="newItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newItems"
-				:key="val.current?.Id"
-				:title="`#${val.current?.Id} - ${val?.current?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
+				:key="val.To?.Data.ItemID"
+				:title="`#${val.To?.Data?.ItemID} - ${val?.To?.Data?.IdentifiedName} (${val?.To?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<!-- <strong>Last update:</strong> {{ val.lastUpdate }} -->
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<ItemCompareTable :current="val.current" />
+				<ItemCompareTable :current="val.To?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No new items in this page</p>
@@ -69,19 +69,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="updatedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedItems"
-				:key="val.current?.Id ?? val.previous?.Id"
-				:title="`#${val.current?.Id ?? val.previous?.Id} - ${val?.current?.IdentifiedName ?? val?.previous?.IdentifiedName} (${val?.current?.MoveInfo?.commentName ?? ''})`"
+				:key="val.To?.Data?.ItemID ?? val.From?.Data?.ItemID"
+				:title="`#${val.To?.Data?.ItemID ?? val.From?.Data?.ItemID} - ${val?.To?.Data?.IdentifiedName ?? val?.From?.Data?.IdentifiedName} (${val?.To?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<!-- <strong>Last update:</strong> {{ val.lastUpdate }} -->
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<ItemCompareTable :current="val.current" :previous="val.previous" />
+				<ItemCompareTable :current="val.To?.Data" :previous="val.From?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No updated items in this page</p>
@@ -90,19 +90,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.previous !== null
 		<BsAccordion v-if="deletedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedItems"
-				:key="val.previous?.Id"
-				:title="`#${val.previous?.Id} - ${val?.previous?.IdentifiedName} (${val?.previous?.MoveInfo?.commentName ?? ''})`"
+				:key="val.From?.Data?.ItemID"
+				:title="`#${val.From?.Data?.ItemID} - ${val?.From?.Data?.IdentifiedName} (${val?.From?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<!-- <strong>Last update:</strong> {{ val.lastUpdate }} -->
 					<BsLink
-						:to="{ name: RouteName.ItemHistory, params: { itemId: val.current?.Id ?? val.previous?.Id } }"
+						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"
 					>
 						View Item history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<ItemCompareTable :previous="val.previous" />
+				<!-- <ItemCompareTable :previous="val.From?.Data" /> -->
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No deleted items in this page</p>
