@@ -50,8 +50,9 @@ type recordResponse[T any] struct {
 }
 
 type fromToRecordResponse[T any] struct {
-	From *recordResponse[T]
-	To   *recordResponse[T]
+	LastUpdated *string
+	From        *recordResponse[T]
+	To          *recordResponse[T]
 }
 
 func sqlInt32ToPointer(val sql.NullInt32) *int32 {

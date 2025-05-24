@@ -24,9 +24,11 @@ func (q *Queries) CountChangedItemsInPatch(ctx context.Context, update string) (
 }
 
 const getChangedItems = `-- name: GetChangedItems :many
-SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info
+SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info, latest.update lastUpdate
 FROM ` + "`" + `item_history` + "`" + ` current
 LEFT JOIN ` + "`" + `previous_item_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+LEFT JOIN ` + "`" + `items` + "`" + ` latest_id ON ` + "`" + `latest_id` + "`" + `.` + "`" + `item_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `item_id` + "`" + `
+LEFT JOIN ` + "`" + `item_history` + "`" + ` latest ON ` + "`" + `latest_id` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `latest` + "`" + `.` + "`" + `history_id` + "`" + `
 WHERE ` + "`" + `current` + "`" + `.` + "`" + `update` + "`" + ` = ?
 ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + `
 LIMIT ?, ?
@@ -41,6 +43,7 @@ type GetChangedItemsParams struct {
 type GetChangedItemsRow struct {
 	ItemHistory           ItemHistory
 	PreviousItemHistoryVw PreviousItemHistoryVw
+	Lastupdate            sql.NullString
 }
 
 func (q *Queries) GetChangedItems(ctx context.Context, arg GetChangedItemsParams) ([]GetChangedItemsRow, error) {
@@ -97,6 +100,7 @@ func (q *Queries) GetChangedItems(ctx context.Context, arg GetChangedItemsParams
 			&i.PreviousItemHistoryVw.EffectID,
 			&i.PreviousItemHistoryVw.PackageID,
 			&i.PreviousItemHistoryVw.MoveInfo,
+			&i.Lastupdate,
 		); err != nil {
 			return nil, err
 		}

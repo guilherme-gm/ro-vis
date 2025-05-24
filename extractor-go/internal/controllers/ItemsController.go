@@ -100,8 +100,9 @@ func (ctlr *ItemsController) formatFromTo(record repository.FromToRecord[domain.
 	}
 
 	return fromToRecordResponse[itemResponse]{
-		From: fromRec,
-		To:   toRec,
+		LastUpdated: sqlStringToPointer(record.LastUpdate),
+		From:        fromRec,
+		To:          toRec,
 	}
 }
 

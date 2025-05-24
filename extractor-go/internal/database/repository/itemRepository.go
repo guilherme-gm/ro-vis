@@ -173,7 +173,7 @@ func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, e
 	return int(res), nil
 }
 
-func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbTo dao.ItemHistory) FromToRecord[domain.Item] {
+func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbTo dao.ItemHistory, lastUpdate sql.NullString) FromToRecord[domain.Item] {
 	var from *domain.Record[domain.Item] = nil
 	var to *domain.Record[domain.Item] = nil
 
@@ -192,8 +192,9 @@ func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbT
 	}
 
 	return FromToRecord[domain.Item]{
-		From: from,
-		To:   to,
+		LastUpdate: lastUpdate,
+		From:       from,
+		To:         to,
 	}
 }
 
@@ -214,7 +215,7 @@ func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, paginatio
 
 	records := make([]FromToRecord[domain.Item], len(res))
 	for idx, qmodel := range res {
-		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory)
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory, qmodel.Lastupdate)
 	}
 
 	return records, nil
@@ -237,7 +238,7 @@ func (r *ItemRepository) GetItemHistory(tx *sql.Tx, itemId int32, pagination Pag
 
 	records := make([]FromToRecord[domain.Item], len(res))
 	for idx, qmodel := range res {
-		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory)
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory, sql.NullString{})
 	}
 
 	return records, nil

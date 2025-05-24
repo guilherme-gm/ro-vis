@@ -16,9 +16,11 @@ ON DUPLICATE KEY UPDATE
 	deleted = VALUES(deleted);
 
 -- name: GetChangedItems :many
-SELECT sqlc.embed(current), sqlc.embed(previous)
+SELECT sqlc.embed(current), sqlc.embed(previous), latest.update lastUpdate
 FROM `item_history` current
 LEFT JOIN `previous_item_history_vw` previous ON `previous`.`history_id` = `current`.`previous_history_id`
+LEFT JOIN `items` latest_id ON `latest_id`.`item_id` = `current`.`item_id`
+LEFT JOIN `item_history` latest ON `latest_id`.`latest_history_id` = `latest`.`history_id`
 WHERE `current`.`update` = ?
 ORDER BY `current`.`history_id`
 LIMIT ?, ?;

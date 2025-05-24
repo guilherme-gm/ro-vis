@@ -1,10 +1,15 @@
 package repository
 
-import "github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+import (
+	"database/sql"
+
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+)
 
 type FromToRecord[T any] struct {
-	From *domain.Record[T]
-	To   *domain.Record[T]
+	LastUpdate sql.NullString
+	From       *domain.Record[T]
+	To         *domain.Record[T]
 }
 
 type repositories struct {

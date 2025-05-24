@@ -8,6 +8,7 @@ export type Record<T> = {
 }
 
 export type PatchItem<T> = {
+	LastUpdated: string | null;
 	From: Record<T> | null;
 	To: Record<T> | null;
 };
