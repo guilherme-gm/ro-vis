@@ -173,6 +173,30 @@ func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, e
 	return int(res), nil
 }
 
+func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbTo dao.ItemHistory) FromToRecord[domain.Item] {
+	var from *domain.Record[domain.Item] = nil
+	var to *domain.Record[domain.Item] = nil
+
+	if dbFrom.HistoryID.Valid {
+		from = &domain.Record[domain.Item]{
+			Update: dbFrom.Update.String,
+			Data:   dbFrom.ToDomain(),
+		}
+	}
+
+	if dbTo.HistoryID != 0 {
+		to = &domain.Record[domain.Item]{
+			Update: dbTo.Update,
+			Data:   dbTo.ToDomain(),
+		}
+	}
+
+	return FromToRecord[domain.Item]{
+		From: from,
+		To:   to,
+	}
+}
+
 func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Item], error) {
 	queries := database.GetQueries(tx)
 	res, err := queries.GetChangedItems(context.Background(), dao.GetChangedItemsParams{
@@ -190,27 +214,30 @@ func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, paginatio
 
 	records := make([]FromToRecord[domain.Item], len(res))
 	for idx, qmodel := range res {
-		var from *domain.Record[domain.Item] = nil
-		var to *domain.Record[domain.Item] = nil
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory)
+	}
 
-		if qmodel.PreviousItemHistoryVw.HistoryID.Valid {
-			from = &domain.Record[domain.Item]{
-				Update: qmodel.PreviousItemHistoryVw.Update.String,
-				Data:   qmodel.PreviousItemHistoryVw.ToDomain(),
-			}
-		}
+	return records, nil
+}
 
-		if qmodel.ItemHistory.HistoryID != 0 {
-			to = &domain.Record[domain.Item]{
-				Update: qmodel.ItemHistory.Update,
-				Data:   qmodel.ItemHistory.ToDomain(),
-			}
-		}
+func (r *ItemRepository) GetItemHistory(tx *sql.Tx, itemId int32, pagination Pagination) ([]FromToRecord[domain.Item], error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetItemHistory(context.Background(), dao.GetItemHistoryParams{
+		ItemID: itemId,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Item]{}, nil
+	}
 
-		records[idx] = FromToRecord[domain.Item]{
-			From: from,
-			To:   to,
-		}
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Item], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousItemHistoryVw, qmodel.ItemHistory)
 	}
 
 	return records, nil

@@ -27,3 +27,11 @@ LIMIT ?, ?;
 SELECT COUNT(*)
 FROM `item_history`
 WHERE `update` = ?;
+
+-- name: GetItemHistory :many
+SELECT sqlc.embed(current), sqlc.embed(previous)
+FROM `item_history` current
+LEFT JOIN `previous_item_history_vw` previous ON `previous`.`history_id` = `current`.`previous_history_id`
+WHERE `current`.`item_id` = ?
+ORDER BY `current`.`history_id` ASC
+LIMIT ?, ?;

@@ -190,6 +190,94 @@ func (q *Queries) GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, er
 	return items, nil
 }
 
+const getItemHistory = `-- name: GetItemHistory :many
+SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info
+FROM ` + "`" + `item_history` + "`" + ` current
+LEFT JOIN ` + "`" + `previous_item_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+WHERE ` + "`" + `current` + "`" + `.` + "`" + `item_id` + "`" + ` = ?
+ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + ` ASC
+LIMIT ?, ?
+`
+
+type GetItemHistoryParams struct {
+	ItemID int32
+	Offset int32
+	Limit  int32
+}
+
+type GetItemHistoryRow struct {
+	ItemHistory           ItemHistory
+	PreviousItemHistoryVw PreviousItemHistoryVw
+}
+
+func (q *Queries) GetItemHistory(ctx context.Context, arg GetItemHistoryParams) ([]GetItemHistoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getItemHistory, arg.ItemID, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetItemHistoryRow
+	for rows.Next() {
+		var i GetItemHistoryRow
+		if err := rows.Scan(
+			&i.ItemHistory.HistoryID,
+			&i.ItemHistory.PreviousHistoryID,
+			&i.ItemHistory.ItemID,
+			&i.ItemHistory.FileVersion,
+			&i.ItemHistory.Update,
+			&i.ItemHistory.IdentifiedName,
+			&i.ItemHistory.IdentifiedDescription,
+			&i.ItemHistory.IdentifiedSprite,
+			&i.ItemHistory.UnidentifiedName,
+			&i.ItemHistory.UnidentifiedDescription,
+			&i.ItemHistory.UnidentifiedSprite,
+			&i.ItemHistory.SlotCount,
+			&i.ItemHistory.IsBook,
+			&i.ItemHistory.CanUseBuyingStore,
+			&i.ItemHistory.CardPrefix,
+			&i.ItemHistory.CardIsPostfix,
+			&i.ItemHistory.CardIllustration,
+			&i.ItemHistory.ClassNum,
+			&i.ItemHistory.IsCostume,
+			&i.ItemHistory.EffectID,
+			&i.ItemHistory.PackageID,
+			&i.ItemHistory.MoveInfo,
+			&i.PreviousItemHistoryVw.HistoryID,
+			&i.PreviousItemHistoryVw.PreviousHistoryID,
+			&i.PreviousItemHistoryVw.ItemID,
+			&i.PreviousItemHistoryVw.FileVersion,
+			&i.PreviousItemHistoryVw.Update,
+			&i.PreviousItemHistoryVw.IdentifiedName,
+			&i.PreviousItemHistoryVw.IdentifiedDescription,
+			&i.PreviousItemHistoryVw.IdentifiedSprite,
+			&i.PreviousItemHistoryVw.UnidentifiedName,
+			&i.PreviousItemHistoryVw.UnidentifiedDescription,
+			&i.PreviousItemHistoryVw.UnidentifiedSprite,
+			&i.PreviousItemHistoryVw.SlotCount,
+			&i.PreviousItemHistoryVw.IsBook,
+			&i.PreviousItemHistoryVw.CanUseBuyingStore,
+			&i.PreviousItemHistoryVw.CardPrefix,
+			&i.PreviousItemHistoryVw.CardIsPostfix,
+			&i.PreviousItemHistoryVw.CardIllustration,
+			&i.PreviousItemHistoryVw.ClassNum,
+			&i.PreviousItemHistoryVw.IsCostume,
+			&i.PreviousItemHistoryVw.EffectID,
+			&i.PreviousItemHistoryVw.PackageID,
+			&i.PreviousItemHistoryVw.MoveInfo,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getItemIdsInUpdate = `-- name: GetItemIdsInUpdate :many
 SELECT ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `item_history` + "`" + `.` + "`" + `item_id` + "`" + `
 FROM ` + "`" + `item_history` + "`" + `

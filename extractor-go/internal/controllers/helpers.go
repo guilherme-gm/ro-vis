@@ -34,6 +34,16 @@ func paramAsUpdate(c *gin.Context, name string) (string, error) {
 	return val, nil
 }
 
+func intParam(c *gin.Context, name string) (int, error) {
+	val := c.Param(name)
+	if val == "" {
+		return 0, errors.New("missing required param " + name)
+	}
+
+	intVal, err := strconv.Atoi(val)
+	return intVal, err
+}
+
 type recordResponse[T any] struct {
 	Update string
 	Data   *T

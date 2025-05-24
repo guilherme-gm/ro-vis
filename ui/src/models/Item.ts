@@ -19,6 +19,8 @@ export type ItemMoveInfo = {
 };
 
 export type Item = {
+	HistoryID: number;
+
 	FileVersion: number;
 
 	ItemID: number;

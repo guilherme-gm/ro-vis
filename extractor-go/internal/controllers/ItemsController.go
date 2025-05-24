@@ -148,3 +148,36 @@ func (ctlr *ItemsController) ListForUpdate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"total": count, "list": list})
 }
+
+func (ctlr *ItemsController) ListForItem(c *gin.Context) {
+	offset, err := queryInt(c, "start", 0)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	itemId, err := intParam(c, "itemId")
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	itemRepo := repository.GetItemRepository()
+	updates, err := itemRepo.GetItemHistory(nil, int32(itemId), repository.Pagination{
+		Offset: int32(offset),
+		Limit:  100,
+	})
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	list := []fromToRecordResponse[itemResponse]{}
+	for _, val := range updates {
+		list = append(list, ctlr.formatFromTo(val))
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total": len(list), "list": list})
+}
