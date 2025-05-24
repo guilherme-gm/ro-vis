@@ -8,6 +8,8 @@ dist/
 # Input files
 extractor/raw
 
+extractor-go/api
+
 # Output files
 extractor/out
 extractor/db
