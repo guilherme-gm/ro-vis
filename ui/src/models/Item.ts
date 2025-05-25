@@ -61,7 +61,9 @@ export type Item = {
 };
 
 export type MinItem = {
-	ItemID: string;
+	ItemID: number;
+
+	LastUpdate: string;
 
 	IdentifiedName: string | null;
 };

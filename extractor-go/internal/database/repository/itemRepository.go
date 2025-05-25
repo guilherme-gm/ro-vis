@@ -243,3 +243,31 @@ func (r *ItemRepository) GetItemHistory(tx *sql.Tx, itemId int32, pagination Pag
 
 	return records, nil
 }
+
+func (r *ItemRepository) CountItems(tx *sql.Tx) (int32, error) {
+	queries := database.GetQueries(tx)
+
+	res, err := queries.CountItems(context.Background())
+	if err == sql.ErrNoRows {
+		return int32(res), nil
+	}
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(res), nil
+}
+
+func (r *ItemRepository) GetItems(tx *sql.Tx, pagination Pagination) ([]dao.GetItemListRow, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetItemList(context.Background(), dao.GetItemListParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []dao.GetItemListRow{}, nil
+	}
+
+	return res, nil
+}

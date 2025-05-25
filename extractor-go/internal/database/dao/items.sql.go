@@ -23,6 +23,20 @@ func (q *Queries) CountChangedItemsInPatch(ctx context.Context, update string) (
 	return count, err
 }
 
+const countItems = `-- name: CountItems :one
+SELECT COUNT(*)
+FROM ` + "`" + `items` + "`" + `
+INNER JOIN ` + "`" + `item_history` + "`" + ` ON ` + "`" + `items` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `
+WHERE ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+`
+
+func (q *Queries) CountItems(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countItems)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getChangedItems = `-- name: GetChangedItems :many
 SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info, latest.update lastUpdate
 FROM ` + "`" + `item_history` + "`" + ` current
@@ -303,6 +317,49 @@ func (q *Queries) GetItemIdsInUpdate(ctx context.Context, update string) ([]GetI
 	for rows.Next() {
 		var i GetItemIdsInUpdateRow
 		if err := rows.Scan(&i.HistoryID, &i.ItemID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getItemList = `-- name: GetItemList :many
+SELECT ` + "`" + `item_history` + "`" + `.` + "`" + `item_id` + "`" + `, ` + "`" + `item_history` + "`" + `.` + "`" + `identified_name` + "`" + `, ` + "`" + `item_history` + "`" + `.` + "`" + `update` + "`" + ` lastUpdate
+FROM ` + "`" + `items` + "`" + `
+INNER JOIN ` + "`" + `item_history` + "`" + ` ON ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `items` + "`" + `.` + "`" + `latest_history_id` + "`" + `
+WHERE ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+ORDER BY ` + "`" + `item_history` + "`" + `.` + "`" + `item_id` + "`" + ` ASC
+LIMIT ?, ?
+`
+
+type GetItemListParams struct {
+	Offset int32
+	Limit  int32
+}
+
+type GetItemListRow struct {
+	ItemID         int32
+	IdentifiedName sql.NullString
+	Lastupdate     string
+}
+
+func (q *Queries) GetItemList(ctx context.Context, arg GetItemListParams) ([]GetItemListRow, error) {
+	rows, err := q.db.QueryContext(ctx, getItemList, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetItemListRow
+	for rows.Next() {
+		var i GetItemListRow
+		if err := rows.Scan(&i.ItemID, &i.IdentifiedName, &i.Lastupdate); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -37,3 +37,17 @@ LEFT JOIN `previous_item_history_vw` previous ON `previous`.`history_id` = `curr
 WHERE `current`.`item_id` = ?
 ORDER BY `current`.`history_id` ASC
 LIMIT ?, ?;
+
+-- name: GetItemList :many
+SELECT `item_history`.`item_id`, `item_history`.`identified_name`, `item_history`.`update` lastUpdate
+FROM `items`
+INNER JOIN `item_history` ON `item_history`.`history_id` = `items`.`latest_history_id`
+WHERE `items`.`deleted` = FALSE
+ORDER BY `item_history`.`item_id` ASC
+LIMIT ?, ?;
+
+-- name: CountItems :one
+SELECT COUNT(*)
+FROM `items`
+INNER JOIN `item_history` ON `items`.`latest_history_id` = `item_history`.`history_id`
+WHERE `items`.`deleted` = FALSE;

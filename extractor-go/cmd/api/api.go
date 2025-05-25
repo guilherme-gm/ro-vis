@@ -18,6 +18,7 @@ func main() {
 	itemsController := controllers.ItemsController{}
 	updatesController := controllers.UpdatesController{}
 	router.Group("api/items/").
+		GET("/", itemsController.List).
 		GET("/update/:update", itemsController.ListForUpdate).
 		GET("/:itemId", itemsController.ListForItem)
 	router.Group("api/updates/").

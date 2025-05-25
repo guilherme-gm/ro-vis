@@ -35,6 +35,12 @@ type itemResponse struct {
 	MoveInfo                domain.ItemMoveInfo
 }
 
+type minItemResponse struct {
+	ItemID         int32
+	LastUpdate     string
+	IdentifiedName *string
+}
+
 func (ctlr *ItemsController) formatFromTo(record repository.FromToRecord[domain.Item]) fromToRecordResponse[itemResponse] {
 	var fromRec *recordResponse[itemResponse] = nil
 	var toRec *recordResponse[itemResponse] = nil
@@ -104,6 +110,48 @@ func (ctlr *ItemsController) formatFromTo(record repository.FromToRecord[domain.
 		From:        fromRec,
 		To:          toRec,
 	}
+}
+
+func (ctlr *ItemsController) List(c *gin.Context) {
+	offset, err := queryInt(c, "start", 0)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	itemRepo := repository.GetItemRepository()
+	count, err := itemRepo.CountItems(nil)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if count < int32(offset) {
+		fmt.Println("Out of range")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	items, err := itemRepo.GetItems(nil, repository.Pagination{
+		Offset: int32(offset),
+		Limit:  100,
+	})
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	list := []minItemResponse{}
+	for _, val := range items {
+		list = append(list, minItemResponse{
+			ItemID:         val.ItemID,
+			LastUpdate:     val.Lastupdate,
+			IdentifiedName: sqlStringToPointer(val.IdentifiedName),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total": count, "list": list})
 }
 
 func (ctlr *ItemsController) ListForUpdate(c *gin.Context) {
