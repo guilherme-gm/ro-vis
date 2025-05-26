@@ -1,9 +1,5 @@
 package domain
 
-import (
-	"database/sql"
-)
-
 type ItemMoveInfo struct {
 	CanDrop               bool
 	CanTrade              bool
@@ -42,23 +38,23 @@ func (i *ItemMoveInfo) Equals(other ItemMoveInfo) bool {
 }
 
 type Item struct {
-	PreviousHistoryID       sql.NullInt32
-	HistoryID               sql.NullInt32
+	PreviousHistoryID       NullableInt32
+	HistoryID               NullableInt32
 	ItemID                  int32
 	FileVersion             int32
-	IdentifiedName          sql.NullString
-	IdentifiedDescription   sql.NullString
-	IdentifiedSprite        sql.NullString
-	UnidentifiedName        sql.NullString
-	UnidentifiedDescription sql.NullString
-	UnidentifiedSprite      sql.NullString
+	IdentifiedName          NullableString
+	IdentifiedDescription   NullableString
+	IdentifiedSprite        NullableString
+	UnidentifiedName        NullableString
+	UnidentifiedDescription NullableString
+	UnidentifiedSprite      NullableString
 	SlotCount               int8
 	IsBook                  bool
 	CanUseBuyingStore       bool
-	CardPrefix              sql.NullString
+	CardPrefix              NullableString
 	CardIsPostfix           bool
-	CardIllustration        sql.NullString
-	ClassNum                sql.NullInt32
+	CardIllustration        NullableString
+	ClassNum                NullableInt32
 	IsCostume               bool
 	EffectID                int32
 	PackageID               int32
@@ -94,4 +90,10 @@ func (i *Item) Equals(otherItem Item) bool {
 		i.EffectID == otherItem.EffectID &&
 		i.PackageID == otherItem.PackageID &&
 		i.MoveInfo.Equals(otherItem.MoveInfo))
+}
+
+type MinItem struct {
+	ItemID         int32
+	LastUpdate     string
+	IdentifiedName NullableString
 }

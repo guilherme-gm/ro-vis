@@ -59,14 +59,14 @@ func (p ItemV6Parser) Parse(basePath string, update *domain.Update, existingDB m
 			}
 
 			newDB[itemID].FileVersion = 6
-			newDB[itemID].UnidentifiedName = dao.ToNullString(entry.UnidentifiedDisplayName)
-			newDB[itemID].UnidentifiedSprite = dao.ToNullString(entry.UnidentifiedResourceName)
-			newDB[itemID].UnidentifiedDescription = dao.ToNullString(strings.Join(entry.UnidentifiedDescriptionName, "\n"))
-			newDB[itemID].IdentifiedName = dao.ToNullString(entry.IdentifiedDisplayName)
-			newDB[itemID].IdentifiedSprite = dao.ToNullString(entry.IdentifiedResourceName)
-			newDB[itemID].IdentifiedDescription = dao.ToNullString(strings.Join(entry.IdentifiedDescriptionName, "\n"))
+			newDB[itemID].UnidentifiedName = dao.ToNullableString(entry.UnidentifiedDisplayName)
+			newDB[itemID].UnidentifiedSprite = dao.ToNullableString(entry.UnidentifiedResourceName)
+			newDB[itemID].UnidentifiedDescription = dao.ToNullableString(strings.Join(entry.UnidentifiedDescriptionName, "\n"))
+			newDB[itemID].IdentifiedName = dao.ToNullableString(entry.IdentifiedDisplayName)
+			newDB[itemID].IdentifiedSprite = dao.ToNullableString(entry.IdentifiedResourceName)
+			newDB[itemID].IdentifiedDescription = dao.ToNullableString(strings.Join(entry.IdentifiedDescriptionName, "\n"))
 			newDB[itemID].SlotCount = int8(entry.SlotCount)
-			newDB[itemID].ClassNum = dao.ToNullInt32(int32(entry.ClassNum))
+			newDB[itemID].ClassNum = dao.ToNullableInt32(int32(entry.ClassNum))
 			newDB[itemID].IsCostume = entry.Costume
 			newDB[itemID].EffectID = int32(entry.EffectID)
 		}

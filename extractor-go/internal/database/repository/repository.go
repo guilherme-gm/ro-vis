@@ -1,13 +1,11 @@
 package repository
 
 import (
-	"database/sql"
-
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
 type FromToRecord[T any] struct {
-	LastUpdate sql.NullString
+	LastUpdate domain.NullableString
 	From       *domain.Record[T]
 	To         *domain.Record[T]
 }

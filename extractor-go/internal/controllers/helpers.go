@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"errors"
 	"regexp"
 	"strconv"
@@ -42,29 +41,4 @@ func intParam(c *gin.Context, name string) (int, error) {
 
 	intVal, err := strconv.Atoi(val)
 	return intVal, err
-}
-
-type recordResponse[T any] struct {
-	Update string
-	Data   *T
-}
-
-type fromToRecordResponse[T any] struct {
-	LastUpdated *string
-	From        *recordResponse[T]
-	To          *recordResponse[T]
-}
-
-func sqlInt32ToPointer(val sql.NullInt32) *int32 {
-	if !val.Valid {
-		return nil
-	}
-	return &val.Int32
-}
-
-func sqlStringToPointer(val sql.NullString) *string {
-	if !val.Valid {
-		return nil
-	}
-	return &val.String
 }

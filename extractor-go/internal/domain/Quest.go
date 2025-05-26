@@ -1,25 +1,23 @@
 package domain
 
-import "database/sql"
-
 type Quest struct {
-	PreviousHistoryID sql.NullInt32
-	HistoryID         sql.NullInt32
+	PreviousHistoryID NullableInt32
+	HistoryID         NullableInt32
 	QuestID           int32
 	FileVersion       int32
-	Title             sql.NullString
-	Description       sql.NullString
-	Summary           sql.NullString
-	OldImage          sql.NullString
-	IconName          sql.NullString
-	NpcSpr            sql.NullString
-	NpcNavi           sql.NullString
-	NpcPosX           sql.NullInt32
-	NpcPosY           sql.NullInt32
-	RewardExp         sql.NullString
-	RewardJexp        sql.NullString
-	RewardItemList    sql.NullString
-	CoolTimeQuest     sql.NullInt32
+	Title             NullableString
+	Description       NullableString
+	Summary           NullableString
+	OldImage          NullableString
+	IconName          NullableString
+	NpcSpr            NullableString
+	NpcNavi           NullableString
+	NpcPosX           NullableInt32
+	NpcPosY           NullableInt32
+	RewardExp         NullableString
+	RewardJexp        NullableString
+	RewardItemList    NullableString
+	CoolTimeQuest     NullableInt32
 	Deleted           bool
 }
 

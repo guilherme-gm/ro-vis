@@ -1,26 +1,28 @@
 package dao
 
-import "github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+import (
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+)
 
 func (q *GetCurrentQuestsRow) ToDomain() domain.Quest {
 	return domain.Quest{
-		PreviousHistoryID: q.PreviousHistoryID,
-		HistoryID:         ToNullInt32(q.HistoryID),
+		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
+		HistoryID:         ToNullableInt32(q.HistoryID),
 		QuestID:           q.QuestID,
 		FileVersion:       q.FileVersion,
-		Title:             q.Title,
-		Description:       q.Description,
-		Summary:           q.Summary,
-		OldImage:          q.OldImage,
-		IconName:          q.IconName,
-		NpcSpr:            q.NpcSpr,
-		NpcNavi:           q.NpcNavi,
-		NpcPosX:           q.NpcPosX,
-		NpcPosY:           q.NpcPosY,
-		RewardExp:         q.RewardExp,
-		RewardJexp:        q.RewardJexp,
-		RewardItemList:    q.RewardItemList,
-		CoolTimeQuest:     q.CoolTimeQuest,
+		Title:             domain.NullableString(q.Title),
+		Description:       domain.NullableString(q.Description),
+		Summary:           domain.NullableString(q.Summary),
+		OldImage:          domain.NullableString(q.OldImage),
+		IconName:          domain.NullableString(q.IconName),
+		NpcSpr:            domain.NullableString(q.NpcSpr),
+		NpcNavi:           domain.NullableString(q.NpcNavi),
+		NpcPosX:           domain.NullableInt32(q.NpcPosX),
+		NpcPosY:           domain.NullableInt32(q.NpcPosY),
+		RewardExp:         domain.NullableString(q.RewardExp),
+		RewardJexp:        domain.NullableString(q.RewardJexp),
+		RewardItemList:    domain.NullableString(q.RewardItemList),
+		CoolTimeQuest:     domain.NullableInt32(q.CoolTimeQuest),
 		Deleted:           q.Deleted,
 	}
 }

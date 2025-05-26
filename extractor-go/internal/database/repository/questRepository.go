@@ -49,23 +49,23 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 	for _, it := range *newHistories {
 		updatedIdMap[it.QuestID] = true
 		bulkParams = append(bulkParams, dao.BulkInsertQuestHistoryParams{
-			PreviousHistoryID: it.PreviousHistoryID,
+			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
 			QuestID:           it.QuestID,
 			FileVersion:       it.FileVersion,
 			Patch:             patch,
-			Title:             it.Title,
-			Description:       it.Description,
-			Summary:           it.Summary,
-			OldImage:          it.OldImage,
-			IconName:          it.IconName,
-			NpcSpr:            it.NpcSpr,
-			NpcNavi:           it.NpcNavi,
-			NpcPosX:           it.NpcPosX,
-			NpcPosY:           it.NpcPosY,
-			RewardExp:         it.RewardExp,
-			RewardJexp:        it.RewardJexp,
-			RewardItemList:    it.RewardItemList,
-			CoolTimeQuest:     it.CoolTimeQuest,
+			Title:             sql.NullString(it.Title),
+			Description:       sql.NullString(it.Description),
+			Summary:           sql.NullString(it.Summary),
+			OldImage:          sql.NullString(it.OldImage),
+			IconName:          sql.NullString(it.IconName),
+			NpcSpr:            sql.NullString(it.NpcSpr),
+			NpcNavi:           sql.NullString(it.NpcNavi),
+			NpcPosX:           sql.NullInt32(it.NpcPosX),
+			NpcPosY:           sql.NullInt32(it.NpcPosY),
+			RewardExp:         sql.NullString(it.RewardExp),
+			RewardJexp:        sql.NullString(it.RewardJexp),
+			RewardItemList:    sql.NullString(it.RewardItemList),
+			CoolTimeQuest:     sql.NullInt32(it.CoolTimeQuest),
 		})
 	}
 
@@ -126,7 +126,7 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, patch string, newHistor
 func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, patch string, quest *domain.Quest) error {
 	queries := database.GetQueries(tx)
 	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
-		PreviousHistoryID: quest.HistoryID,
+		PreviousHistoryID: sql.NullInt32(quest.HistoryID),
 		QuestID:           quest.QuestID,
 		FileVersion:       quest.FileVersion,
 		Patch:             patch,
@@ -141,7 +141,7 @@ func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, patch string, quest *domai
 		return err
 	}
 
-	quest.HistoryID = dao.ToNullInt32(int32(historyId))
+	quest.HistoryID = dao.ToNullableInt32(int32(historyId))
 
 	_, err = queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
 		QuestID:         quest.QuestID,

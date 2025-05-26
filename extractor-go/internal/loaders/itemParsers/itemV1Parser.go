@@ -1,7 +1,6 @@
 package itemParsers
 
 import (
-	"database/sql"
 	"strconv"
 	"time"
 
@@ -63,34 +62,34 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 				newDB[entry.ItemID] = &newItem
 			}
 
-			newDB[entry.ItemID].IdentifiedName = dao.ToNullString(entry.Value)
+			newDB[entry.ItemID].IdentifiedName = dao.ToNullableString(entry.Value)
 		}
 	}
 
 	// ID#Value# tables
 	loadTxtSubTable(basePath, update, newDB, "data/num2itemdisplaynametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.UnidentifiedName = sql.NullString{}
+			item.UnidentifiedName = domain.NullableString{}
 			return
 		}
 
-		item.UnidentifiedName = dao.ToNullString(entry.Value)
+		item.UnidentifiedName = dao.ToNullableString(entry.Value)
 	})
 	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.IdentifiedSprite = sql.NullString{}
+			item.IdentifiedSprite = domain.NullableString{}
 			return
 		}
 
-		item.IdentifiedSprite = dao.ToNullString(entry.Value)
+		item.IdentifiedSprite = dao.ToNullableString(entry.Value)
 	})
 	loadTxtSubTable(basePath, update, newDB, "data/num2itemresnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.UnidentifiedSprite = sql.NullString{}
+			item.UnidentifiedSprite = domain.NullableString{}
 			return
 		}
 
-		item.UnidentifiedSprite = dao.ToNullString(entry.Value)
+		item.UnidentifiedSprite = dao.ToNullableString(entry.Value)
 	})
 	loadTxtSubTable(basePath, update, newDB, "data/itemslotcounttable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
@@ -111,19 +110,19 @@ func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB m
 	// ID#Multiline description# tables
 	loadTxtSubTable(basePath, update, newDB, "data/idnum2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry *subparsers.ItemDescTableEntry) {
 		if entry == nil {
-			item.IdentifiedDescription = sql.NullString{}
+			item.IdentifiedDescription = domain.NullableString{}
 			return
 		}
 
-		item.IdentifiedDescription = dao.ToNullString(entry.Description)
+		item.IdentifiedDescription = dao.ToNullableString(entry.Description)
 	})
 	loadTxtSubTable(basePath, update, newDB, "data/num2itemdesctable.txt", subparsers.ParseItemDescTable, func(item *domain.Item, entry *subparsers.ItemDescTableEntry) {
 		if entry == nil {
-			item.UnidentifiedDescription = sql.NullString{}
+			item.UnidentifiedDescription = domain.NullableString{}
 			return
 		}
 
-		item.UnidentifiedDescription = dao.ToNullString(entry.Description)
+		item.UnidentifiedDescription = dao.ToNullableString(entry.Description)
 	})
 
 	// ID# tables

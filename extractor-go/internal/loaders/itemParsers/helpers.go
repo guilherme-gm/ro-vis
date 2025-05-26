@@ -1,8 +1,6 @@
 package itemParsers
 
 import (
-	"database/sql"
-
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	subparsers "github.com/guilherme-gm/ro-vis/extractor/internal/loaders/itemParsers/subParsers"
@@ -36,22 +34,22 @@ func loadTxtSubTable[T txtEntry](basePath string, update *domain.Update, newDB m
 func loadCardPrefix(basePath string, update *domain.Update, newDB map[int32]*domain.Item) {
 	loadTxtSubTable(basePath, update, newDB, "data/cardprefixnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.CardPrefix = sql.NullString{}
+			item.CardPrefix = domain.NullableString{}
 			return
 		}
 
-		item.CardPrefix = dao.ToNullString(entry.Value)
+		item.CardPrefix = dao.ToNullableString(entry.Value)
 	})
 }
 
 func loadCardIllustName(basePath string, update *domain.Update, newDB map[int32]*domain.Item) {
 	loadTxtSubTable(basePath, update, newDB, "data/num2cardillustnametable.txt", subparsers.ParseItemValueTable, func(item *domain.Item, entry *subparsers.ItemValueTableEntry) {
 		if entry == nil {
-			item.CardIllustration = sql.NullString{}
+			item.CardIllustration = domain.NullableString{}
 			return
 		}
 
-		item.CardIllustration = dao.ToNullString(entry.Value)
+		item.CardIllustration = dao.ToNullableString(entry.Value)
 	})
 }
 

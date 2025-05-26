@@ -52,7 +52,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 				:title="`#${val.To?.Data?.ItemID} - ${val?.To?.Data?.IdentifiedName} (${val?.To?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.LastUpdated }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
 						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"
@@ -73,7 +73,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 				:title="`#${val.To?.Data?.ItemID ?? val.From?.Data?.ItemID} - ${val?.To?.Data?.IdentifiedName ?? val?.From?.Data?.IdentifiedName} (${val?.To?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.LastUpdated }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
 						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"
@@ -94,7 +94,7 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 				:title="`#${val.From?.Data?.ItemID} - ${val?.From?.Data?.IdentifiedName} (${val?.From?.Data?.MoveInfo?.CommentName ?? ''})`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.LastUpdated }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
 						:to="{ name: RouteName.ItemHistory, params: { itemId: val.To?.Data?.ItemID ?? val.From?.Data?.ItemID } }"
 						target="_blank"

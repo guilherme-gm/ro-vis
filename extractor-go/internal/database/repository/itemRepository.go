@@ -56,23 +56,23 @@ func (r *ItemRepository) addItemsToHistory_sub(tx *sql.Tx, update string, newHis
 		}
 
 		bulkParams = append(bulkParams, dao.BulkInsertItemHistoryParams{
-			PreviousHistoryID:       it.PreviousHistoryID,
+			PreviousHistoryID:       sql.NullInt32(it.PreviousHistoryID),
 			ItemID:                  it.ItemID,
 			FileVersion:             it.FileVersion,
 			Update:                  update,
-			IdentifiedName:          it.IdentifiedName,
-			IdentifiedDescription:   it.IdentifiedDescription,
-			IdentifiedSprite:        it.IdentifiedSprite,
-			UnidentifiedName:        it.UnidentifiedName,
-			UnidentifiedDescription: it.UnidentifiedDescription,
-			UnidentifiedSprite:      it.UnidentifiedSprite,
+			IdentifiedName:          sql.NullString(it.IdentifiedName),
+			IdentifiedDescription:   sql.NullString(it.IdentifiedDescription),
+			IdentifiedSprite:        sql.NullString(it.IdentifiedSprite),
+			UnidentifiedName:        sql.NullString(it.UnidentifiedName),
+			UnidentifiedDescription: sql.NullString(it.UnidentifiedDescription),
+			UnidentifiedSprite:      sql.NullString(it.UnidentifiedSprite),
 			SlotCount:               it.SlotCount,
 			IsBook:                  it.IsBook,
 			CanUseBuyingStore:       it.CanUseBuyingStore,
-			CardPrefix:              it.CardPrefix,
+			CardPrefix:              sql.NullString(it.CardPrefix),
 			CardIsPostfix:           it.CardIsPostfix,
-			CardIllustration:        it.CardIllustration,
-			ClassNum:                it.ClassNum,
+			CardIllustration:        sql.NullString(it.CardIllustration),
+			ClassNum:                sql.NullInt32(it.ClassNum),
 			IsCostume:               it.IsCostume,
 			EffectID:                it.EffectID,
 			PackageID:               it.PackageID,
@@ -137,7 +137,7 @@ func (r *ItemRepository) AddItemsToHistory(tx *sql.Tx, patch string, newHistorie
 func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.Item) error {
 	queries := database.GetQueries(tx)
 	res, err := queries.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
-		PreviousHistoryID: Item.HistoryID,
+		PreviousHistoryID: sql.NullInt32(Item.HistoryID),
 		ItemID:            Item.ItemID,
 		FileVersion:       Item.FileVersion,
 		Update:            patch,
@@ -152,7 +152,7 @@ func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.I
 		return err
 	}
 
-	Item.HistoryID = dao.ToNullInt32(int32(historyId))
+	Item.HistoryID = dao.ToNullableInt32(int32(historyId))
 
 	_, err = queries.UpsertItem(context.Background(), dao.UpsertItemParams{
 		ItemID:          Item.ItemID,
@@ -192,7 +192,7 @@ func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbT
 	}
 
 	return FromToRecord[domain.Item]{
-		LastUpdate: lastUpdate,
+		LastUpdate: domain.NullableString(lastUpdate),
 		From:       from,
 		To:         to,
 	}
@@ -259,15 +259,26 @@ func (r *ItemRepository) CountItems(tx *sql.Tx) (int32, error) {
 	return int32(res), nil
 }
 
-func (r *ItemRepository) GetItems(tx *sql.Tx, pagination Pagination) ([]dao.GetItemListRow, error) {
+func (r *ItemRepository) GetItems(tx *sql.Tx, pagination Pagination) ([]domain.MinItem, error) {
 	queries := database.GetQueries(tx)
 	res, err := queries.GetItemList(context.Background(), dao.GetItemListParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,
 	})
 	if err == sql.ErrNoRows {
-		return []dao.GetItemListRow{}, nil
+		return []domain.MinItem{}, nil
+	}
+	if err != nil {
+		return []domain.MinItem{}, nil
 	}
 
-	return res, nil
+	items := make([]domain.MinItem, len(res))
+	for idx, val := range res {
+		items[idx] = domain.MinItem{
+			ItemID:         val.ItemID,
+			LastUpdate:     val.Lastupdate,
+			IdentifiedName: domain.NullableString(val.IdentifiedName),
+		}
+	}
+	return items, nil
 }
