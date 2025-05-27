@@ -9,13 +9,11 @@ import (
 
 type UpdatesController struct{}
 
-func (ctlr *UpdatesController) List(c *gin.Context) {
-	offset, err := queryInt(c, "start", 0)
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+type ListUpdatesParams struct {
+	Query PaginateQuery
+}
 
+func (ctlr *UpdatesController) List(c *gin.Context, params ListUpdatesParams) {
 	// @TODO: Probably better make it a go routine
 	patchRepo := repository.GetPatchRepository()
 	count, err := patchRepo.GetUpdateCount(nil)
@@ -24,13 +22,13 @@ func (ctlr *UpdatesController) List(c *gin.Context) {
 		return
 	}
 
-	if count < int32(offset) {
+	if count < int32(params.Query.Start) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
 	updates, err := repository.GetPatchRepository().ListUpdates(nil, repository.Pagination{
-		Offset: int32(offset),
+		Offset: int32(params.Query.Start),
 		Limit:  100,
 	})
 	if err != nil {

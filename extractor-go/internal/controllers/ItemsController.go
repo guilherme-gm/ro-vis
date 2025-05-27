@@ -10,13 +10,11 @@ import (
 
 type ItemsController struct{}
 
-func (ctlr *ItemsController) List(c *gin.Context) {
-	offset, err := queryInt(c, "start", 0)
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+type ListItemsParams struct {
+	Query PaginateQuery
+}
 
+func (ctlr *ItemsController) List(c *gin.Context, params ListItemsParams) {
 	itemRepo := repository.GetItemRepository()
 	count, err := itemRepo.CountItems(nil)
 	if err != nil {
@@ -25,14 +23,14 @@ func (ctlr *ItemsController) List(c *gin.Context) {
 		return
 	}
 
-	if count < int32(offset) {
+	if count < int32(params.Query.Start) {
 		fmt.Println("Out of range")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
 	items, err := itemRepo.GetItems(nil, repository.Pagination{
-		Offset: int32(offset),
+		Offset: int32(params.Query.Start),
 		Limit:  100,
 	})
 	if err != nil {
@@ -43,34 +41,29 @@ func (ctlr *ItemsController) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"total": count, "list": items})
 }
 
-func (ctlr *ItemsController) ListForUpdate(c *gin.Context) {
-	offset, err := queryInt(c, "start", 0)
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+type ListItemsForUpdateParams struct {
+	Params struct {
+		Update string `uri:"update" binding:"updateStr"`
 	}
+	Query PaginateQuery
+}
 
-	update, err := paramAsUpdate(c, "update")
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
+func (ctlr *ItemsController) ListForUpdate(c *gin.Context, params ListItemsForUpdateParams) {
 	// @TODO: Probably better make it a go routine
 	itemRepo := repository.GetItemRepository()
-	count, err := itemRepo.CountChangesInUpdate(nil, update)
+	count, err := itemRepo.CountChangesInUpdate(nil, params.Params.Update)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if count < offset {
+	if count < int(params.Query.Start) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	updates, err := itemRepo.GetChangesInUpdate(nil, update, repository.Pagination{
-		Offset: int32(offset),
+	updates, err := itemRepo.GetChangesInUpdate(nil, params.Params.Update, repository.Pagination{
+		Offset: params.Query.Start,
 		Limit:  100,
 	})
 	if err != nil {
@@ -82,23 +75,17 @@ func (ctlr *ItemsController) ListForUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"total": count, "list": updates})
 }
 
-func (ctlr *ItemsController) ListForItem(c *gin.Context) {
-	offset, err := queryInt(c, "start", 0)
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+type ListForItemParams struct {
+	Params struct {
+		ItemId int32 `uri:"itemId" binding:"min=1"`
 	}
+	Query PaginateQuery
+}
 
-	itemId, err := intParam(c, "itemId")
-	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
+func (ctlr *ItemsController) ListForItem(c *gin.Context, params ListForItemParams) {
 	itemRepo := repository.GetItemRepository()
-	updates, err := itemRepo.GetItemHistory(nil, int32(itemId), repository.Pagination{
-		Offset: int32(offset),
+	updates, err := itemRepo.GetItemHistory(nil, params.Params.ItemId, repository.Pagination{
+		Offset: params.Query.Start,
 		Limit:  100,
 	})
 	if err != nil {
