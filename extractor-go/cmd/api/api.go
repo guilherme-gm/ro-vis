@@ -21,6 +21,7 @@ func main() {
 	}
 
 	router.Use(cors.Default()) // @TODO: Review CORS config
+	router.Use(controllers.ErrorHandler())
 
 	itemsController := controllers.ItemsController{}
 	updatesController := controllers.UpdatesController{}

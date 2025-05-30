@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,14 +17,12 @@ func (ctlr *ItemsController) List(c *gin.Context, params ListItemsParams) {
 	itemRepo := repository.GetItemRepository()
 	count, err := itemRepo.CountItems(nil)
 	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch count", err))
 		return
 	}
 
 	if count < int32(params.Query.Start) {
-		fmt.Println("Out of range")
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.Error(NewBadRequestError("offset is out of range", nil))
 		return
 	}
 
@@ -34,7 +31,7 @@ func (ctlr *ItemsController) List(c *gin.Context, params ListItemsParams) {
 		Limit:  100,
 	})
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch items", err))
 		return
 	}
 
@@ -53,12 +50,12 @@ func (ctlr *ItemsController) ListForUpdate(c *gin.Context, params ListItemsForUp
 	itemRepo := repository.GetItemRepository()
 	count, err := itemRepo.CountChangesInUpdate(nil, params.Params.Update)
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch count", err))
 		return
 	}
 
 	if count < int(params.Query.Start) {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.Error(NewBadRequestError("offset is out of range", nil))
 		return
 	}
 
@@ -67,8 +64,7 @@ func (ctlr *ItemsController) ListForUpdate(c *gin.Context, params ListItemsForUp
 		Limit:  100,
 	})
 	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch items", err))
 		return
 	}
 
@@ -89,8 +85,7 @@ func (ctlr *ItemsController) ListForItem(c *gin.Context, params ListForItemParam
 		Limit:  100,
 	})
 	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch items", err))
 		return
 	}
 

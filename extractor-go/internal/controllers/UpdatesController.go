@@ -18,12 +18,12 @@ func (ctlr *UpdatesController) List(c *gin.Context, params ListUpdatesParams) {
 	patchRepo := repository.GetPatchRepository()
 	count, err := patchRepo.GetUpdateCount(nil)
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch count", err))
 		return
 	}
 
 	if count < int32(params.Query.Start) {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.Error(NewBadRequestError("offset is out of range", nil))
 		return
 	}
 
@@ -32,7 +32,7 @@ func (ctlr *UpdatesController) List(c *gin.Context, params ListUpdatesParams) {
 		Limit:  100,
 	})
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Error(NewInternalServerError("failed to fetch updates", err))
 		return
 	}
 

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -49,8 +48,7 @@ func GlobalHandler(handler any) func(*gin.Context) {
 			paramsField := newArg.Elem().FieldByName("Params").Addr()
 			err := c.ShouldBindUri(paramsField.Interface())
 			if err != nil {
-				fmt.Println(err)
-				c.AbortWithError(400, err)
+				c.Error(NewBadRequestError("failed to parse Params", err))
 				return
 			}
 		}
@@ -59,8 +57,7 @@ func GlobalHandler(handler any) func(*gin.Context) {
 			queryField := newArg.Elem().FieldByName("Query").Addr()
 			err := c.ShouldBindQuery(queryField.Interface())
 			if err != nil {
-				fmt.Println(err)
-				c.AbortWithError(400, err)
+				c.Error(NewBadRequestError("failed to parse Query", err))
 				return
 			}
 		}
