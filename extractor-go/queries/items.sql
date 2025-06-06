@@ -25,7 +25,7 @@ WHERE `current`.`update` = ?
 ORDER BY `current`.`history_id`
 LIMIT ?, ?;
 
--- name: CountChangedItemsInPatch :one
+-- name: CountChangedItemsInUpdate :one
 SELECT COUNT(*)
 FROM `item_history`
 WHERE `update` = ?;

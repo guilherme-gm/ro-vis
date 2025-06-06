@@ -24,12 +24,17 @@ func main() {
 	router.Use(controllers.ErrorHandler())
 
 	itemsController := controllers.ItemsController{}
+	questController := controllers.QuestController{}
 	updatesController := controllers.UpdatesController{}
 
 	router.Group("api/items/").
 		GET("/", controllers.GlobalHandler(itemsController.List)).
 		GET("/update/:update", controllers.GlobalHandler(itemsController.ListForUpdate)).
 		GET("/:itemId", controllers.GlobalHandler(itemsController.ListForItem))
+	router.Group("api/quests/").
+		GET("/", controllers.GlobalHandler(questController.List)).
+		GET("/update/:update", controllers.GlobalHandler(questController.ListForUpdate)).
+		GET("/:questId", controllers.GlobalHandler(questController.ListForItem))
 	router.Group("api/updates/").
 		GET("/", controllers.GlobalHandler(updatesController.List))
 

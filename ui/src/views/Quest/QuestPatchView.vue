@@ -48,20 +48,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.From !== null &&
 		<BsAccordion v-if="newQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newQuests"
-				:key="val.To?.Id"
-				:title="`#${val.To?.Id} - ${val?.To?.Title}`"
+				:key="val.To?.Data.QuestID"
+				:title="`#${val.To?.Data.QuestID} - ${val?.To?.Data.Title}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Data.QuestID ?? val.From?.Data.QuestID } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :current="val.To" />
+				<QuestCompareTable :current="val.To?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No new quests in this page</p>
@@ -70,20 +70,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.From !== null &&
 		<BsAccordion v-if="updatedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedQuests"
-				:key="val.To?.Id ?? val.From?.Id"
-				:title="`#${val.To?.Id ?? val.From?.Id} - ${val?.To?.Title ?? val?.From?.Title}`"
+				:key="val.To?.Data.QuestID ?? val.From?.Data.QuestID"
+				:title="`#${val.To?.Data.QuestID ?? val.From?.Data.QuestID} - ${val?.To?.Data.Title ?? val?.From?.Data.Title}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Data.QuestID ?? val.From?.Data.QuestID } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :current="val.To" :previous="val.From" />
+				<QuestCompareTable :current="val.To?.Data" :previous="val.From?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No updated quests in this page</p>
@@ -92,20 +92,20 @@ const deletedQuests = computed(() => list.value.filter((v) => v.From !== null &&
 		<BsAccordion v-if="deletedQuests.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedQuests"
-				:key="val.From?.Id"
-				:title="`#${val.From?.Id} - ${val?.From?.Title}`"
+				:key="val.From?.Data.QuestID"
+				:title="`#${val.From?.Data.QuestID} - ${val?.From?.Data.Title}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.QuestHistory, params: { questId: val.To?.Data.QuestID ?? val.From?.Data.QuestID } }"
 						target="_blank"
 					>
 						View Quest history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
 
-				<QuestCompareTable :previous="val.From" />
+				<QuestCompareTable :previous="val.From?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No deleted quests in this page</p>

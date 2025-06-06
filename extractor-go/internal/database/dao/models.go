@@ -78,6 +78,27 @@ type PreviousItemHistoryVw struct {
 	MoveInfo                []byte
 }
 
+type PreviousQuestHistoryVw struct {
+	HistoryID         sql.NullInt32
+	PreviousHistoryID sql.NullInt32
+	QuestID           sql.NullInt32
+	FileVersion       sql.NullInt32
+	Update            sql.NullString
+	Title             sql.NullString
+	Description       sql.NullString
+	Summary           sql.NullString
+	OldImage          sql.NullString
+	IconName          sql.NullString
+	NpcSpr            sql.NullString
+	NpcNavi           sql.NullString
+	NpcPosX           sql.NullInt32
+	NpcPosY           sql.NullInt32
+	RewardExp         sql.NullString
+	RewardJexp        sql.NullString
+	RewardItemList    sql.NullString
+	CoolTimeQuest     sql.NullInt32
+}
+
 type Quest struct {
 	QuestID         int32
 	LatestHistoryID int32
@@ -89,7 +110,7 @@ type QuestHistory struct {
 	PreviousHistoryID sql.NullInt32
 	QuestID           int32
 	FileVersion       int32
-	Patch             string
+	Update            string
 	Title             sql.NullString
 	Description       sql.NullString
 	Summary           sql.NullString

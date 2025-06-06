@@ -10,14 +10,14 @@ import (
 	"database/sql"
 )
 
-const countChangedItemsInPatch = `-- name: CountChangedItemsInPatch :one
+const countChangedItemsInUpdate = `-- name: CountChangedItemsInUpdate :one
 SELECT COUNT(*)
 FROM ` + "`" + `item_history` + "`" + `
 WHERE ` + "`" + `update` + "`" + ` = ?
 `
 
-func (q *Queries) CountChangedItemsInPatch(ctx context.Context, update string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countChangedItemsInPatch, update)
+func (q *Queries) CountChangedItemsInUpdate(ctx context.Context, update string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countChangedItemsInUpdate, update)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

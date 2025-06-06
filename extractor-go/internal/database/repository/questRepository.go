@@ -62,8 +62,8 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 			NpcNavi:           sql.NullString(it.NpcNavi),
 			NpcPosX:           sql.NullInt32(it.NpcPosX),
 			NpcPosY:           sql.NullInt32(it.NpcPosY),
-			RewardExp:         sql.NullString(it.RewardExp),
-			RewardJexp:        sql.NullString(it.RewardJexp),
+			RewardExp:         sql.NullString(it.RewardEXP),
+			RewardJexp:        sql.NullString(it.RewardJEXP),
 			RewardItemList:    sql.NullString(it.RewardItemList),
 			CoolTimeQuest:     sql.NullInt32(it.CoolTimeQuest),
 		})
@@ -74,7 +74,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 		return err
 	}
 
-	res, err := queries.GetQuestsIdsInPatch(context.Background(), patch)
+	res, err := queries.GetQuestsIdsInUpdate(context.Background(), patch)
 	if err != nil {
 		return err
 	}
@@ -150,4 +150,124 @@ func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, patch string, quest *domai
 	})
 
 	return err
+}
+
+func (r *QuestRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.CountChangedQuestsInUpdate(context.Background(), update)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
+}
+
+func (r *QuestRepository) sqlRecordToDomain(dbFrom dao.PreviousQuestHistoryVw, dbTo dao.QuestHistory, lastUpdate sql.NullString) FromToRecord[domain.Quest] {
+	var from *domain.Record[domain.Quest] = nil
+	var to *domain.Record[domain.Quest] = nil
+
+	if dbFrom.HistoryID.Valid {
+		from = &domain.Record[domain.Quest]{
+			Update: dbFrom.Update.String,
+			Data:   dbFrom.ToDomain(),
+		}
+	}
+
+	if dbTo.HistoryID != 0 {
+		to = &domain.Record[domain.Quest]{
+			Update: dbTo.Update,
+			Data:   dbTo.ToDomain(),
+		}
+	}
+
+	return FromToRecord[domain.Quest]{
+		LastUpdate: domain.NullableString(lastUpdate),
+		From:       from,
+		To:         to,
+	}
+}
+
+func (r *QuestRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Quest], error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetChangedQuests(context.Background(), dao.GetChangedQuestsParams{
+		Update: update,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Quest]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Quest], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousQuestHistoryVw, qmodel.QuestHistory, qmodel.Lastupdate)
+	}
+
+	return records, nil
+}
+
+func (r *QuestRepository) GetQuestHistory(tx *sql.Tx, questId int32, pagination Pagination) ([]FromToRecord[domain.Quest], error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetQuestHistory(context.Background(), dao.GetQuestHistoryParams{
+		QuestID: questId,
+		Offset:  pagination.Offset,
+		Limit:   pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Quest]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Quest], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousQuestHistoryVw, qmodel.QuestHistory, sql.NullString{})
+	}
+
+	return records, nil
+}
+
+func (r *QuestRepository) CountQuests(tx *sql.Tx) (int32, error) {
+	queries := database.GetQueries(tx)
+
+	res, err := queries.CountItems(context.Background())
+	if err == sql.ErrNoRows {
+		return int32(res), nil
+	}
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(res), nil
+}
+
+func (r *QuestRepository) GetQuests(tx *sql.Tx, pagination Pagination) ([]domain.MinQuest, error) {
+	queries := database.GetQueries(tx)
+	res, err := queries.GetQuestList(context.Background(), dao.GetQuestListParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []domain.MinQuest{}, nil
+	}
+	if err != nil {
+		return []domain.MinQuest{}, nil
+	}
+
+	quests := make([]domain.MinQuest, len(res))
+	for idx, val := range res {
+		quests[idx] = domain.MinQuest{
+			QuestID:    val.QuestID,
+			LastUpdate: val.Lastupdate,
+			Title:      domain.NullableString(val.Title),
+		}
+	}
+	return quests, nil
 }

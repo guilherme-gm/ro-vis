@@ -4,6 +4,10 @@
 install-dev:
 	go install github.com/githubnemo/CompileDaemon@latest
 
+# Applies database migrations
+migrate:
+	go run ./cmd/migrate/migrate.go
+
 # Run the API in development mode, with auto restart.
 # Requires CompileDaemon -- https://github.com/githubnemo/CompileDaemon
 # 	go install github.com/githubnemo/CompileDaemon@latest

@@ -60,8 +60,8 @@ func (q *QuestV3) ToDomain() domain.Quest {
 		NpcNavi:     dao.ToNullableString(q.NpcNavi),
 		NpcPosX:     dao.ToNullableInt32(int32(q.NpcPosX)),
 		NpcPosY:     dao.ToNullableInt32(int32(q.NpcPosY)),
-		RewardExp:   dao.ToNullableString(q.RewardEXP),
-		RewardJexp:  dao.ToNullableString(q.RewardJEXP),
+		RewardEXP:   dao.ToNullableString(q.RewardEXP),
+		RewardJEXP:  dao.ToNullableString(q.RewardJEXP),
 		// TODO:
 		// RewardItemList: dao.ToNullString(q.RewardItemList),
 	}
@@ -101,8 +101,8 @@ func (q *QuestV4) ToDomain() domain.Quest {
 		NpcNavi:     dao.ToNullableString(q.NpcNavi),
 		NpcPosX:     dao.ToNullableInt32(int32(q.NpcPosX)),
 		NpcPosY:     dao.ToNullableInt32(int32(q.NpcPosY)),
-		RewardExp:   dao.ToNullableString(q.RewardEXP),
-		RewardJexp:  dao.ToNullableString(q.RewardJEXP),
+		RewardEXP:   dao.ToNullableString(q.RewardEXP),
+		RewardJEXP:  dao.ToNullableString(q.RewardJEXP),
 		// TODO:
 		// RewardItemList: dao.ToNullString(q.RewardItemList),
 	}

@@ -14,8 +14,8 @@ type Quest struct {
 	NpcNavi           NullableString
 	NpcPosX           NullableInt32
 	NpcPosY           NullableInt32
-	RewardExp         NullableString
-	RewardJexp        NullableString
+	RewardEXP         NullableString
+	RewardJEXP        NullableString
 	RewardItemList    NullableString
 	CoolTimeQuest     NullableInt32
 	Deleted           bool
@@ -33,8 +33,14 @@ func (q *Quest) Equals(otherQuest Quest) bool {
 		q.NpcNavi == otherQuest.NpcNavi &&
 		q.NpcPosX == otherQuest.NpcPosX &&
 		q.NpcPosY == otherQuest.NpcPosY &&
-		q.RewardExp == otherQuest.RewardExp &&
-		q.RewardJexp == otherQuest.RewardJexp &&
+		q.RewardEXP == otherQuest.RewardEXP &&
+		q.RewardJEXP == otherQuest.RewardJEXP &&
 		q.RewardItemList == otherQuest.RewardItemList &&
 		q.CoolTimeQuest == otherQuest.CoolTimeQuest)
+}
+
+type MinQuest struct {
+	QuestID    int32
+	LastUpdate string
+	Title      NullableString
 }

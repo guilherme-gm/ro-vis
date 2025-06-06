@@ -5,13 +5,11 @@ export type QuestRewardItem  = {
 }
 
 export type Quest = {
-	HistoryId: string;
+	HistoryID: string;
 
-	Patch: string;
+	FileVersion: number;
 
-	_FileVersion: number;
-
-	Id: number;
+	QuestID: number;
 
 	Title: string;
 

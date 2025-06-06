@@ -165,7 +165,7 @@ func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.I
 
 func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
 	queries := database.GetQueries(tx)
-	res, err := queries.CountChangedItemsInPatch(context.Background(), update)
+	res, err := queries.CountChangedItemsInUpdate(context.Background(), update)
 	if err != nil {
 		return 0, err
 	}

@@ -10,8 +10,119 @@ import (
 	"database/sql"
 )
 
+const countChangedQuestsInUpdate = `-- name: CountChangedQuestsInUpdate :one
+SELECT COUNT(*)
+FROM ` + "`" + `quest_history` + "`" + `
+WHERE ` + "`" + `update` + "`" + ` = ?
+`
+
+func (q *Queries) CountChangedQuestsInUpdate(ctx context.Context, update string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countChangedQuestsInUpdate, update)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countQuests = `-- name: CountQuests :one
+SELECT COUNT(*)
+FROM ` + "`" + `quests` + "`" + `
+INNER JOIN ` + "`" + `quest_history` + "`" + ` ON ` + "`" + `quests` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `
+WHERE ` + "`" + `quests` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+`
+
+func (q *Queries) CountQuests(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countQuests)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getChangedQuests = `-- name: GetChangedQuests :many
+SELECT current.history_id, current.previous_history_id, current.quest_id, current.file_version, current.` + "`" + `update` + "`" + `, current.title, current.description, current.summary, current.old_image, current.icon_name, current.npc_spr, current.npc_navi, current.npc_pos_x, current.npc_pos_y, current.reward_exp, current.reward_jexp, current.reward_item_list, current.cool_time_quest, previous.history_id, previous.previous_history_id, previous.quest_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.title, previous.description, previous.summary, previous.old_image, previous.icon_name, previous.npc_spr, previous.npc_navi, previous.npc_pos_x, previous.npc_pos_y, previous.reward_exp, previous.reward_jexp, previous.reward_item_list, previous.cool_time_quest, latest.update lastUpdate
+FROM ` + "`" + `quest_history` + "`" + ` current
+LEFT JOIN ` + "`" + `previous_quest_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+LEFT JOIN ` + "`" + `quests` + "`" + ` latest_id ON ` + "`" + `latest_id` + "`" + `.` + "`" + `quest_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `quest_id` + "`" + `
+LEFT JOIN ` + "`" + `quest_history` + "`" + ` latest ON ` + "`" + `latest_id` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `latest` + "`" + `.` + "`" + `history_id` + "`" + `
+WHERE ` + "`" + `current` + "`" + `.` + "`" + `update` + "`" + ` = ?
+ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + `
+LIMIT ?, ?
+`
+
+type GetChangedQuestsParams struct {
+	Update string
+	Offset int32
+	Limit  int32
+}
+
+type GetChangedQuestsRow struct {
+	QuestHistory           QuestHistory
+	PreviousQuestHistoryVw PreviousQuestHistoryVw
+	Lastupdate             sql.NullString
+}
+
+func (q *Queries) GetChangedQuests(ctx context.Context, arg GetChangedQuestsParams) ([]GetChangedQuestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getChangedQuests, arg.Update, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetChangedQuestsRow
+	for rows.Next() {
+		var i GetChangedQuestsRow
+		if err := rows.Scan(
+			&i.QuestHistory.HistoryID,
+			&i.QuestHistory.PreviousHistoryID,
+			&i.QuestHistory.QuestID,
+			&i.QuestHistory.FileVersion,
+			&i.QuestHistory.Update,
+			&i.QuestHistory.Title,
+			&i.QuestHistory.Description,
+			&i.QuestHistory.Summary,
+			&i.QuestHistory.OldImage,
+			&i.QuestHistory.IconName,
+			&i.QuestHistory.NpcSpr,
+			&i.QuestHistory.NpcNavi,
+			&i.QuestHistory.NpcPosX,
+			&i.QuestHistory.NpcPosY,
+			&i.QuestHistory.RewardExp,
+			&i.QuestHistory.RewardJexp,
+			&i.QuestHistory.RewardItemList,
+			&i.QuestHistory.CoolTimeQuest,
+			&i.PreviousQuestHistoryVw.HistoryID,
+			&i.PreviousQuestHistoryVw.PreviousHistoryID,
+			&i.PreviousQuestHistoryVw.QuestID,
+			&i.PreviousQuestHistoryVw.FileVersion,
+			&i.PreviousQuestHistoryVw.Update,
+			&i.PreviousQuestHistoryVw.Title,
+			&i.PreviousQuestHistoryVw.Description,
+			&i.PreviousQuestHistoryVw.Summary,
+			&i.PreviousQuestHistoryVw.OldImage,
+			&i.PreviousQuestHistoryVw.IconName,
+			&i.PreviousQuestHistoryVw.NpcSpr,
+			&i.PreviousQuestHistoryVw.NpcNavi,
+			&i.PreviousQuestHistoryVw.NpcPosX,
+			&i.PreviousQuestHistoryVw.NpcPosY,
+			&i.PreviousQuestHistoryVw.RewardExp,
+			&i.PreviousQuestHistoryVw.RewardJexp,
+			&i.PreviousQuestHistoryVw.RewardItemList,
+			&i.PreviousQuestHistoryVw.CoolTimeQuest,
+			&i.Lastupdate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCurrentQuests = `-- name: GetCurrentQuests :many
-SELECT quest_history.history_id, quest_history.previous_history_id, quest_history.quest_id, quest_history.file_version, quest_history.patch, quest_history.title, quest_history.description, quest_history.summary, quest_history.old_image, quest_history.icon_name, quest_history.npc_spr, quest_history.npc_navi, quest_history.npc_pos_x, quest_history.npc_pos_y, quest_history.reward_exp, quest_history.reward_jexp, quest_history.reward_item_list, quest_history.cool_time_quest, ` + "`" + `quests` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT quest_history.history_id, quest_history.previous_history_id, quest_history.quest_id, quest_history.file_version, quest_history.` + "`" + `update` + "`" + `, quest_history.title, quest_history.description, quest_history.summary, quest_history.old_image, quest_history.icon_name, quest_history.npc_spr, quest_history.npc_navi, quest_history.npc_pos_x, quest_history.npc_pos_y, quest_history.reward_exp, quest_history.reward_jexp, quest_history.reward_item_list, quest_history.cool_time_quest, ` + "`" + `quests` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `quests` + "`" + `
 INNER JOIN ` + "`" + `quest_history` + "`" + ` ON ` + "`" + `quests` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -21,7 +132,7 @@ type GetCurrentQuestsRow struct {
 	PreviousHistoryID sql.NullInt32
 	QuestID           int32
 	FileVersion       int32
-	Patch             string
+	Update            string
 	Title             sql.NullString
 	Description       sql.NullString
 	Summary           sql.NullString
@@ -52,7 +163,7 @@ func (q *Queries) GetCurrentQuests(ctx context.Context) ([]GetCurrentQuestsRow, 
 			&i.PreviousHistoryID,
 			&i.QuestID,
 			&i.FileVersion,
-			&i.Patch,
+			&i.Update,
 			&i.Title,
 			&i.Description,
 			&i.Summary,
@@ -81,26 +192,149 @@ func (q *Queries) GetCurrentQuests(ctx context.Context) ([]GetCurrentQuestsRow, 
 	return items, nil
 }
 
-const getQuestsIdsInPatch = `-- name: GetQuestsIdsInPatch :many
-SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + `
-FROM ` + "`" + `quest_history` + "`" + `
-WHERE ` + "`" + `quest_history` + "`" + `.` + "`" + `patch` + "`" + ` = ?
+const getQuestHistory = `-- name: GetQuestHistory :many
+SELECT current.history_id, current.previous_history_id, current.quest_id, current.file_version, current.` + "`" + `update` + "`" + `, current.title, current.description, current.summary, current.old_image, current.icon_name, current.npc_spr, current.npc_navi, current.npc_pos_x, current.npc_pos_y, current.reward_exp, current.reward_jexp, current.reward_item_list, current.cool_time_quest, previous.history_id, previous.previous_history_id, previous.quest_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.title, previous.description, previous.summary, previous.old_image, previous.icon_name, previous.npc_spr, previous.npc_navi, previous.npc_pos_x, previous.npc_pos_y, previous.reward_exp, previous.reward_jexp, previous.reward_item_list, previous.cool_time_quest
+FROM ` + "`" + `quest_history` + "`" + ` current
+LEFT JOIN ` + "`" + `previous_quest_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+WHERE ` + "`" + `current` + "`" + `.` + "`" + `quest_id` + "`" + ` = ?
+ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + ` ASC
+LIMIT ?, ?
 `
 
-type GetQuestsIdsInPatchRow struct {
-	HistoryID int32
-	QuestID   int32
+type GetQuestHistoryParams struct {
+	QuestID int32
+	Offset  int32
+	Limit   int32
 }
 
-func (q *Queries) GetQuestsIdsInPatch(ctx context.Context, patch string) ([]GetQuestsIdsInPatchRow, error) {
-	rows, err := q.db.QueryContext(ctx, getQuestsIdsInPatch, patch)
+type GetQuestHistoryRow struct {
+	QuestHistory           QuestHistory
+	PreviousQuestHistoryVw PreviousQuestHistoryVw
+}
+
+func (q *Queries) GetQuestHistory(ctx context.Context, arg GetQuestHistoryParams) ([]GetQuestHistoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getQuestHistory, arg.QuestID, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetQuestsIdsInPatchRow
+	var items []GetQuestHistoryRow
 	for rows.Next() {
-		var i GetQuestsIdsInPatchRow
+		var i GetQuestHistoryRow
+		if err := rows.Scan(
+			&i.QuestHistory.HistoryID,
+			&i.QuestHistory.PreviousHistoryID,
+			&i.QuestHistory.QuestID,
+			&i.QuestHistory.FileVersion,
+			&i.QuestHistory.Update,
+			&i.QuestHistory.Title,
+			&i.QuestHistory.Description,
+			&i.QuestHistory.Summary,
+			&i.QuestHistory.OldImage,
+			&i.QuestHistory.IconName,
+			&i.QuestHistory.NpcSpr,
+			&i.QuestHistory.NpcNavi,
+			&i.QuestHistory.NpcPosX,
+			&i.QuestHistory.NpcPosY,
+			&i.QuestHistory.RewardExp,
+			&i.QuestHistory.RewardJexp,
+			&i.QuestHistory.RewardItemList,
+			&i.QuestHistory.CoolTimeQuest,
+			&i.PreviousQuestHistoryVw.HistoryID,
+			&i.PreviousQuestHistoryVw.PreviousHistoryID,
+			&i.PreviousQuestHistoryVw.QuestID,
+			&i.PreviousQuestHistoryVw.FileVersion,
+			&i.PreviousQuestHistoryVw.Update,
+			&i.PreviousQuestHistoryVw.Title,
+			&i.PreviousQuestHistoryVw.Description,
+			&i.PreviousQuestHistoryVw.Summary,
+			&i.PreviousQuestHistoryVw.OldImage,
+			&i.PreviousQuestHistoryVw.IconName,
+			&i.PreviousQuestHistoryVw.NpcSpr,
+			&i.PreviousQuestHistoryVw.NpcNavi,
+			&i.PreviousQuestHistoryVw.NpcPosX,
+			&i.PreviousQuestHistoryVw.NpcPosY,
+			&i.PreviousQuestHistoryVw.RewardExp,
+			&i.PreviousQuestHistoryVw.RewardJexp,
+			&i.PreviousQuestHistoryVw.RewardItemList,
+			&i.PreviousQuestHistoryVw.CoolTimeQuest,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getQuestList = `-- name: GetQuestList :many
+SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `title` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `update` + "`" + ` lastUpdate
+FROM ` + "`" + `quests` + "`" + `
+INNER JOIN ` + "`" + `quest_history` + "`" + ` ON ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `quests` + "`" + `.` + "`" + `latest_history_id` + "`" + `
+WHERE ` + "`" + `quests` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+ORDER BY ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + ` ASC
+LIMIT ?, ?
+`
+
+type GetQuestListParams struct {
+	Offset int32
+	Limit  int32
+}
+
+type GetQuestListRow struct {
+	QuestID    int32
+	Title      sql.NullString
+	Lastupdate string
+}
+
+func (q *Queries) GetQuestList(ctx context.Context, arg GetQuestListParams) ([]GetQuestListRow, error) {
+	rows, err := q.db.QueryContext(ctx, getQuestList, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetQuestListRow
+	for rows.Next() {
+		var i GetQuestListRow
+		if err := rows.Scan(&i.QuestID, &i.Title, &i.Lastupdate); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getQuestsIdsInUpdate = `-- name: GetQuestsIdsInUpdate :many
+SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + `
+FROM ` + "`" + `quest_history` + "`" + `
+WHERE ` + "`" + `quest_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
+`
+
+type GetQuestsIdsInUpdateRow struct {
+	HistoryID int32
+	QuestID   int32
+}
+
+func (q *Queries) GetQuestsIdsInUpdate(ctx context.Context, update string) ([]GetQuestsIdsInUpdateRow, error) {
+	rows, err := q.db.QueryContext(ctx, getQuestsIdsInUpdate, update)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetQuestsIdsInUpdateRow
+	for rows.Next() {
+		var i GetQuestsIdsInUpdateRow
 		if err := rows.Scan(&i.HistoryID, &i.QuestID); err != nil {
 			return nil, err
 		}
