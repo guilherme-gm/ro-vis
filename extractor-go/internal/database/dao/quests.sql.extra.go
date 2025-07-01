@@ -12,7 +12,7 @@ INSERT INTO ` + "`" + `quest_history` + "`" + ` (
 	` + "`" + `previous_history_id` + "`" + `, -- 1
 	` + "`" + `quest_id` + "`" + `, -- 2
 	` + "`" + `file_version` + "`" + `, -- 3
-	` + "`" + `patch` + "`" + `, -- 4
+	` + "`" + `update` + "`" + `, -- 4
 	` + "`" + `title` + "`" + `, -- 5
 	` + "`" + `description` + "`" + `, -- 6
 	` + "`" + `summary` + "`" + `, -- 7
@@ -36,7 +36,7 @@ type BulkInsertQuestHistoryParams struct {
 	PreviousHistoryID sql.NullInt32
 	QuestID           int32
 	FileVersion       int32
-	Patch             string
+	Update            string
 	Title             sql.NullString
 	Description       sql.NullString
 	Summary           sql.NullString
@@ -65,7 +65,7 @@ func (q *Queries) BulkInsertQuestHistory(ctx context.Context, arg []BulkInsertQu
 			data.PreviousHistoryID,
 			data.QuestID,
 			data.FileVersion,
-			data.Patch,
+			data.Update,
 			data.Title,
 			data.Description,
 			data.Summary,

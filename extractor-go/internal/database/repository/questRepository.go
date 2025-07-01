@@ -43,7 +43,7 @@ func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) 
 	return &quests, nil
 }
 
-func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHistories *[]domain.Quest) error {
+func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.Quest) error {
 	queries := database.GetQueries(tx)
 	bulkParams := []dao.BulkInsertQuestHistoryParams{}
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
@@ -58,7 +58,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
 			QuestID:           it.QuestID,
 			FileVersion:       it.FileVersion,
-			Patch:             patch,
+			Update:            update,
 			Title:             sql.NullString(it.Title),
 			Description:       sql.NullString(it.Description),
 			Summary:           sql.NullString(it.Summary),
@@ -80,7 +80,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 		return err
 	}
 
-	res, err := queries.GetQuestsIdsInUpdate(context.Background(), patch)
+	res, err := queries.GetQuestsIdsInUpdate(context.Background(), update)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 	return err
 }
 
-func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, patch string, newHistories *[]domain.Quest) error {
+func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHistories *[]domain.Quest) error {
 	if len(*newHistories) == 0 {
 		return nil
 	}
@@ -116,26 +116,26 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, patch string, newHistor
 	i := 0
 	for ; i < steps; i++ {
 		slice := (*newHistories)[i*500 : (i+1)*500]
-		if err := r.addQuestsToHistory_sub(tx, patch, &slice); err != nil {
+		if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
 			return err
 		}
 	}
 
 	slice := (*newHistories)[i*500 : len(*newHistories)]
-	if err := r.addQuestsToHistory_sub(tx, patch, &slice); err != nil {
+	if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, patch string, quest *domain.Quest) error {
+func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, update string, quest *domain.Quest) error {
 	queries := database.GetQueries(tx)
 	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
 		PreviousHistoryID: sql.NullInt32(quest.HistoryID),
 		QuestID:           quest.QuestID,
 		FileVersion:       quest.FileVersion,
-		Patch:             patch,
+		Update:            update,
 	}})
 
 	if err != nil {
