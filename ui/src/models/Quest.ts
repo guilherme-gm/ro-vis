@@ -39,9 +39,9 @@ export type Quest = {
 }
 
 export type MinQuest = {
-	Id: number;
+	QuestID: number;
 
-	Patch: string;
+	LastUpdate: string;
 
 	Title: string;
 };
