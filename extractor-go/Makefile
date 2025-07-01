@@ -4,6 +4,10 @@
 install-dev:
 	go install github.com/githubnemo/CompileDaemon@latest
 
+# Run extractor in development mode
+extractor-dev:
+	CGO_ENABLED=1 GOARCH=386 go run -tags luaa cmd/dev/dev.go
+
 # Applies database migrations
 migrate:
 	go run ./cmd/migrate/migrate.go
