@@ -49,21 +49,28 @@ type QuestV3 struct {
 }
 
 func (q *QuestV3) ToDomain() domain.Quest {
+	rewardItems := make([]domain.RewardItem, len(q.RewardItemList))
+	for i, item := range q.RewardItemList {
+		rewardItems[i] = domain.RewardItem{
+			ItemID:   int32(item.ItemID),
+			Quantity: int32(item.ItemNum),
+		}
+	}
+
 	return domain.Quest{
-		QuestID:     int32(q.QuestId),
-		FileVersion: 3,
-		Title:       dao.ToNullableString(q.Title),
-		Description: dao.ToNullableString(strings.Join(q.Description, "\n")),
-		Summary:     dao.ToNullableString(q.Summary),
-		IconName:    dao.ToNullableString(q.IconName),
-		NpcSpr:      dao.ToNullableString(q.NpcSpr),
-		NpcNavi:     dao.ToNullableString(q.NpcNavi),
-		NpcPosX:     dao.ToNullableInt32(int32(q.NpcPosX)),
-		NpcPosY:     dao.ToNullableInt32(int32(q.NpcPosY)),
-		RewardEXP:   dao.ToNullableString(q.RewardEXP),
-		RewardJEXP:  dao.ToNullableString(q.RewardJEXP),
-		// TODO:
-		// RewardItemList: dao.ToNullString(q.RewardItemList),
+		QuestID:        int32(q.QuestId),
+		FileVersion:    3,
+		Title:          dao.ToNullableString(q.Title),
+		Description:    dao.ToNullableString(strings.Join(q.Description, "\n")),
+		Summary:        dao.ToNullableString(q.Summary),
+		IconName:       dao.ToNullableString(q.IconName),
+		NpcSpr:         dao.ToNullableString(q.NpcSpr),
+		NpcNavi:        dao.ToNullableString(q.NpcNavi),
+		NpcPosX:        dao.ToNullableInt32(int32(q.NpcPosX)),
+		NpcPosY:        dao.ToNullableInt32(int32(q.NpcPosY)),
+		RewardEXP:      dao.ToNullableString(q.RewardEXP),
+		RewardJEXP:     dao.ToNullableString(q.RewardJEXP),
+		RewardItemList: rewardItems,
 	}
 }
 
@@ -90,20 +97,27 @@ type QuestV4RewardItem struct {
 }
 
 func (q *QuestV4) ToDomain() domain.Quest {
+	rewardItems := make([]domain.RewardItem, len(q.RewardItemList))
+	for i, item := range q.RewardItemList {
+		rewardItems[i] = domain.RewardItem{
+			ItemID:   int32(item.ItemID),
+			Quantity: int32(item.ItemNum),
+		}
+	}
+
 	return domain.Quest{
-		QuestID:     int32(q.QuestId),
-		FileVersion: 3,
-		Title:       dao.ToNullableString(q.Title),
-		Description: dao.ToNullableString(strings.Join(q.Description, "\n")),
-		Summary:     dao.ToNullableString(q.Summary),
-		IconName:    dao.ToNullableString(q.IconName),
-		NpcSpr:      dao.ToNullableString(q.NpcSpr),
-		NpcNavi:     dao.ToNullableString(q.NpcNavi),
-		NpcPosX:     dao.ToNullableInt32(int32(q.NpcPosX)),
-		NpcPosY:     dao.ToNullableInt32(int32(q.NpcPosY)),
-		RewardEXP:   dao.ToNullableString(q.RewardEXP),
-		RewardJEXP:  dao.ToNullableString(q.RewardJEXP),
-		// TODO:
-		// RewardItemList: dao.ToNullString(q.RewardItemList),
+		QuestID:        int32(q.QuestId),
+		FileVersion:    3,
+		Title:          dao.ToNullableString(q.Title),
+		Description:    dao.ToNullableString(strings.Join(q.Description, "\n")),
+		Summary:        dao.ToNullableString(q.Summary),
+		IconName:       dao.ToNullableString(q.IconName),
+		NpcSpr:         dao.ToNullableString(q.NpcSpr),
+		NpcNavi:        dao.ToNullableString(q.NpcNavi),
+		NpcPosX:        dao.ToNullableInt32(int32(q.NpcPosX)),
+		NpcPosY:        dao.ToNullableInt32(int32(q.NpcPosY)),
+		RewardEXP:      dao.ToNullableString(q.RewardEXP),
+		RewardJEXP:     dao.ToNullableString(q.RewardJEXP),
+		RewardItemList: rewardItems,
 	}
 }

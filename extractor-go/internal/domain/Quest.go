@@ -1,5 +1,10 @@
 package domain
 
+type RewardItem struct {
+	ItemID   int32
+	Quantity int32
+}
+
 type Quest struct {
 	PreviousHistoryID NullableInt32
 	HistoryID         NullableInt32
@@ -16,13 +21,22 @@ type Quest struct {
 	NpcPosY           NullableInt32
 	RewardEXP         NullableString
 	RewardJEXP        NullableString
-	RewardItemList    NullableString
+	RewardItemList    []RewardItem
 	CoolTimeQuest     NullableInt32
 	Deleted           bool
 }
 
 func (q *Quest) Equals(otherQuest Quest) bool {
 	// FileVersion is not checked, if the file has changed but the quest is the same, we don't care.
+	if len(q.RewardItemList) != len(otherQuest.RewardItemList) {
+		return false
+	}
+	for i := range q.RewardItemList {
+		if q.RewardItemList[i].ItemID != otherQuest.RewardItemList[i].ItemID ||
+			q.RewardItemList[i].Quantity != otherQuest.RewardItemList[i].Quantity {
+			return false
+		}
+	}
 	return (q.QuestID == otherQuest.QuestID &&
 		q.Title == otherQuest.Title &&
 		q.Description == otherQuest.Description &&
@@ -35,7 +49,6 @@ func (q *Quest) Equals(otherQuest Quest) bool {
 		q.NpcPosY == otherQuest.NpcPosY &&
 		q.RewardEXP == otherQuest.RewardEXP &&
 		q.RewardJEXP == otherQuest.RewardJEXP &&
-		q.RewardItemList == otherQuest.RewardItemList &&
 		q.CoolTimeQuest == otherQuest.CoolTimeQuest)
 }
 

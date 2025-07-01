@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
@@ -48,6 +49,11 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
 	for _, it := range *newHistories {
 		updatedIdMap[it.QuestID] = true
+		var rewardItemListJson string
+		if len(it.RewardItemList) > 0 {
+			jsonBytes, _ := json.Marshal(it.RewardItemList)
+			rewardItemListJson = string(jsonBytes)
+		}
 		bulkParams = append(bulkParams, dao.BulkInsertQuestHistoryParams{
 			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
 			QuestID:           it.QuestID,
@@ -64,7 +70,7 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, patch string, newHi
 			NpcPosY:           sql.NullInt32(it.NpcPosY),
 			RewardExp:         sql.NullString(it.RewardEXP),
 			RewardJexp:        sql.NullString(it.RewardJEXP),
-			RewardItemList:    sql.NullString(it.RewardItemList),
+			RewardItemList:    sql.NullString{String: rewardItemListJson, Valid: len(it.RewardItemList) > 0},
 			CoolTimeQuest:     sql.NullInt32(it.CoolTimeQuest),
 		})
 	}

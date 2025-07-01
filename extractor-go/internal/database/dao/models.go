@@ -95,8 +95,8 @@ type PreviousQuestHistoryVw struct {
 	NpcPosY           sql.NullInt32
 	RewardExp         sql.NullString
 	RewardJexp        sql.NullString
-	RewardItemList    sql.NullString
 	CoolTimeQuest     sql.NullInt32
+	RewardItemList    []byte
 }
 
 type Quest struct {
@@ -122,6 +122,6 @@ type QuestHistory struct {
 	NpcPosY           sql.NullInt32
 	RewardExp         sql.NullString
 	RewardJexp        sql.NullString
-	RewardItemList    sql.NullString
 	CoolTimeQuest     sql.NullInt32
+	RewardItemList    []byte
 }

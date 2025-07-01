@@ -1,10 +1,18 @@
 package dao
 
 import (
+	"encoding/json"
+
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
 func (q *GetCurrentQuestsRow) ToDomain() domain.Quest {
+	var rewardItems []domain.RewardItem
+	if q.RewardItemList != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.RewardItemList, &rewardItems)
+	}
+
 	return domain.Quest{
 		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
 		HistoryID:         ToNullableInt32(q.HistoryID),
@@ -21,13 +29,19 @@ func (q *GetCurrentQuestsRow) ToDomain() domain.Quest {
 		NpcPosY:           domain.NullableInt32(q.NpcPosY),
 		RewardEXP:         domain.NullableString(q.RewardExp),
 		RewardJEXP:        domain.NullableString(q.RewardJexp),
-		RewardItemList:    domain.NullableString(q.RewardItemList),
+		RewardItemList:    rewardItems,
 		CoolTimeQuest:     domain.NullableInt32(q.CoolTimeQuest),
 		Deleted:           q.Deleted,
 	}
 }
 
 func (q *QuestHistory) ToDomain() domain.Quest {
+	var rewardItems []domain.RewardItem
+	if q.RewardItemList != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.RewardItemList, &rewardItems)
+	}
+
 	return domain.Quest{
 		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
 		HistoryID:         ToNullableInt32(q.HistoryID),
@@ -44,12 +58,18 @@ func (q *QuestHistory) ToDomain() domain.Quest {
 		NpcPosY:           domain.NullableInt32(q.NpcPosY),
 		RewardEXP:         domain.NullableString(q.RewardExp),
 		RewardJEXP:        domain.NullableString(q.RewardJexp),
-		RewardItemList:    domain.NullableString(q.RewardItemList),
+		RewardItemList:    rewardItems,
 		CoolTimeQuest:     domain.NullableInt32(q.CoolTimeQuest),
 	}
 }
 
 func (q *PreviousQuestHistoryVw) ToDomain() domain.Quest {
+	var rewardItems []domain.RewardItem
+	if q.RewardItemList != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.RewardItemList, &rewardItems)
+	}
+
 	return domain.Quest{
 		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
 		HistoryID:         domain.NullableInt32(q.HistoryID),
@@ -66,7 +86,7 @@ func (q *PreviousQuestHistoryVw) ToDomain() domain.Quest {
 		NpcPosY:           domain.NullableInt32(q.NpcPosY),
 		RewardEXP:         domain.NullableString(q.RewardExp),
 		RewardJEXP:        domain.NullableString(q.RewardJexp),
-		RewardItemList:    domain.NullableString(q.RewardItemList),
+		RewardItemList:    rewardItems,
 		CoolTimeQuest:     domain.NullableInt32(q.CoolTimeQuest),
 	}
 }
