@@ -1,7 +1,7 @@
 export type QuestRewardItem  = {
 	ItemID: number;
 
-	ItemNum: number;
+	Quantity: number;
 }
 
 export type Quest = {
