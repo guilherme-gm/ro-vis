@@ -20,7 +20,13 @@ func main() {
 		v.RegisterValidation("updateStr", controllers.UpdateString)
 	}
 
-	router.Use(cors.Default()) // @TODO: Review CORS config
+	if gin.Mode() == gin.ReleaseMode {
+		corsConfig := cors.DefaultConfig()
+		corsConfig.AllowOrigins = []string{"https://guilherme-gm.github.io"}
+		router.Use(cors.New(corsConfig))
+	} else {
+		router.Use(cors.Default())
+	}
 	router.Use(controllers.ErrorHandler())
 
 	itemsController := controllers.ItemsController{}
