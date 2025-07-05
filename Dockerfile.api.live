@@ -1,0 +1,6 @@
+# Live version of the API container
+# Simply runs the binary inside it.
+
+FROM scratch
+COPY extractor-go/api /api
+ENTRYPOINT ["/api"]

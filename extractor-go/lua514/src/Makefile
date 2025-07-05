@@ -101,6 +101,9 @@ linux:
 linux32: # Custom platform to build 32-bits on 64-bits systems
 	$(MAKE) all MYCFLAGS="-DLUA_USE_LINUX -m32" MYLDFLAGS="-m32" MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
 
+linux32arm: # Custom platform to build 32-bits arm on 64-bits x86 systems
+	$(MAKE) all CC="arm-linux-gnueabihf-gcc" MYCFLAGS="-DLUA_USE_LINUX" MYLIBS="-Wl,-E -ldl"
+
 macosx:
 	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-lreadline"
 # use this on Mac OS X 10.3-

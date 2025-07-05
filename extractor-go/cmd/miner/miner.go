@@ -135,6 +135,10 @@ func extractRelevantFiles(server *server.Server, loader loaders.Loader, update d
 		}
 
 		patchFileExt := change.Patch[len(change.Patch)-4:]
+		if _, err := os.Stat(server.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+
 		var patchFile patchfile.PatchFile
 		switch patchFileExt {
 		case ".rgz":
@@ -207,12 +211,12 @@ func main() {
 	fmt.Println("RO Vis extractor - Miner")
 	conf.LoadExtractor()
 
-	_ = downloadPatches // just to avoid complains from compiler
+	// _ = downloadPatches // just to avoid complains from compiler
 
 	// @TODO: server.GetServers()
 	for _, server := range []*server.Server{server.GetLATAM()} {
 		fmt.Println("------ Mining " + server.DatabaseName + " ------")
-		// downloadPatches(server)
+		downloadPatches(server)
 		processPatches(server)
 	}
 
