@@ -1,0 +1,353 @@
+[
+    {
+        "name": "ExMacro.gpf",
+        "patchDate": null,
+        "files": [
+            {
+                "name": "data\\lua files\\exmacro\\bossmonsterlist.lub",
+                "size": 3487,
+                "hash": "7d738c9316f63673d5a66f526201edda"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\etc_exmacro.lub",
+                "size": 2028,
+                "hash": "1503d77fcb1eea38fef6d96347ca1931"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\exmacro_f.lub",
+                "size": 423,
+                "hash": "c9fd7423c397a2294ea2edf7df5183c1"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\init_exmacro.lub",
+                "size": 1621,
+                "hash": "044d67265cb9bc00d3c39b860be3328c"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\item_exmacro.lub",
+                "size": 4711,
+                "hash": "291fbb919b79877bd851e7d6356d9832"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\skill_exmacro.lub",
+                "size": 1458,
+                "hash": "2b058c4e0816ab701ed4cebbcd7f2c4a"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\tactic_exmacro.lub",
+                "size": 6476,
+                "hash": "ce725a072c52b2aa15fc800fcaa3e456"
+            },
+            {
+                "name": "data\\lua files\\hotkey.lub",
+                "size": 19570,
+                "hash": "aeeaf8ae989ec1e791a791152bf267e7"
+            },
+            {
+                "name": "data\\lua files\\msgstring_kr.lub",
+                "size": 28274,
+                "hash": "1545717f2371d66330c231307e91124b"
+            },
+            {
+                "name": "data\\lua files\\wndinfo.lub",
+                "size": 4341,
+                "hash": "0529cf0b5eb2eaf42b152cd9e68ec831"
+            },
+            {
+                "name": "data\\texture\\effect\\매크로사용.tga",
+                "size": 4140,
+                "hash": "6b56991698a38c5e7f7818476ea1852b"
+            },
+            {
+                "name": "data\\texture\\effect\\매크로후딜레이.tga",
+                "size": 4140,
+                "hash": "aa0f929d33816546d8318e9fcd1ba091"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_close_a.bmp",
+                "size": 1784,
+                "hash": "ca1ad9535fda5af89f3a1e3c49427044"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_close_b.bmp",
+                "size": 1784,
+                "hash": "4e3914f1542f7b9288469219c7aa14a3"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro.bmp",
+                "size": 1288,
+                "hash": "eabf558645fb3f0825e50400902d4f2f"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro_a.bmp",
+                "size": 1932,
+                "hash": "a82af166257a22391a50b20fbfa2f2a0"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro_b.bmp",
+                "size": 1880,
+                "hash": "ceee874fe03e61cfa5bdfde944445e36"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_save_a.bmp",
+                "size": 1784,
+                "hash": "61e67b00a2a0c0c0b3fbf6cd7e36bf5e"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_save_b.bmp",
+                "size": 1784,
+                "hash": "c7838bb689fe40ee612b938a2b2179d0"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_setup_a.bmp",
+                "size": 1784,
+                "hash": "132cd02099b090b20fa71326d07188ff"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_setup_b.bmp",
+                "size": 1784,
+                "hash": "89f312bfbda5ff01fec0dea9173afdf1"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_start_a.bmp",
+                "size": 1784,
+                "hash": "4c831909cdee075c910a9bfabc8889cb"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_start_b.bmp",
+                "size": 1784,
+                "hash": "b74a3217b94bcdb3e5c7f002ecb39495"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_stop_a.bmp",
+                "size": 1784,
+                "hash": "49da7935c4a1afe61332ae9979ab3749"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_stop_b.bmp",
+                "size": 1784,
+                "hash": "f04d83302ebb1c04db525876e25a5aa4"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\no_item.bmp",
+                "size": 1256,
+                "hash": "4b4d8f28bcd9917d3f2e5b45bbd27e3b"
+            }
+        ]
+    },
+    {
+        "name": "ExMacroData.gpf",
+        "patchDate": null,
+        "files": [
+            {
+                "name": "data\\lua files\\exmacro\\bossmonsterlist.lub",
+                "size": 3487,
+                "hash": "7d738c9316f63673d5a66f526201edda"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\etc_exmacro.lub",
+                "size": 2028,
+                "hash": "1503d77fcb1eea38fef6d96347ca1931"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\exmacro_f.lub",
+                "size": 423,
+                "hash": "c9fd7423c397a2294ea2edf7df5183c1"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\init_exmacro.lub",
+                "size": 1621,
+                "hash": "044d67265cb9bc00d3c39b860be3328c"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\item_exmacro.lub",
+                "size": 4711,
+                "hash": "291fbb919b79877bd851e7d6356d9832"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\skill_exmacro.lub",
+                "size": 1458,
+                "hash": "2b058c4e0816ab701ed4cebbcd7f2c4a"
+            },
+            {
+                "name": "data\\lua files\\exmacro\\tactic_exmacro.lub",
+                "size": 6476,
+                "hash": "ce725a072c52b2aa15fc800fcaa3e456"
+            },
+            {
+                "name": "data\\lua files\\hotkey.lub",
+                "size": 19570,
+                "hash": "aeeaf8ae989ec1e791a791152bf267e7"
+            },
+            {
+                "name": "data\\lua files\\msgstring_kr.lub",
+                "size": 28371,
+                "hash": "641abd397288061983a8cc8cf939a5df"
+            },
+            {
+                "name": "data\\lua files\\wndinfo.lub",
+                "size": 4341,
+                "hash": "0529cf0b5eb2eaf42b152cd9e68ec831"
+            },
+            {
+                "name": "data\\texture\\effect\\매크로사용.tga",
+                "size": 4140,
+                "hash": "6b56991698a38c5e7f7818476ea1852b"
+            },
+            {
+                "name": "data\\texture\\effect\\매크로후딜레이.tga",
+                "size": 4140,
+                "hash": "aa0f929d33816546d8318e9fcd1ba091"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_close_a.bmp",
+                "size": 1784,
+                "hash": "ca1ad9535fda5af89f3a1e3c49427044"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_close_b.bmp",
+                "size": 1784,
+                "hash": "4e3914f1542f7b9288469219c7aa14a3"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro.bmp",
+                "size": 1288,
+                "hash": "eabf558645fb3f0825e50400902d4f2f"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro_a.bmp",
+                "size": 1932,
+                "hash": "a82af166257a22391a50b20fbfa2f2a0"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_ex_macro_b.bmp",
+                "size": 1880,
+                "hash": "ceee874fe03e61cfa5bdfde944445e36"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_save_a.bmp",
+                "size": 1784,
+                "hash": "61e67b00a2a0c0c0b3fbf6cd7e36bf5e"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_save_b.bmp",
+                "size": 1784,
+                "hash": "c7838bb689fe40ee612b938a2b2179d0"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_setup_a.bmp",
+                "size": 1784,
+                "hash": "132cd02099b090b20fa71326d07188ff"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_setup_b.bmp",
+                "size": 1784,
+                "hash": "89f312bfbda5ff01fec0dea9173afdf1"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_start_a.bmp",
+                "size": 1784,
+                "hash": "4c831909cdee075c910a9bfabc8889cb"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_start_b.bmp",
+                "size": 1784,
+                "hash": "b74a3217b94bcdb3e5c7f002ecb39495"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_stop_a.bmp",
+                "size": 1784,
+                "hash": "49da7935c4a1afe61332ae9979ab3749"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\btn_stop_b.bmp",
+                "size": 1784,
+                "hash": "f04d83302ebb1c04db525876e25a5aa4"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\exmacro\\no_item.bmp",
+                "size": 1256,
+                "hash": "4b4d8f28bcd9917d3f2e5b45bbd27e3b"
+            }
+        ]
+    },
+    {
+        "name": "20140-06-25data_sakray_fittingroom.gpf",
+        "patchDate": "0140-06-25T00:00:00.000Z",
+        "files": [
+            {
+                "name": "data\\luafiles514\\lua files\\dressroom\\dress_f.lub",
+                "size": 463,
+                "hash": "2f28f900848d709ede0b3fc40467174c"
+            },
+            {
+                "name": "data\\luafiles514\\lua files\\dressroom\\jobdresslist.lub",
+                "size": 3907,
+                "hash": "d88b889fcf6a976fb2c22ed037e4d362"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroom.bmp",
+                "size": 1452,
+                "hash": "65e7b1e5686091544d3767237084f1a6"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroomback_0.bmp",
+                "size": 108056,
+                "hash": "3c75a6ef9e7b80c925ff568ca38d24e2"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroomback_1.bmp",
+                "size": 108056,
+                "hash": "22baa11776f2840b5c44a8d5ebbde267"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroomback_2.bmp",
+                "size": 108056,
+                "hash": "3da110daae7a8c2ed0e56029a2bd5e0a"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroomback_3.bmp",
+                "size": 108056,
+                "hash": "209a60bd04d26335ac65e37faadd50a1"
+            },
+            {
+                "name": "data\\texture\\유저인터페이스\\basic_interface\\dressroomback_4.bmp",
+                "size": 108056,
+                "hash": "30b82b3a44c6289cef1f78decca4132a"
+            }
+        ]
+    },
+    {
+        "name": "gameguard_tachyonx.rgz",
+        "patchDate": null,
+        "files": [
+            {
+                "name": "GameGuard\\GameGuard.des",
+                "size": 146719,
+                "hash": "366233e63f179687a09cb11cad729753"
+            }
+        ]
+    },
+    {
+        "name": "test.rgz",
+        "patchDate": null,
+        "files": [
+            {
+                "name": "Patchup.exe",
+                "size": 273408,
+                "hash": "fb8951e2a81789ef3098bfe474f4d5b7"
+            }
+        ]
+    },
+    {
+        "name": "03-10-28aRagexe.rgz",
+        "patchDate": null,
+        "files": [
+            {
+                "name": "Ragexe.exe",
+                "size": 2383950,
+                "hash": "e4efd0fb87568b7710a1ec6eda77dfe4"
+            }
+        ]
+    }
+]
