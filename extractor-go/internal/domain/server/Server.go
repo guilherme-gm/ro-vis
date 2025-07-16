@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 )
 
 type ServerType string
@@ -18,16 +19,20 @@ type Server struct {
 	LocalPatchFolder string
 	DatabaseName     string
 	Database         *database.Database
+	Repositories     *repository.Repository
 }
 
 func New(svType ServerType, patchListUrl string, patchFolderUrl string, localPatchFolder string, databaseName string) *Server {
+	db := database.NewDatabase(databaseName)
+
 	return &Server{
 		Type:             svType,
 		PatchListUrl:     patchListUrl,
 		PatchFolderUrl:   patchFolderUrl,
 		LocalPatchFolder: localPatchFolder,
 		DatabaseName:     databaseName,
-		Database:         database.NewDatabase(databaseName),
+		Database:         db,
+		Repositories:     repository.NewRepository(db),
 	}
 }
 
@@ -56,4 +61,11 @@ func GetLATAM() *Server {
 			"ro-vis-latam")
 	}
 	return latam
+}
+
+func GetServers() []*Server {
+	return []*Server{
+		GetKROMain(),
+		GetLATAM(),
+	}
 }

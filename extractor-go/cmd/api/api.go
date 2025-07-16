@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/controllers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/middleware"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 		router.Use(cors.Default())
 	}
 	router.Use(controllers.ErrorHandler())
+	router.Use(middleware.ServerSelectorMiddleware())
 
 	itemsController := controllers.ItemsController{}
 	questController := controllers.QuestController{}

@@ -6,14 +6,16 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/itemParsers"
 )
 
 type ItemLoader struct {
-	parsers []itemParsers.ItemParser
+	parsers    []itemParsers.ItemParser
+	repository *repository.ItemRepository
 }
 
-func NewItemLoader() *ItemLoader {
+func NewItemLoader(server *server.Server) *ItemLoader {
 	return &ItemLoader{
 		parsers: []itemParsers.ItemParser{
 			itemParsers.ItemV1Parser{},
@@ -24,6 +26,7 @@ func NewItemLoader() *ItemLoader {
 			itemParsers.ItemV6Parser{},
 			itemParsers.ItemV7Parser{},
 		},
+		repository: server.Repositories.ItemRepository,
 	}
 }
 
@@ -47,7 +50,7 @@ func (l *ItemLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	}
 
 	fmt.Println("> Fetching current list...")
-	currentItems, err := repository.GetItemRepository().GetCurrentItems(tx)
+	currentItems, err := l.repository.GetCurrentItems(tx)
 	if err != nil {
 		panic(err)
 	}
@@ -84,20 +87,20 @@ func (l *ItemLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	}
 
 	fmt.Printf("> Saving new records... (%d records to save)\n", len(newItems))
-	err = repository.GetItemRepository().AddItemsToHistory(tx, update.Name(), &newItems)
+	err = l.repository.AddItemsToHistory(tx, update.Name(), &newItems)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedItems))
-	err = repository.GetItemRepository().AddItemsToHistory(tx, update.Name(), &updatedItems)
+	err = l.repository.AddItemsToHistory(tx, update.Name(), &updatedItems)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Deleting records... (%d records to delete)\n", len(idsToBeDeleted))
 	for deletedId := range idsToBeDeleted {
-		err := repository.GetItemRepository().AddDeletedItem(tx, update.Name(), itemMap[deletedId])
+		err := l.repository.AddDeletedItem(tx, update.Name(), itemMap[deletedId])
 		if err != nil {
 			panic(err)
 		}

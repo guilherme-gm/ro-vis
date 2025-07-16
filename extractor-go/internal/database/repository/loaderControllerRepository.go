@@ -9,22 +9,19 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 )
 
-type LoaderControllerRepository struct{}
-
-func newLoaderControllerRepository() *LoaderControllerRepository {
-	return &LoaderControllerRepository{}
+type LoaderControllerRepository struct {
+	DB *database.Database
 }
 
-func GetLoaderControllerRepository() *LoaderControllerRepository {
-	if repositoriesCache.LoaderControllerRepository == nil {
-		repositoriesCache.LoaderControllerRepository = newLoaderControllerRepository()
+// NewLoaderControllerRepository creates a new LoaderControllerRepository instance
+func NewLoaderControllerRepository(db *database.Database) *LoaderControllerRepository {
+	return &LoaderControllerRepository{
+		DB: db,
 	}
-
-	return repositoriesCache.LoaderControllerRepository
 }
 
 func (r *LoaderControllerRepository) GetLatestUpdate(tx *sql.Tx, name string) (time.Time, error) {
-	queries := database.GetQueries(tx)
+	queries := r.DB.GetQueries(tx)
 	res, err := queries.GetLatestUpdate(context.Background(), name)
 	if err == sql.ErrNoRows {
 		return time.Time{}, nil
@@ -38,7 +35,7 @@ func (r *LoaderControllerRepository) GetLatestUpdate(tx *sql.Tx, name string) (t
 }
 
 func (r *LoaderControllerRepository) SetLatestPatch(tx *sql.Tx, name string, date time.Time) error {
-	queries := database.GetQueries(tx)
+	queries := r.DB.GetQueries(tx)
 	err := queries.UpsertLatestUpdate(context.Background(), dao.UpsertLatestUpdateParams{
 		Name:           name,
 		LastUpdateDate: date,

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
@@ -10,11 +11,19 @@ type FromToRecord[T any] struct {
 	To         *domain.Record[T]
 }
 
-type repositories struct {
+type Repository struct {
 	ItemRepository             *ItemRepository
 	LoaderControllerRepository *LoaderControllerRepository
-	patchRepository            *PatchRepository
-	questRepository            *QuestRepository
+	PatchRepository            *PatchRepository
+	QuestRepository            *QuestRepository
 }
 
-var repositoriesCache repositories = repositories{}
+// NewRepository creates a new repository instance with the provided database connection
+func NewRepository(db *database.Database) *Repository {
+	return &Repository{
+		ItemRepository:             NewItemRepository(db),
+		LoaderControllerRepository: NewLoaderControllerRepository(db),
+		PatchRepository:            NewPatchRepository(db),
+		QuestRepository:            NewQuestRepository(db),
+	}
+}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 )
 
 type PatchItem struct {
@@ -39,7 +40,7 @@ func (p *PatchFile) ToDomain() domain.Patch {
 
 var sakrayPatchExpressions = [4]*regexp.Regexp{
 	regexp.MustCompile(`(?i)^\d+-\d+-\d+_?rData`), // 9999-12-31rData.... or 9999-12-31_rData....
-	regexp.MustCompile(`(?i)_sak[_\.]`),           // 9999-12-31_foo_sak_a....
+	regexp.MustCompile(`(?i)_sak[_\\.]`),          // 9999-12-31_foo_sak_a....
 	regexp.MustCompile(`(?i)_sakra`),              // 9999-12-31_foo_sakra(y)....
 	regexp.MustCompile(`(?i)ragexeRE`),            // 9999-12-31_ragExeRE.rgz
 }
@@ -54,7 +55,17 @@ func shouldSkipPatch(rawPatch PatchFile) bool {
 	return false
 }
 
-func loadFromJson(tx *sql.Tx, filePath string) error {
+type PatchListLoader struct {
+	repository *repository.PatchRepository
+}
+
+func NewPatchListLoader(server *server.Server) *PatchListLoader {
+	return &PatchListLoader{
+		repository: server.Repositories.PatchRepository,
+	}
+}
+
+func (l *PatchListLoader) LoadFromJson(tx *sql.Tx, filePath string) error {
 	var patchList []PatchFile
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -68,14 +79,13 @@ func loadFromJson(tx *sql.Tx, filePath string) error {
 
 	// Note: old code ignored places where hash was empty; not sure if this matter
 
-	patchRepository := repository.GetPatchRepository()
 	for _, rawPatch := range patchList {
 		if shouldSkipPatch(rawPatch) {
 			continue
 		}
 		patch := rawPatch.ToDomain()
 
-		err = patchRepository.InsertPatch(tx, &patch)
+		err = l.repository.InsertPatch(tx, &patch)
 		if err != nil {
 			return err
 		}
@@ -91,7 +101,7 @@ func loadFromJson(tx *sql.Tx, filePath string) error {
  *
  * This should only be used once, to populate the initial patch list.
  */
-func ExtractInitialPatchList(tx *sql.Tx) {
+func (l *PatchListLoader) ExtractInitialPatchList(tx *sql.Tx) {
 	files := [...]string{
 		"../patches/_plist/_init.json",
 		"../patches/_plist/2012.json",
@@ -107,12 +117,10 @@ func ExtractInitialPatchList(tx *sql.Tx) {
 		"../patches/_plist/2022.json",
 		"../patches/_plist/2023.json",
 		"../patches/_plist/2024.json",
+		"../patches/_plist/2025.json",
 	}
 
-	for _, file := range files {
-		err := loadFromJson(tx, file)
-		if err != nil {
-			panic(err)
-		}
+	for _, filePath := range files {
+		l.LoadFromJson(tx, filePath)
 	}
 }

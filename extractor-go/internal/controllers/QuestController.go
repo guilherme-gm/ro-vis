@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 )
 
 type QuestController struct{}
@@ -14,7 +15,7 @@ type ListQuestParams struct {
 }
 
 func (ctlr *QuestController) List(c *gin.Context, params ListQuestParams) {
-	questRepo := repository.GetQuestRepository()
+	questRepo := c.MustGet("x-server").(*server.Server).Repositories.QuestRepository
 	count, err := questRepo.CountQuests(nil)
 	if err != nil {
 		c.Error(NewInternalServerError("failed to fetch count", err))
@@ -47,7 +48,7 @@ type ListQuestForUpdateParams struct {
 
 func (ctlr *QuestController) ListForUpdate(c *gin.Context, params ListQuestForUpdateParams) {
 	// @TODO: Probably better make it a go routine
-	itemRepo := repository.GetQuestRepository()
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.QuestRepository
 	count, err := itemRepo.CountChangesInUpdate(nil, params.Params.Update)
 	if err != nil {
 		c.Error(NewInternalServerError("failed to fetch count", err))
@@ -79,7 +80,7 @@ type ListForQuestParams struct {
 }
 
 func (ctlr *QuestController) ListForItem(c *gin.Context, params ListForQuestParams) {
-	itemRepo := repository.GetQuestRepository()
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.QuestRepository
 	updates, err := itemRepo.GetQuestHistory(nil, params.Params.QuestId, repository.Pagination{
 		Offset: params.Query.Start,
 		Limit:  100,

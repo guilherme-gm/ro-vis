@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 )
 
 type ItemsController struct{}
@@ -14,7 +15,7 @@ type ListItemsParams struct {
 }
 
 func (ctlr *ItemsController) List(c *gin.Context, params ListItemsParams) {
-	itemRepo := repository.GetItemRepository()
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.ItemRepository
 	count, err := itemRepo.CountItems(nil)
 	if err != nil {
 		c.Error(NewInternalServerError("failed to fetch count", err))
@@ -47,7 +48,7 @@ type ListItemsForUpdateParams struct {
 
 func (ctlr *ItemsController) ListForUpdate(c *gin.Context, params ListItemsForUpdateParams) {
 	// @TODO: Probably better make it a go routine
-	itemRepo := repository.GetItemRepository()
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.ItemRepository
 	count, err := itemRepo.CountChangesInUpdate(nil, params.Params.Update)
 	if err != nil {
 		c.Error(NewInternalServerError("failed to fetch count", err))
@@ -79,7 +80,7 @@ type ListForItemParams struct {
 }
 
 func (ctlr *ItemsController) ListForItem(c *gin.Context, params ListForItemParams) {
-	itemRepo := repository.GetItemRepository()
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.ItemRepository
 	updates, err := itemRepo.GetItemHistory(nil, params.Params.ItemId, repository.Pagination{
 		Offset: params.Query.Start,
 		Limit:  100,

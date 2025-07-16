@@ -11,22 +11,19 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
-type PatchRepository struct{}
-
-func newPatchRepository() *PatchRepository {
-	return &PatchRepository{}
+type PatchRepository struct {
+	DB *database.Database
 }
 
-func GetPatchRepository() *PatchRepository {
-	if repositoriesCache.patchRepository == nil {
-		repositoriesCache.patchRepository = newPatchRepository()
+// NewPatchRepository creates a new PatchRepository instance
+func NewPatchRepository(db *database.Database) *PatchRepository {
+	return &PatchRepository{
+		DB: db,
 	}
-
-	return repositoriesCache.patchRepository
 }
 
 func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
-	queries := database.GetQueries(tx)
+	queries := r.DB.GetQueries(tx)
 	res, err := queries.ListPatches(context.Background())
 	if err == sql.ErrNoRows {
 		return []domain.Patch{}, nil
@@ -45,7 +42,7 @@ func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
 }
 
 func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) ([]domain.Patch, error) {
-	queries := database.GetQueries(tx)
+	queries := r.DB.GetQueries(tx)
 	res, err := queries.ListUpdatesPatches(context.Background(), dao.ListUpdatesPatchesParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,
@@ -67,7 +64,7 @@ func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) 
 }
 
 func (r *PatchRepository) GetUpdateCount(tx *sql.Tx) (int32, error) {
-	count, err := database.GetQueries(tx).GetUpdatesCount(context.Background())
+	count, err := r.DB.GetQueries(tx).GetUpdatesCount(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -128,7 +125,7 @@ func (r *PatchRepository) ListUpdates(tx *sql.Tx, pagination Pagination) ([]doma
 }
 
 func (r *PatchRepository) InsertPatch(tx *sql.Tx, patch *domain.Patch) error {
-	queries := database.GetQueries(tx)
+	queries := r.DB.GetQueries(tx)
 	jsonMsg, err := json.Marshal(patch.Files)
 	if err != nil {
 		return err

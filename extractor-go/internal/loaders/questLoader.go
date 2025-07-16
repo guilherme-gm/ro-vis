@@ -6,14 +6,16 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/questParsers"
 )
 
 type QuestLoader struct {
-	parsers []questParsers.QuestParser
+	parsers    []questParsers.QuestParser
+	repository *repository.QuestRepository
 }
 
-func NewQuestLoader() *QuestLoader {
+func NewQuestLoader(server *server.Server) *QuestLoader {
 	return &QuestLoader{
 		parsers: []questParsers.QuestParser{
 			questParsers.QuestV1Parser{},
@@ -21,6 +23,7 @@ func NewQuestLoader() *QuestLoader {
 			questParsers.QuestV3Parser{},
 			questParsers.QuestV4Parser{},
 		},
+		repository: server.Repositories.QuestRepository,
 	}
 }
 
@@ -46,7 +49,7 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	fileQuests := targetParser.Parse(basePath, &update)
 
 	fmt.Println("> Fetching current list...")
-	currentQuests, err := repository.GetQuestRepository().GetCurrentQuests(tx)
+	currentQuests, err := l.repository.GetCurrentQuests(tx)
 	if err != nil {
 		panic(err)
 	}
@@ -80,20 +83,20 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	}
 
 	fmt.Printf("> Saving new records... (%d records to save)\n", len(newQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(tx, update.Name(), &newQuests)
+	err = l.repository.AddQuestsToHistory(tx, update.Name(), &newQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedQuests))
-	err = repository.GetQuestRepository().AddQuestsToHistory(tx, update.Name(), &updatedQuests)
+	err = l.repository.AddQuestsToHistory(tx, update.Name(), &updatedQuests)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("> Deleting records... (%d records to delete)\n", len(deletedIds))
 	for deletedId := range deletedIds {
-		err := repository.GetQuestRepository().AddDeletedQuest(tx, update.Name(), questMap[deletedId])
+		err := l.repository.AddDeletedQuest(tx, update.Name(), questMap[deletedId])
 		if err != nil {
 			panic(err)
 		}
