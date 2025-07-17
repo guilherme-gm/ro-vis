@@ -7,6 +7,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type migratorConfig struct {
+	DbUrl string
+}
+
+var MigratorConfig migratorConfig
+
 type config struct {
 	DbUrl string
 }
@@ -44,6 +50,14 @@ func getIntEnv(name string) int {
 func loadApiConfig() {
 	ApiConfig = apiConfig{
 		Port: uint16(getIntEnv("API_PORT")),
+	}
+}
+
+func LoadMigrator() {
+	loadEnv()
+	loadConfig()
+	MigratorConfig = migratorConfig{
+		DbUrl: os.Getenv("MIGRATOR_DB_URL"),
 	}
 }
 

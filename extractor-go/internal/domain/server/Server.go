@@ -46,7 +46,7 @@ func GetKROMain() *Server {
 			"", // @TODO: patch list url
 			"", // @TODO: patch folder url
 			"kro",
-			"ro-vis-kro-main")
+			"rovis-kro")
 	}
 	return kroMain
 }
@@ -58,7 +58,7 @@ func GetLATAM() *Server {
 			"https://ro1patch.gnjoylatam.com/LIVE/patchinfo/patch.txt",
 			"https://ro1patch.gnjoylatam.com/LIVE/patchfile/",
 			"latam",
-			"ro-vis-latam")
+			"rovis-latam")
 	}
 	return latam
 }
