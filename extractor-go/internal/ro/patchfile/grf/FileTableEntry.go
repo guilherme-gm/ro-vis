@@ -66,7 +66,8 @@ func (ft *FileTableEntry) readFromV1(r io.Reader) error {
 
 	binUtils.ReadBytes(r, 4)
 
-	ft.FileName = strings.Trim(grfio_decode_filename(encryptedName), "\x00")
+	ft.FileName = grfio_decode_filename(encryptedName)
+	ft.FileName = ft.FileName[:strings.Index(ft.FileName, "\x00")]
 
 	// +ofs2
 
