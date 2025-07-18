@@ -66,8 +66,16 @@ func (ft *FileTableEntry) readFromV1(r io.Reader) error {
 
 	binUtils.ReadBytes(r, 4)
 
-	ft.FileName = grfio_decode_filename(encryptedName)
-	ft.FileName = ft.FileName[:strings.Index(ft.FileName, "\x00")]
+	fileName, err := grfio_decode_filename(encryptedName)
+	if err != nil {
+		return err
+	}
+
+	ft.FileName = fileName
+	nullIndex := strings.Index(ft.FileName, "\x00")
+	if nullIndex != -1 {
+		ft.FileName = ft.FileName[:nullIndex]
+	}
 
 	// +ofs2
 
