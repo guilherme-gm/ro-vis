@@ -41,6 +41,22 @@ func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
 	return patches, nil
 }
 
+// Returns the most recent patch applied to this server
+func (r *PatchRepository) GetLatestPatch(tx *sql.Tx) (*domain.Patch, error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetLatestPatch(context.Background())
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	patch := res.ToDomain()
+	return &patch, nil
+}
+
 func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) ([]domain.Patch, error) {
 	queries := r.DB.GetQueries(tx)
 	res, err := queries.ListUpdatesPatches(context.Background(), dao.ListUpdatesPatchesParams{
@@ -132,8 +148,10 @@ func (r *PatchRepository) InsertPatch(tx *sql.Tx, patch *domain.Patch) error {
 	}
 
 	return queries.InsertPatch(context.Background(), dao.InsertPatchParams{
-		Name:  patch.Name,
-		Date:  patch.Date,
-		Files: jsonMsg,
+		ID:     patch.Id,
+		Name:   patch.Name,
+		Date:   patch.Date,
+		Files:  jsonMsg,
+		Status: dao.PatchesStatus(patch.Status),
 	})
 }

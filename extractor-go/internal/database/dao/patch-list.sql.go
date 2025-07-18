@@ -11,6 +11,23 @@ import (
 	"time"
 )
 
+const getLatestPatch = `-- name: GetLatestPatch :one
+SELECT id, name, date, files, status FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` DESC LIMIT 1
+`
+
+func (q *Queries) GetLatestPatch(ctx context.Context) (Patch, error) {
+	row := q.db.QueryRowContext(ctx, getLatestPatch)
+	var i Patch
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Date,
+		&i.Files,
+		&i.Status,
+	)
+	return i, err
+}
+
 const getUpdatesCount = `-- name: GetUpdatesCount :one
 SELECT COUNT(*) FROM (SELECT ` + "`" + `date` + "`" + ` FROM ` + "`" + `patches` + "`" + ` GROUP BY ` + "`" + `date` + "`" + `) updates
 `
@@ -23,22 +40,30 @@ func (q *Queries) GetUpdatesCount(ctx context.Context) (int64, error) {
 }
 
 const insertPatch = `-- name: InsertPatch :exec
-INSERT INTO ` + "`" + `patches` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `date` + "`" + `, ` + "`" + `files` + "`" + `) VALUES (?, ?, ?)
+INSERT INTO ` + "`" + `patches` + "`" + ` (` + "`" + `id` + "`" + `, ` + "`" + `name` + "`" + `, ` + "`" + `date` + "`" + `, ` + "`" + `files` + "`" + `, ` + "`" + `status` + "`" + `) VALUES (?, ?, ?, ?, ?)
 `
 
 type InsertPatchParams struct {
-	Name  string
-	Date  time.Time
-	Files json.RawMessage
+	ID     int32
+	Name   string
+	Date   time.Time
+	Files  json.RawMessage
+	Status PatchesStatus
 }
 
 func (q *Queries) InsertPatch(ctx context.Context, arg InsertPatchParams) error {
-	_, err := q.db.ExecContext(ctx, insertPatch, arg.Name, arg.Date, arg.Files)
+	_, err := q.db.ExecContext(ctx, insertPatch,
+		arg.ID,
+		arg.Name,
+		arg.Date,
+		arg.Files,
+		arg.Status,
+	)
 	return err
 }
 
 const listPatches = `-- name: ListPatches :many
-SELECT id, name, date, files FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` ASC
+SELECT id, name, date, files, status FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` ASC
 `
 
 func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
@@ -55,6 +80,7 @@ func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
 			&i.Name,
 			&i.Date,
 			&i.Files,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
@@ -70,7 +96,7 @@ func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
 }
 
 const listUpdatesPatches = `-- name: ListUpdatesPatches :many
-SELECT patches.id, patches.name, patches.date, patches.files
+SELECT patches.id, patches.name, patches.date, patches.files, patches.status
 FROM (
 	SELECT ` + "`" + `date` + "`" + `
 	FROM ` + "`" + `patches` + "`" + `
@@ -101,6 +127,7 @@ func (q *Queries) ListUpdatesPatches(ctx context.Context, arg ListUpdatesPatches
 			&i.Name,
 			&i.Date,
 			&i.Files,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}

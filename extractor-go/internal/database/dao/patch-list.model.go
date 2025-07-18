@@ -14,9 +14,10 @@ func (p *Patch) ToDomain() domain.Patch {
 	}
 
 	return domain.Patch{
-		Id:    p.ID,
-		Name:  p.Name,
-		Date:  p.Date,
-		Files: files,
+		Id:     p.ID,
+		Name:   p.Name,
+		Date:   p.Date,
+		Files:  files,
+		Status: domain.PatchStatus(p.Status),
 	}
 }

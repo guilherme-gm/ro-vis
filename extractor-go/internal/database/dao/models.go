@@ -6,9 +6,55 @@ package dao
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 )
+
+type PatchesStatus string
+
+const (
+	PatchesStatusPending   PatchesStatus = "pending"
+	PatchesStatusExtracted PatchesStatus = "extracted"
+	PatchesStatusGone      PatchesStatus = "gone"
+	PatchesStatusSkipped   PatchesStatus = "skipped"
+)
+
+func (e *PatchesStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PatchesStatus(s)
+	case string:
+		*e = PatchesStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PatchesStatus: %T", src)
+	}
+	return nil
+}
+
+type NullPatchesStatus struct {
+	PatchesStatus PatchesStatus
+	Valid         bool // Valid is true if PatchesStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPatchesStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.PatchesStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PatchesStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPatchesStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PatchesStatus), nil
+}
 
 type Item struct {
 	ItemID          int32
@@ -47,10 +93,11 @@ type LoaderController struct {
 }
 
 type Patch struct {
-	ID    int32
-	Name  string
-	Date  time.Time
-	Files json.RawMessage
+	ID     int32
+	Name   string
+	Date   time.Time
+	Files  json.RawMessage
+	Status PatchesStatus
 }
 
 type PreviousItemHistoryVw struct {
