@@ -61,28 +61,28 @@ func parsePatchList(list string) ([]PatchItem, error) {
 	return patchList, nil
 }
 
-func NewPatchServer(patchListUrl string, patchFolderUrl string) *PatchServer {
+func NewPatchServer(patchListUrl string, patchFolderUrl string) (*PatchServer, error) {
 	resp, err := http.Get(patchListUrl)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	patchList, err := parsePatchList(string(data))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &PatchServer{
 		PatchListUrl:   patchListUrl,
 		PatchFolderUrl: patchFolderUrl,
 		PatchList:      patchList,
-	}
+	}, nil
 }
 
 func (ps *PatchServer) DownloadPatch(patch *PatchItem, savePath string) error {
