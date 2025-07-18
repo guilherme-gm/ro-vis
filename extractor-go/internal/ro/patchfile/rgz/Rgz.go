@@ -42,6 +42,7 @@ func readDirectoryEntry(reader io.Reader) (*RgzEntry, error) {
 	len := binutils.ReadByte(reader)
 	fileName := string(binutils.ReadBytes(reader, int(len)))
 	fileName = strings.Split(fileName, "\x00")[0]
+	fileName = strings.ReplaceAll(fileName, "\\", "/")
 
 	return &RgzEntry{
 		Name:      fileName,
@@ -53,6 +54,7 @@ func readFileEntry(reader io.Reader) (*RgzEntry, error) {
 	len := binutils.ReadByte(reader)
 	fileName := string(binutils.ReadBytes(reader, int(len)))
 	fileName = strings.Split(fileName, "\x00")[0]
+	fileName = strings.ReplaceAll(fileName, "\\", "/")
 
 	dataLen := binutils.ReadInt32(reader)
 	data := binutils.ReadBytes(reader, int(dataLen))

@@ -77,6 +77,8 @@ func (ft *FileTableEntry) readFromV1(r io.Reader) error {
 		ft.FileName = ft.FileName[:nullIndex]
 	}
 
+	ft.FileName = strings.ReplaceAll(ft.FileName, "\\", "/")
+
 	// +ofs2
 
 	lenEnd := binUtils.ReadInt32(r)
@@ -111,6 +113,7 @@ func (ft *FileTableEntry) readFromV1(r io.Reader) error {
 
 func (ft *FileTableEntry) readFromV2(r io.Reader) error {
 	ft.FileName = binUtils.ReadString(r)
+	ft.FileName = strings.ReplaceAll(ft.FileName, "\\", "/")
 	ft.CompressedSize = int(binUtils.ReadInt32(r))
 	ft.CompressedSizeAlignment = int(binUtils.ReadInt32(r))
 	ft.OriginalSize = int(binUtils.ReadInt32(r))
