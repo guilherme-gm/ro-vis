@@ -7,5 +7,6 @@ import (
 type ItemParser interface {
 	IsUpdateInRange(update *domain.Update) bool
 	HasFiles(update *domain.Update) bool
+	GetRelevantFiles() []string
 	Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item
 }

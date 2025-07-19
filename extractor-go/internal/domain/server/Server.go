@@ -10,6 +10,7 @@ type ServerType string
 const (
 	ServerTypeKROMain ServerType = "kRO-main"
 	ServerTypeLATAM   ServerType = "latam"
+	ServerTypeTest    ServerType = "test"
 )
 
 type Server struct {
@@ -63,8 +64,21 @@ func GetLATAM() *Server {
 	return latam
 }
 
+func GetTestServer() *Server {
+	return &Server{
+		Type:             ServerTypeTest,
+		PatchListUrl:     "", // @TODO: patch list url
+		PatchFolderUrl:   "", // @TODO: patch folder url
+		LocalPatchFolder: "test",
+		DatabaseName:     "rovis-test",
+		Database:         nil,
+		Repositories:     repository.NewRepository(nil),
+	}
+}
+
 func GetServers() []*Server {
 	return []*Server{
+		// GetTestServer(), // not used for production
 		GetKROMain(),
 		GetLATAM(),
 	}

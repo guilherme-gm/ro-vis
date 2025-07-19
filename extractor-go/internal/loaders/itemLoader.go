@@ -15,6 +15,24 @@ type ItemLoader struct {
 	repository *repository.ItemRepository
 }
 
+// GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
+// The list is deduplicated to avoid returning the same file path multiple times.
+func (l *ItemLoader) GetRelevantFiles() []string {
+	fileMap := make(map[string]bool)
+	var result []string
+
+	for _, parser := range l.parsers {
+		for _, file := range parser.GetRelevantFiles() {
+			if !fileMap[file] {
+				fileMap[file] = true
+				result = append(result, file)
+			}
+		}
+	}
+
+	return result
+}
+
 func NewItemLoader(server *server.Server) *ItemLoader {
 	return &ItemLoader{
 		parsers: []itemParsers.ItemParser{

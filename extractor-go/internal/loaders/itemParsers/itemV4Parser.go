@@ -21,8 +21,8 @@ func (p ItemV4Parser) IsUpdateInRange(update *domain.Update) bool {
 		update.Date.Before(time.Date(2017, time.August, 1, 0, 0, 0, 0, time.UTC))
 }
 
-func (p ItemV4Parser) HasFiles(update *domain.Update) bool {
-	return update.HasChangedAnyFiles([]string{
+func (p ItemV4Parser) GetRelevantFiles() []string {
+	return []string{
 		"data/bookitemnametable.txt",
 		"data/buyingstoreitemlist.txt",
 		"data/cardpostfixnametable.txt",
@@ -30,7 +30,11 @@ func (p ItemV4Parser) HasFiles(update *domain.Update) bool {
 		"data/num2cardillustnametable.txt",
 		"System/itemInfo_true.lub",
 		"data/itemmoveinfov5.txt",
-	})
+	}
+}
+
+func (p ItemV4Parser) HasFiles(update *domain.Update) bool {
+	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
 func (p ItemV4Parser) Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item {

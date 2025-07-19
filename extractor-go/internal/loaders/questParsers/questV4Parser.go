@@ -1,8 +1,6 @@
 package questParsers
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
@@ -21,20 +19,14 @@ func (p QuestV4Parser) IsUpdateInRange(update *domain.Update) bool {
 		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC)))
 }
 
-func (p QuestV4Parser) HasFiles(update *domain.Update) bool {
-	for _, change := range update.Changes {
-		if change.File == "System/OngoingQuestInfoList_True.lub" {
-			return true
-		}
-
-		lowerName := strings.ToLower(change.File)
-		if lowerName == "system/ongoingquestinfolist_true.lub" {
-			fmt.Println("FOUND on lower -- " + change.File)
-			return true
-		}
+func (p QuestV4Parser) GetRelevantFiles() []string {
+	return []string{
+		"System/OngoingQuestInfoList_True.lub",
 	}
+}
 
-	return false
+func (p QuestV4Parser) HasFiles(update *domain.Update) bool {
+	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
 func (p QuestV4Parser) Parse(basePath string, update *domain.Update) []domain.Quest {
