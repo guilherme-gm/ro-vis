@@ -2,7 +2,9 @@
 INSERT INTO `patches` (`id`, `name`, `date`, `files`, `status`) VALUES (?, ?, ?, ?, ?);
 
 -- name: ListPatches :many
-SELECT * FROM `patches` ORDER BY `id` ASC;
+-- We include pending and extracted because we may have patches marked as 'extracted' but
+-- that were not processed for a new record type, while gone/skipped should never be considered.
+SELECT * FROM `patches` WHERE `date` <= ? AND `status` IN ('pending', 'extracted') ORDER BY `id` ASC;
 
 -- name: ListUpdatesPatches :many
 SELECT patches.*

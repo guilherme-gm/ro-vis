@@ -12,7 +12,7 @@ import (
 )
 
 const getLatestPatch = `-- name: GetLatestPatch :one
-SELECT id, name, date, files, status FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` DESC LIMIT 1
+SELECT id, name, files, status, date, created_at, updated_at FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` DESC LIMIT 1
 `
 
 func (q *Queries) GetLatestPatch(ctx context.Context) (Patch, error) {
@@ -21,9 +21,11 @@ func (q *Queries) GetLatestPatch(ctx context.Context) (Patch, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Date,
 		&i.Files,
 		&i.Status,
+		&i.Date,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -63,11 +65,13 @@ func (q *Queries) InsertPatch(ctx context.Context, arg InsertPatchParams) error 
 }
 
 const listPatches = `-- name: ListPatches :many
-SELECT id, name, date, files, status FROM ` + "`" + `patches` + "`" + ` ORDER BY ` + "`" + `id` + "`" + ` ASC
+SELECT id, name, files, status, date, created_at, updated_at FROM ` + "`" + `patches` + "`" + ` WHERE ` + "`" + `date` + "`" + ` <= ? AND ` + "`" + `status` + "`" + ` IN ('pending', 'extracted') ORDER BY ` + "`" + `id` + "`" + ` ASC
 `
 
-func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
-	rows, err := q.db.QueryContext(ctx, listPatches)
+// We include pending and extracted because we may have patches marked as 'extracted' but
+// that were not processed for a new record type, while gone/skipped should never be considered.
+func (q *Queries) ListPatches(ctx context.Context, date time.Time) ([]Patch, error) {
+	rows, err := q.db.QueryContext(ctx, listPatches, date)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +82,11 @@ func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Date,
 			&i.Files,
 			&i.Status,
+			&i.Date,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +102,7 @@ func (q *Queries) ListPatches(ctx context.Context) ([]Patch, error) {
 }
 
 const listUpdatesPatches = `-- name: ListUpdatesPatches :many
-SELECT patches.id, patches.name, patches.date, patches.files, patches.status
+SELECT patches.id, patches.name, patches.files, patches.status, patches.date, patches.created_at, patches.updated_at
 FROM (
 	SELECT ` + "`" + `date` + "`" + `
 	FROM ` + "`" + `patches` + "`" + `
@@ -125,9 +131,11 @@ func (q *Queries) ListUpdatesPatches(ctx context.Context, arg ListUpdatesPatches
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Date,
 			&i.Files,
 			&i.Status,
+			&i.Date,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

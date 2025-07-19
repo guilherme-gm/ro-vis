@@ -1,0 +1,8 @@
+-- Change date column type from DATETIME to DATE
+ALTER TABLE `patches`
+MODIFY COLUMN `date` DATE NOT NULL;
+
+-- Add created_at and updated_at timestamp columns
+ALTER TABLE `patches`
+ADD COLUMN `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;

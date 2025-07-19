@@ -22,9 +22,9 @@ func NewPatchRepository(db *database.Database) *PatchRepository {
 	}
 }
 
-func (r *PatchRepository) ListPatches(tx *sql.Tx) ([]domain.Patch, error) {
+func (r *PatchRepository) ListPatches(tx *sql.Tx, untilDate time.Time) ([]domain.Patch, error) {
 	queries := r.DB.GetQueries(tx)
-	res, err := queries.ListPatches(context.Background())
+	res, err := queries.ListPatches(context.Background(), untilDate)
 	if err == sql.ErrNoRows {
 		return []domain.Patch{}, nil
 	}
@@ -88,11 +88,11 @@ func (r *PatchRepository) GetUpdateCount(tx *sql.Tx) (int32, error) {
 	return int32(count), nil
 }
 
-func (r *PatchRepository) ListUpdates(tx *sql.Tx, pagination Pagination) ([]domain.Update, error) {
+func (r *PatchRepository) ListUpdates(tx *sql.Tx, untilDate time.Time, pagination Pagination) ([]domain.Update, error) {
 	var patches []domain.Patch
 	var err error
 	if pagination == PaginateAll {
-		patches, err = r.ListPatches(tx)
+		patches, err = r.ListPatches(tx, untilDate)
 	} else {
 		patches, err = r.listUpdatesPatches(tx, pagination)
 	}

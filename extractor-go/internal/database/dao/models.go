@@ -93,11 +93,13 @@ type LoaderController struct {
 }
 
 type Patch struct {
-	ID     int32
-	Name   string
-	Date   time.Time
-	Files  json.RawMessage
-	Status PatchesStatus
+	ID        int32
+	Name      string
+	Files     json.RawMessage
+	Status    PatchesStatus
+	Date      time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type PreviousItemHistoryVw struct {
