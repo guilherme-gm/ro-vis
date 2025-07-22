@@ -41,9 +41,21 @@ func ParseItemMoveInfoV5(filePath string) (map[int32]ItemMoveInfoV5Entry, error)
 			continue
 		}
 
-		columns := strings.Split(trimmedLine, "\t")
-		if len(columns) != 10 {
-			return moveInfo, fmt.Errorf("moveInfo line %d has %d columns. 10 expected", (idx + 1), len(columns))
+		var columns []string
+		tempColumn := ""
+		for _, ch := range trimmedLine {
+			if ch == '\t' || ch == ' ' {
+				columns = append(columns, tempColumn)
+				tempColumn = ""
+			} else {
+				tempColumn += string(ch)
+			}
+		}
+
+		columns = append(columns, tempColumn)
+
+		if len(columns) < 9 {
+			return moveInfo, fmt.Errorf("moveInfo line %d has %d columns. 9 or 10 expected", (idx + 1), len(columns))
 		}
 
 		parsedItemId, err := strconv.Atoi(columns[0])
@@ -55,6 +67,13 @@ func ParseItemMoveInfoV5(filePath string) (map[int32]ItemMoveInfoV5Entry, error)
 
 		restrictions := []int{}
 		for i := 1; i <= 8; i++ {
+			if columns[i] == "" {
+				// I am not 100% sure on that, the client usually crashes and don't open, but LATAM works with broken files..
+				// fmt.Printf("WARN: moveInfo line %d has an empty column %d. Assuming 0\n", (idx + 1), i)
+				restrictions = append(restrictions, 0)
+				continue
+			}
+
 			restriction, err := strconv.Atoi(columns[i])
 			if err != nil {
 				return moveInfo, err
@@ -65,6 +84,11 @@ func ParseItemMoveInfoV5(filePath string) (map[int32]ItemMoveInfoV5Entry, error)
 			}
 
 			restrictions = append(restrictions, restriction)
+		}
+
+		description := ""
+		if len(columns) == 10 {
+			description = strings.TrimPrefix(strings.TrimSpace(columns[9]), "/ ")
 		}
 
 		// restriction == 0 means not restricted, thus _can_ do something
@@ -78,7 +102,7 @@ func ParseItemMoveInfoV5(filePath string) (map[int32]ItemMoveInfoV5Entry, error)
 			CanMail:               restrictions[5] == 0,
 			CanAuction:            restrictions[6] == 0,
 			CanMoveToGuildStorage: restrictions[7] == 0,
-			Description:           strings.TrimPrefix(strings.TrimSpace(columns[9]), "/ "),
+			Description:           description,
 		}
 	}
 
