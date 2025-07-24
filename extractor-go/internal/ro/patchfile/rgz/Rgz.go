@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 
 	binutils "github.com/guilherme-gm/ro-vis/extractor/internal/binUtils"
@@ -133,4 +134,16 @@ func Open(filename string) (*RgzFile, error) {
 	}
 
 	return RgzFile, nil
+}
+
+func (rgzFile *RgzFile) Extract(filePath string, rootFolder string) error {
+	toPath := path.Join(rootFolder, filePath)
+	for _, entry := range rgzFile.Entries {
+		if entry.EntryType == EntryType_File && strings.EqualFold(entry.Name, filePath) {
+			os.MkdirAll(path.Dir(toPath), 0755)
+			return os.WriteFile(toPath, entry.Data, 0644)
+		}
+	}
+
+	return fmt.Errorf("file %s not found", filePath)
 }
