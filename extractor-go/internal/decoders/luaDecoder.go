@@ -15,6 +15,7 @@ import (
 
 type luaDecoder struct {
 	L                *lua.State
+	reencoder        StringReencoder
 	path             *stack.Stack[string]
 	notConsumedPaths map[string]bool
 }
@@ -123,7 +124,7 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 
 	case reflect.String:
 		str := d.L.ToString(-1)
-		dataValue.SetString(ConvertToUTF8(str))
+		dataValue.SetString(d.reencoder(str))
 
 	case reflect.Int:
 		val := d.L.ToInteger(-1)
@@ -148,16 +149,17 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	}
 }
 
-func newLuaDecoder() *luaDecoder {
+func newLuaDecoder(reencoder StringReencoder) *luaDecoder {
 	return &luaDecoder{
 		L:                lua.NewState(),
+		reencoder:        reencoder,
 		path:             stack.NewStack[string](),
 		notConsumedPaths: make(map[string]bool),
 	}
 }
 
-func DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult {
-	decoder := newLuaDecoder()
+func DecodeLuaTable(filePath string, tableName string, dst any, reencoder StringReencoder) LuaDecoderResult {
+	decoder := newLuaDecoder(reencoder)
 	decoder.L.OpenLibs()
 	defer decoder.L.Close()
 

@@ -34,7 +34,7 @@ func ParseItemMoveInfoV5(filePath string) (map[int32]ItemMoveInfoV5Entry, error)
 		return moveInfo, err
 	}
 
-	lines := strings.Split(decoders.ConvertToUTF8(string(fileContent)), "\n")
+	lines := strings.Split(decoders.ConvertEucKrToUtf8(string(fileContent)), "\n")
 	for idx, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
 		if strings.HasPrefix(trimmedLine, "//") || trimmedLine == "" {

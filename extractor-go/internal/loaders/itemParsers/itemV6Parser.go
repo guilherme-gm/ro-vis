@@ -61,7 +61,7 @@ func (p ItemV6Parser) Parse(basePath string, update *domain.Update, existingDB m
 		}
 
 		itemTbl := []rostructs.ItemV6{}
-		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl)
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl, decoders.ConvertEucKrToUtf8)
 		if len(result.NotConsumedPaths) > 0 {
 			fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
 			panic("Not all keys were consumed.")

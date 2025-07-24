@@ -37,7 +37,7 @@ func (p QuestV3Parser) Parse(basePath string, update *domain.Update) []domain.Qu
 	}
 
 	var fileQuests []rostructs.QuestV3
-	result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests, decoders.ConvertEucKrToUtf8)
 	if len(result.NotConsumedPaths) > 0 {
 		fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
 		panic("Not all keys were consumed.")

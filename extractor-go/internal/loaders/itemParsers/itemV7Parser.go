@@ -86,7 +86,7 @@ func (p ItemV7Parser) Parse(basePath string, update *domain.Update, existingDB m
 		}
 
 		itemTbl := []rostructs.ItemV7{}
-		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl)
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl, decoders.ConvertEucKrToUtf8)
 		p.checkNotConsumedPaths(result)
 
 		for _, entry := range itemTbl {
