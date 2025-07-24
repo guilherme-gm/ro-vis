@@ -20,7 +20,7 @@ type luaDecoder struct {
 }
 
 type LuaDecoderResult struct {
-	NotConsumedPaths map[string]bool
+	NotConsumedPaths []string
 }
 
 type luaDecContextInfo struct {
@@ -174,7 +174,12 @@ func DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult
 
 	decoder.path.Pop()
 
+	var notConsumedPaths []string
+	for k := range decoder.notConsumedPaths {
+		notConsumedPaths = append(notConsumedPaths, k)
+	}
+
 	return LuaDecoderResult{
-		NotConsumedPaths: decoder.notConsumedPaths,
+		NotConsumedPaths: notConsumedPaths,
 	}
 }

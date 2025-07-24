@@ -57,6 +57,21 @@ func (p ItemV7Parser) HasFiles(update *domain.Update) bool {
 	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
+func (p ItemV7Parser) checkNotConsumedPaths(result decoders.LuaDecoderResult) {
+	if len(result.NotConsumedPaths) == 0 {
+		return
+	}
+
+	if p.server.Type == server.ServerTypeLATAM && len(result.NotConsumedPaths) == 1 && result.NotConsumedPaths[0] == "tbl/Visual" {
+		// LATAM has created "Visual" field by mistake in some patches, so we ignore it
+		// this field is not used.
+		return
+	}
+
+	fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
+	panic("Not all keys were consumed.")
+}
+
 func (p ItemV7Parser) Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item {
 	newDB := make(map[int32]*domain.Item, len(existingDB))
 	if !update.HasChangedAnyFiles([]string{p.GetItemInfoPath()}) {
@@ -72,10 +87,7 @@ func (p ItemV7Parser) Parse(basePath string, update *domain.Update, existingDB m
 
 		itemTbl := []rostructs.ItemV7{}
 		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl)
-		if len(result.NotConsumedPaths) > 0 {
-			fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
-			panic("Not all keys were consumed.")
-		}
+		p.checkNotConsumedPaths(result)
 
 		for _, entry := range itemTbl {
 			itemID := int32(entry.ItemID)
