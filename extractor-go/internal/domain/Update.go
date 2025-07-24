@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -24,7 +24,7 @@ func (u Update) GetChangeForFile(file string) (UpdateChange, error) {
 		}
 	}
 
-	return UpdateChange{}, errors.New("could not find file - " + file)
+	return UpdateChange{}, NewNotFoundError(fmt.Sprintf("file '%s' not found in update", file))
 }
 
 func (u Update) HasChangedAnyFiles(files []string) bool {
