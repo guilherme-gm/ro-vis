@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 
 	binUtils "github.com/guilherme-gm/ro-vis/extractor/internal/binUtils"
@@ -273,12 +274,12 @@ func grf_decode(buffer *[]byte, ft *FileTableEntry) {
 	}
 }
 
-func (ft *FileTableEntry) Extract(path string) error {
+func (ft *FileTableEntry) Extract(grfPath string, toPath string) error {
 	if ft.Flags == EntryType_Directory {
 		panic("directory not supported yet")
 	}
 
-	file, err := os.Open(path)
+	file, err := os.Open(grfPath)
 	if err != nil {
 		return err
 	}
@@ -308,7 +309,11 @@ func (ft *FileTableEntry) Extract(path string) error {
 		return err
 	}
 
-	outFile, err := os.Create("out_file.dat")
+	if err := os.MkdirAll(path.Dir(toPath), 0755); err != nil {
+		return err
+	}
+
+	outFile, err := os.Create(toPath)
 	if err != nil {
 		return err
 	}

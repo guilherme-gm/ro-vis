@@ -1,11 +1,15 @@
 package grf
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path"
+	"strings"
 )
 
 type GrfFile struct {
+	Path      string
 	Header    GrfHeader
 	FileTable FileTable
 	grfReader io.Reader
@@ -32,8 +36,20 @@ func Open(path string) (*GrfFile, error) {
 	}
 
 	return &GrfFile{
+		Path:      path,
 		Header:    header,
 		FileTable: fileTable,
 		grfReader: file,
 	}, nil
+}
+
+func (grfFile *GrfFile) Extract(filePath string, rootFolder string) error {
+	toPath := path.Join(rootFolder, filePath)
+	for _, file := range grfFile.FileTable.Files {
+		if file.Flags == EntryType_File && strings.EqualFold(file.FileName, filePath) {
+			return file.Extract(grfFile.Path, toPath)
+		}
+	}
+
+	return fmt.Errorf("file %s not found", filePath)
 }
