@@ -6,13 +6,22 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	subparsers "github.com/guilherme-gm/ro-vis/extractor/internal/loaders/itemParsers/subParsers"
 )
 
 /**
  * First version of Item data, everything is TXT
  */
-type ItemV1Parser struct{}
+type ItemV1Parser struct {
+	server *server.Server
+}
+
+func NewItemV1Parser(server *server.Server) ItemParser {
+	return &ItemV1Parser{
+		server: server,
+	}
+}
 
 func (p ItemV1Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.Before(time.Date(2012, time.July, 11, 0, 0, 0, 0, time.UTC))

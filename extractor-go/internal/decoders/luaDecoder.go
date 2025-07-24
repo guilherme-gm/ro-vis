@@ -6,14 +6,21 @@ package decoders
 //#cgo LDFLAGS: -L${SRCDIR}/../../lua514/src -llua -lm
 import "C"
 import (
-	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/aarzilli/golua/lua"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/utils/stack"
 )
 
 type luaDecoder struct {
-	L *lua.State
+	L                *lua.State
+	path             *stack.Stack[string]
+	notConsumedPaths map[string]bool
+}
+
+type LuaDecoderResult struct {
+	NotConsumedPaths map[string]bool
 }
 
 type luaDecContextInfo struct {
@@ -91,14 +98,15 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 			continue
 		}
 
+		d.path.Push(fieldName)
 		d.decode(fieldValue, newLuaDecContextInfo())
+		d.path.Pop()
 
 		d.L.Pop(1)
 	}
 
-	if len(fieldList) > 0 {
-		fmt.Println("Not all keys were consumed.", fieldList)
-		panic("Not all keys were consumed.")
+	for k := range fieldList {
+		d.notConsumedPaths[strings.Join(d.path.ToSlice(), "/")+"/"+k] = true
 	}
 }
 
@@ -140,10 +148,16 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	}
 }
 
-func DecodeLuaTable(filePath string, tableName string, dst any) {
-	decoder := luaDecoder{
-		L: lua.NewState(),
+func newLuaDecoder() *luaDecoder {
+	return &luaDecoder{
+		L:                lua.NewState(),
+		path:             stack.NewStack[string](),
+		notConsumedPaths: make(map[string]bool),
 	}
+}
+
+func DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult {
+	decoder := newLuaDecoder()
 	decoder.L.OpenLibs()
 	defer decoder.L.Close()
 
@@ -153,6 +167,14 @@ func DecodeLuaTable(filePath string, tableName string, dst any) {
 	}
 
 	decoder.L.GetGlobal(tableName)
+	decoder.path.Push(tableName)
+
 	qv := reflect.ValueOf(dst)
 	decoder.decode(qv.Elem(), newLuaDecContextInfo())
+
+	decoder.path.Pop()
+
+	return LuaDecoderResult{
+		NotConsumedPaths: decoder.notConsumedPaths,
+	}
 }

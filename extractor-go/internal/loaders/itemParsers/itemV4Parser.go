@@ -1,12 +1,14 @@
 package itemParsers
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
@@ -14,7 +16,15 @@ import (
  * 4th Version of Item Data (introduced in 2017-04-19)
  * - Renamed System/ItemInfo.lub to System/ItemInfo_true.lub
  */
-type ItemV4Parser struct{}
+type ItemV4Parser struct {
+	server *server.Server
+}
+
+func NewItemV4Parser(server *server.Server) ItemParser {
+	return &ItemV4Parser{
+		server: server,
+	}
+}
 
 func (p ItemV4Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2017, time.April, 18, 0, 0, 0, 0, time.UTC)) &&
@@ -51,7 +61,12 @@ func (p ItemV4Parser) Parse(basePath string, update *domain.Update, existingDB m
 		}
 
 		itemTbl := []rostructs.ItemV2{}
-		decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl)
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl)
+		if len(result.NotConsumedPaths) > 0 {
+			fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
+			panic("Not all keys were consumed.")
+		}
+
 		for _, entry := range itemTbl {
 			itemID := int32(entry.ItemID)
 			if existingItem, ok := existingDB[itemID]; ok {

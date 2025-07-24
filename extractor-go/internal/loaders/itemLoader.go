@@ -36,13 +36,13 @@ func (l *ItemLoader) GetRelevantFiles() []string {
 func NewItemLoader(server *server.Server) *ItemLoader {
 	return &ItemLoader{
 		parsers: []itemParsers.ItemParser{
-			itemParsers.ItemV1Parser{},
-			itemParsers.ItemV2Parser{},
-			itemParsers.ItemV3Parser{},
-			itemParsers.ItemV4Parser{},
-			itemParsers.ItemV5Parser{},
-			itemParsers.ItemV6Parser{},
-			itemParsers.ItemV7Parser{},
+			itemParsers.NewItemV1Parser(server),
+			itemParsers.NewItemV2Parser(server),
+			itemParsers.NewItemV3Parser(server),
+			itemParsers.NewItemV4Parser(server),
+			itemParsers.NewItemV5Parser(server),
+			itemParsers.NewItemV6Parser(server),
+			itemParsers.NewItemV7Parser(server),
 		},
 		repository: server.Repositories.ItemRepository,
 	}

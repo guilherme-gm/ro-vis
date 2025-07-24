@@ -1,6 +1,7 @@
 package questParsers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
@@ -36,7 +37,11 @@ func (p QuestV4Parser) Parse(basePath string, update *domain.Update) []domain.Qu
 	}
 
 	var fileQuests []rostructs.QuestV4
-	decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/OngoingQuestInfoList_True.lub", "QuestInfoList", &fileQuests)
+	if len(result.NotConsumedPaths) > 0 {
+		fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
+		panic("Not all keys were consumed.")
+	}
 
 	quests := make([]domain.Quest, len(fileQuests))
 	for idx, val := range fileQuests {

@@ -1,12 +1,14 @@
 package itemParsers
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
@@ -14,7 +16,15 @@ import (
  * 6th Version of Item Data (introduced in 2018-04-18)
  * - System/ItemInfo_true.lub now has the "EffectID" field
  */
-type ItemV6Parser struct{}
+type ItemV6Parser struct {
+	server *server.Server
+}
+
+func NewItemV6Parser(server *server.Server) ItemParser {
+	return &ItemV6Parser{
+		server: server,
+	}
+}
 
 func (p ItemV6Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2018, time.April, 17, 0, 0, 0, 0, time.UTC)) &&
@@ -51,7 +61,12 @@ func (p ItemV6Parser) Parse(basePath string, update *domain.Update, existingDB m
 		}
 
 		itemTbl := []rostructs.ItemV6{}
-		decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl)
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl)
+		if len(result.NotConsumedPaths) > 0 {
+			fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)
+			panic("Not all keys were consumed.")
+		}
+
 		for _, entry := range itemTbl {
 			itemID := int32(entry.ItemID)
 			if existingItem, ok := existingDB[itemID]; ok {
