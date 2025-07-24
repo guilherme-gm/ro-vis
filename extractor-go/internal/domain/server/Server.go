@@ -1,6 +1,8 @@
 package server
 
 import (
+	"path"
+
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 )
@@ -35,6 +37,22 @@ func New(svType ServerType, patchListUrl string, patchFolderUrl string, localPat
 		Database:         db,
 		Repositories:     repository.NewRepository(db),
 	}
+}
+
+func (s *Server) GetPatchesFolder() string {
+	return path.Join("..", "patches", s.LocalPatchFolder)
+}
+
+func (s *Server) GetRawPatchesFolder() string {
+	return path.Join("..", "patches", s.LocalPatchFolder, "_raw")
+}
+
+func (s *Server) GetPatchFile(patchName string) string {
+	return path.Join(s.GetRawPatchesFolder(), patchName)
+}
+
+func (s *Server) GetExtractedPatchFolder(patchName string) string {
+	return path.Join(s.GetPatchesFolder(), patchName)
 }
 
 var kroMain *Server
