@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
@@ -28,7 +29,7 @@ func (ctlr *UpdatesController) List(c *gin.Context, params ListUpdatesParams) {
 		return
 	}
 
-	updates, err := patchRepo.ListUpdates(nil, repository.Pagination{
+	updates, err := patchRepo.ListUpdates(nil, time.Time{}, repository.Pagination{
 		Offset: int32(params.Query.Start),
 		Limit:  100,
 	})
