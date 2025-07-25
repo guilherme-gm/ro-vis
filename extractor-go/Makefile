@@ -8,6 +8,13 @@ install-dev:
 extractor-dev:
 	CGO_ENABLED=1 GOARCH=386 go run -tags luaa cmd/dev/dev.go
 
+# Run miner tool
+miner:
+	CGO_ENABLED=1 GOARCH=386 go run -tags luaa cmd/miner/miner.go
+
+test-extractor:
+	CGO_ENABLED=1 GOARCH=386 go test -tags luaa -v ./...
+
 # Applies database migrations
 migrate:
 	go run ./cmd/migrate/migrate.go

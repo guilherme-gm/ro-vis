@@ -86,7 +86,12 @@ func (p ItemV7Parser) Parse(basePath string, update *domain.Update, existingDB m
 		}
 
 		itemTbl := []rostructs.ItemV7{}
-		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl, decoders.ConvertEucKrToUtf8)
+		stringDecoder := decoders.ConvertEucKrToUtf8
+		if p.server.Type == server.ServerTypeLATAM {
+			stringDecoder = decoders.ConvertNoop // LATAM already encodes in UTF-8
+		}
+
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl, stringDecoder)
 		p.checkNotConsumedPaths(result)
 
 		for _, entry := range itemTbl {

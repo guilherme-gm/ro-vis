@@ -24,3 +24,7 @@ func ConvertWin1252ToUtf8(str string) string {
 	strBytes, _ = io.ReadAll(reader)
 	return string(strBytes)
 }
+
+func ConvertNoop(str string) string {
+	return str
+}
