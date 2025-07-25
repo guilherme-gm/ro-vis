@@ -18,6 +18,9 @@ defineProps<{
 				<ul class="navbar-nav me-auto mb-2 mb-md-0">
 					<slot name="nav-items"></slot>
 				</ul>
+				<div class="d-flex">
+					<slot name="right-content"></slot>
+				</div>
 			</div>
 		</div>
 	</nav>
