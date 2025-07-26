@@ -7,12 +7,12 @@
 	const serverStore = useServerStore();
 
 	const servers = [
-		{ value: 'LATAM', label: 'LATAM' },
-		{ value: 'kRO', label: 'kRO Main' },
+		{ value: 'latam', label: 'LATAM' },
+		{ value: 'kro', label: 'kRO Main' },
 	];
 
 	const selectServer = (serverId: string) => {
-		serverStore.setServer(serverId as 'LATAM' | 'kRO');
+		serverStore.setServer(serverId as 'latam' | 'kro');
 	};
 
 	const currentServerLabel = computed(() => {

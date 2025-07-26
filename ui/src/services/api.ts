@@ -1,3 +1,7 @@
+import { useServerStore } from '@/stores/server';
+
+const serverStore = useServerStore();
+
 // const baseUrl = 'https://ro-viz.c1.is/rovis/';
 const baseUrl = 'http://localhost:5173/api/';
 
@@ -14,11 +18,14 @@ function buildSearchParams(searchParams: URLSearchParams, params?: Record<string
 async function post<T>(path: string, body: object | null, params?: Record<string, string | number>): Promise<T> {
 	const url = new URL(`${baseUrl}${path}`);
 	buildSearchParams(url.searchParams, params);
+	const headers = new Headers({
+		"Content-Type": "application/json",
+		"x-server": serverStore.currentServer
+	});
+
 	const res = await window.fetch(url, {
 		method: 'POST',
-		headers: new Headers({
-			"Content-Type": "application/json",
-		}),
+		headers,
 		body: JSON.stringify(body),
 	});
 
@@ -29,12 +36,15 @@ async function get<T>(path: string, params?: Record<string, string | number>): P
 	const url = new URL(`${baseUrl}${path}`);
 	buildSearchParams(url.searchParams, params);
 
+	const headers = new Headers({
+		"Content-Type": "application/json",
+		"x-server": serverStore.currentServer
+	});
+
 	const res = await window.fetch(url, {
 		method: 'GET',
 		credentials: 'omit',
-		headers: new Headers({
-			"Content-Type": "application/json",
-		}),
+		headers,
 	});
 
 	return await res.json();

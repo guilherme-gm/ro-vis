@@ -30,6 +30,7 @@ async function getUpdates(page: number): Promise<Update[]> {
 
 		return updateList;
 	} catch (error) {
+		console.error(error);
 		state.value = LoadState.Error;
 	}
 

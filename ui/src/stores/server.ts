@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-export type Server = 'LATAM' | 'kRO';
+export type Server = 'latam' | 'kro';
 
 interface ServerState {
 	selectedServer: Server;
@@ -8,7 +8,7 @@ interface ServerState {
 
 export const useServerStore = defineStore('server', {
 	state: (): ServerState => ({
-		selectedServer: 'LATAM',
+		selectedServer: 'latam',
 	}),
 
 	getters: {
