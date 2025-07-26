@@ -36,10 +36,10 @@ func (l *QuestLoader) GetRelevantFiles() []string {
 func NewQuestLoader(server *server.Server) *QuestLoader {
 	return &QuestLoader{
 		parsers: []questParsers.QuestParser{
-			questParsers.QuestV1Parser{},
+			questParsers.NewQuestV1Parser(server),
 			// questParsers.QuestV2Parser{}, -- Not implemented (uses v1 instead)
-			questParsers.QuestV3Parser{},
-			questParsers.QuestV4Parser{},
+			questParsers.NewQuestV3Parser(server),
+			questParsers.NewQuestV4Parser(server),
 		},
 		repository: server.Repositories.QuestRepository,
 	}

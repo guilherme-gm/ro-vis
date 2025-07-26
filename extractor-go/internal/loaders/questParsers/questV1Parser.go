@@ -7,6 +7,7 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
@@ -16,7 +17,13 @@ import (
  *
  * It contained only questID2displayname.txt, a TokenTextTable.
  */
-type QuestV1Parser struct{}
+type QuestV1Parser struct {
+	server *server.Server
+}
+
+func NewQuestV1Parser(server *server.Server) QuestV1Parser {
+	return QuestV1Parser{server: server}
+}
 
 func (p QuestV1Parser) IsUpdateInRange(update *domain.Update) bool {
 	/**

@@ -6,6 +6,7 @@ import (
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
@@ -13,7 +14,13 @@ import (
  * 2018-03-21 was introduced "System/OnGoingQuestInfoList_True.lub" and "System/RecommendedQuestInfoList_True.lub".
  * This marks the end of "questid2display.txt" and lua files/quest/*.lua
  */
-type QuestV3Parser struct{}
+type QuestV3Parser struct {
+	server *server.Server
+}
+
+func NewQuestV3Parser(server *server.Server) QuestV3Parser {
+	return QuestV3Parser{server: server}
+}
 
 func (p QuestV3Parser) IsUpdateInRange(update *domain.Update) bool {
 	return (update.Date.After(time.Date(2018, time.March, 20, 0, 0, 0, 0, time.UTC)) &&
