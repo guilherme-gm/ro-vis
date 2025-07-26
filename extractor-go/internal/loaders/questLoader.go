@@ -120,3 +120,7 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 		}
 	}
 }
+
+func (l *QuestLoader) Name() string {
+	return "quests"
+}

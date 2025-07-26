@@ -124,3 +124,7 @@ func (l *ItemLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 		}
 	}
 }
+
+func (l *ItemLoader) Name() string {
+	return "items"
+}
