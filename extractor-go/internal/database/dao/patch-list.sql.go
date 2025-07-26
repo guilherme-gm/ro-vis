@@ -31,7 +31,7 @@ func (q *Queries) GetLatestPatch(ctx context.Context) (Patch, error) {
 }
 
 const getUpdatesCount = `-- name: GetUpdatesCount :one
-SELECT COUNT(*) FROM (SELECT ` + "`" + `date` + "`" + ` FROM ` + "`" + `patches` + "`" + ` GROUP BY ` + "`" + `date` + "`" + `) updates
+SELECT COUNT(*) FROM (SELECT ` + "`" + `date` + "`" + ` FROM ` + "`" + `patches` + "`" + ` WHERE ` + "`" + `status` + "`" + ` IN ('pending', 'extracted') GROUP BY ` + "`" + `date` + "`" + `) updates
 `
 
 func (q *Queries) GetUpdatesCount(ctx context.Context) (int64, error) {
@@ -106,6 +106,7 @@ SELECT patches.id, patches.name, patches.files, patches.status, patches.date, pa
 FROM (
 	SELECT ` + "`" + `date` + "`" + `
 	FROM ` + "`" + `patches` + "`" + `
+	WHERE ` + "`" + `status` + "`" + ` IN ('pending', 'extracted')
 	GROUP BY ` + "`" + `date` + "`" + `
 	ORDER BY ` + "`" + `date` + "`" + ` ASC
 	LIMIT ?, ?

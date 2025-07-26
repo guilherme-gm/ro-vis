@@ -11,6 +11,7 @@ SELECT patches.*
 FROM (
 	SELECT `date`
 	FROM `patches`
+	WHERE `status` IN ('pending', 'extracted')
 	GROUP BY `date`
 	ORDER BY `date` ASC
 	LIMIT ?, ?
@@ -19,7 +20,7 @@ INNER JOIN `patches` ON `patches`.`date` = dates.`date`
 ORDER BY patches.`id` ASC;
 
 -- name: GetUpdatesCount :one
-SELECT COUNT(*) FROM (SELECT `date` FROM `patches` GROUP BY `date`) updates;
+SELECT COUNT(*) FROM (SELECT `date` FROM `patches` WHERE `status` IN ('pending', 'extracted') GROUP BY `date`) updates;
 
 -- name: GetLatestPatch :one
 SELECT * FROM `patches` ORDER BY `id` DESC LIMIT 1
