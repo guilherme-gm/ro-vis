@@ -120,6 +120,76 @@ func downloadPatches(server *server.Server) {
 	}
 }
 
+// Extracts relevant files for a given update to the patch folder
+func extractRelevantFiles(server *server.Server, loader loaders.Loader, update domain.Update) {
+	relevantFiles := loader.GetRelevantFiles()
+
+	for _, file := range relevantFiles {
+		change, err := update.GetChangeForFile(file)
+		if err != nil {
+			if errors.Is(err, domain.NewNotFoundError("")) {
+				continue
+			}
+
+			panic(err)
+		}
+
+		patchFileExt := change.Patch[len(change.Patch)-4:]
+		var patchFile patchfile.PatchFile
+		switch patchFileExt {
+		case ".rgz":
+			patchFile, err = rgz.Open(server.GetPatchFile(change.Patch))
+			if err != nil {
+				panic(err)
+			}
+		case ".gpf":
+			patchFile, err = grf.Open(server.GetPatchFile(change.Patch))
+			if err != nil {
+				panic(err)
+			}
+		default:
+			fmt.Printf("Unsupported patch format: %s\n", change.Patch)
+			continue
+		}
+
+		if err := patchFile.Extract(file, server.GetExtractedPatchFolder(change.Patch)); err != nil {
+			panic(err)
+		}
+	}
+}
+
+// Processes patches for a given loader
+func processPatchesForLoader(server *server.Server, loader loaders.Loader, updates []domain.Update) {
+	loaderControllerRepository := server.Repositories.LoaderControllerRepository
+	latest, err := loaderControllerRepository.GetLatestUpdate(nil, loader.Name())
+	if err != nil {
+		panic(err)
+	}
+
+	for _, update := range updates {
+		fmt.Println("Processing " + update.Name())
+		if update.Date.Compare(latest) <= 0 {
+			continue
+		}
+
+		extractRelevantFiles(server, loader, update)
+
+		tx, err := server.Database.BeginTx()
+		if err != nil {
+			panic(err)
+		}
+		defer tx.Rollback()
+
+		loader.LoadPatch(tx, server.GetPatchesFolder(), update)
+
+		loaderControllerRepository.SetLatestPatch(tx, loader.Name(), update.Date)
+
+		if err := tx.Commit(); err != nil {
+			panic(err)
+		}
+	}
+}
+
 func processPatches(server *server.Server) {
 	// Get date from 2 days ago
 	untilTime := time.Now().Add(-time.Hour * 24 * 2)
@@ -129,84 +199,19 @@ func processPatches(server *server.Server) {
 		panic(err)
 	}
 
-	loaderControllerRepository := server.Repositories.LoaderControllerRepository
-	latest, err := loaderControllerRepository.GetLatestUpdate(nil, "items")
-	if err != nil {
-		panic(err)
-	}
-
-	loader := loaders.NewItemLoader(server)
-	for _, update := range updates {
-		fmt.Println("Processing " + update.Name())
-		if update.Date.Compare(latest) <= 0 {
-			continue
-		}
-
-		// Get relevant files
-		relevantFiles := loader.GetRelevantFiles()
-
-		// Extract relevant files to patch folder
-		for _, file := range relevantFiles {
-			fmt.Println("Extracting " + file)
-			change, err := update.GetChangeForFile(file)
-			if err != nil {
-				if errors.Is(err, domain.NewNotFoundError("")) {
-					continue
-				}
-
-				panic(err)
-			}
-
-			patchFileExt := change.Patch[len(change.Patch)-4:]
-			var patchFile patchfile.PatchFile
-			switch patchFileExt {
-			case ".rgz":
-				patchFile, err = rgz.Open(server.GetPatchFile(change.Patch))
-				if err != nil {
-					panic(err)
-				}
-			case ".gpf":
-				patchFile, err = grf.Open(server.GetPatchFile(change.Patch))
-				if err != nil {
-					panic(err)
-				}
-			default:
-				fmt.Printf("Unsupported patch format: %s\n", change.Patch)
-				continue
-			}
-
-			if err := patchFile.Extract(file, server.GetExtractedPatchFolder(change.Patch)); err != nil {
-				panic(err)
-			}
-
-			fmt.Println("Extracted " + file)
-		}
-
-		tx, err := server.Database.BeginTx()
-		if err != nil {
-			panic(err)
-		}
-		defer tx.Rollback()
-
-		fmt.Println("Extracting " + update.Name() + "...")
-		loader.LoadPatch(tx, server.GetPatchesFolder(), update)
-
-		loaderControllerRepository.SetLatestPatch(tx, "items", update.Date)
-
-		if err := tx.Commit(); err != nil {
-			panic(err)
-		}
-	}
+	processPatchesForLoader(server, loaders.NewItemLoader(server), updates)
 }
 
 func main() {
 	fmt.Println("RO Vis extractor - Miner")
 	conf.LoadExtractor()
 
+	_ = downloadPatches // just to avoid complains from compiler
+
 	// @TODO: server.GetServers()
 	for _, server := range []*server.Server{server.GetLATAM()} {
 		fmt.Println("------ Mining " + server.DatabaseName + " ------")
-		downloadPatches(server)
+		// downloadPatches(server)
 		processPatches(server)
 	}
 
