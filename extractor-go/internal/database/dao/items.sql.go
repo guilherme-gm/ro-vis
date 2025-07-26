@@ -38,7 +38,7 @@ func (q *Queries) CountItems(ctx context.Context) (int64, error) {
 }
 
 const getChangedItems = `-- name: GetChangedItems :many
-SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info, latest.update lastUpdate
+SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, current.identified_name, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info, latest.update lastUpdate
 FROM ` + "`" + `item_history` + "`" + ` current
 LEFT JOIN ` + "`" + `previous_item_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
 LEFT JOIN ` + "`" + `items` + "`" + ` latest_id ON ` + "`" + `latest_id` + "`" + `.` + "`" + `item_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `item_id` + "`" + `
@@ -75,7 +75,6 @@ func (q *Queries) GetChangedItems(ctx context.Context, arg GetChangedItemsParams
 			&i.ItemHistory.ItemID,
 			&i.ItemHistory.FileVersion,
 			&i.ItemHistory.Update,
-			&i.ItemHistory.IdentifiedName,
 			&i.ItemHistory.IdentifiedDescription,
 			&i.ItemHistory.IdentifiedSprite,
 			&i.ItemHistory.UnidentifiedName,
@@ -92,6 +91,7 @@ func (q *Queries) GetChangedItems(ctx context.Context, arg GetChangedItemsParams
 			&i.ItemHistory.EffectID,
 			&i.ItemHistory.PackageID,
 			&i.ItemHistory.MoveInfo,
+			&i.ItemHistory.IdentifiedName,
 			&i.PreviousItemHistoryVw.HistoryID,
 			&i.PreviousItemHistoryVw.PreviousHistoryID,
 			&i.PreviousItemHistoryVw.ItemID,
@@ -130,7 +130,7 @@ func (q *Queries) GetChangedItems(ctx context.Context, arg GetChangedItemsParams
 }
 
 const getCurrentItems = `-- name: GetCurrentItems :many
-SELECT item_history.history_id, item_history.previous_history_id, item_history.item_id, item_history.file_version, item_history.` + "`" + `update` + "`" + `, item_history.identified_name, item_history.identified_description, item_history.identified_sprite, item_history.unidentified_name, item_history.unidentified_description, item_history.unidentified_sprite, item_history.slot_count, item_history.is_book, item_history.can_use_buying_store, item_history.card_prefix, item_history.card_is_postfix, item_history.card_illustration, item_history.class_num, item_history.is_costume, item_history.effect_id, item_history.package_id, item_history.move_info, ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT item_history.history_id, item_history.previous_history_id, item_history.item_id, item_history.file_version, item_history.` + "`" + `update` + "`" + `, item_history.identified_description, item_history.identified_sprite, item_history.unidentified_name, item_history.unidentified_description, item_history.unidentified_sprite, item_history.slot_count, item_history.is_book, item_history.can_use_buying_store, item_history.card_prefix, item_history.card_is_postfix, item_history.card_illustration, item_history.class_num, item_history.is_costume, item_history.effect_id, item_history.package_id, item_history.move_info, item_history.identified_name, ` + "`" + `items` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `items` + "`" + `
 INNER JOIN ` + "`" + `item_history` + "`" + ` ON ` + "`" + `items` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -141,7 +141,6 @@ type GetCurrentItemsRow struct {
 	ItemID                  int32
 	FileVersion             int32
 	Update                  string
-	IdentifiedName          sql.NullString
 	IdentifiedDescription   sql.NullString
 	IdentifiedSprite        sql.NullString
 	UnidentifiedName        sql.NullString
@@ -158,6 +157,7 @@ type GetCurrentItemsRow struct {
 	EffectID                int32
 	PackageID               int32
 	MoveInfo                []byte
+	IdentifiedName          sql.NullString
 	Deleted                 bool
 }
 
@@ -176,7 +176,6 @@ func (q *Queries) GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, er
 			&i.ItemID,
 			&i.FileVersion,
 			&i.Update,
-			&i.IdentifiedName,
 			&i.IdentifiedDescription,
 			&i.IdentifiedSprite,
 			&i.UnidentifiedName,
@@ -193,6 +192,7 @@ func (q *Queries) GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, er
 			&i.EffectID,
 			&i.PackageID,
 			&i.MoveInfo,
+			&i.IdentifiedName,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -209,7 +209,7 @@ func (q *Queries) GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, er
 }
 
 const getItemHistory = `-- name: GetItemHistory :many
-SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_name, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info
+SELECT current.history_id, current.previous_history_id, current.item_id, current.file_version, current.` + "`" + `update` + "`" + `, current.identified_description, current.identified_sprite, current.unidentified_name, current.unidentified_description, current.unidentified_sprite, current.slot_count, current.is_book, current.can_use_buying_store, current.card_prefix, current.card_is_postfix, current.card_illustration, current.class_num, current.is_costume, current.effect_id, current.package_id, current.move_info, current.identified_name, previous.history_id, previous.previous_history_id, previous.item_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.identified_name, previous.identified_description, previous.identified_sprite, previous.unidentified_name, previous.unidentified_description, previous.unidentified_sprite, previous.slot_count, previous.is_book, previous.can_use_buying_store, previous.card_prefix, previous.card_is_postfix, previous.card_illustration, previous.class_num, previous.is_costume, previous.effect_id, previous.package_id, previous.move_info
 FROM ` + "`" + `item_history` + "`" + ` current
 LEFT JOIN ` + "`" + `previous_item_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
 WHERE ` + "`" + `current` + "`" + `.` + "`" + `item_id` + "`" + ` = ?
@@ -243,7 +243,6 @@ func (q *Queries) GetItemHistory(ctx context.Context, arg GetItemHistoryParams) 
 			&i.ItemHistory.ItemID,
 			&i.ItemHistory.FileVersion,
 			&i.ItemHistory.Update,
-			&i.ItemHistory.IdentifiedName,
 			&i.ItemHistory.IdentifiedDescription,
 			&i.ItemHistory.IdentifiedSprite,
 			&i.ItemHistory.UnidentifiedName,
@@ -260,6 +259,7 @@ func (q *Queries) GetItemHistory(ctx context.Context, arg GetItemHistoryParams) 
 			&i.ItemHistory.EffectID,
 			&i.ItemHistory.PackageID,
 			&i.ItemHistory.MoveInfo,
+			&i.ItemHistory.IdentifiedName,
 			&i.PreviousItemHistoryVw.HistoryID,
 			&i.PreviousItemHistoryVw.PreviousHistoryID,
 			&i.PreviousItemHistoryVw.ItemID,

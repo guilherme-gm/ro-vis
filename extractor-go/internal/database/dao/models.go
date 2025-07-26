@@ -68,7 +68,6 @@ type ItemHistory struct {
 	ItemID                  int32
 	FileVersion             int32
 	Update                  string
-	IdentifiedName          sql.NullString
 	IdentifiedDescription   sql.NullString
 	IdentifiedSprite        sql.NullString
 	UnidentifiedName        sql.NullString
@@ -85,6 +84,7 @@ type ItemHistory struct {
 	EffectID                int32
 	PackageID               int32
 	MoveInfo                []byte
+	IdentifiedName          sql.NullString
 }
 
 type LoaderController struct {

@@ -111,7 +111,8 @@ func (r *PatchRepository) ListUpdates(tx *sql.Tx, untilDate time.Time, paginatio
 			time = patch.Date
 
 			updates = append(updates, domain.Update{
-				Date: time,
+				Date:    time,
+				Changes: []domain.UpdateChange{},
 			})
 			update = &updates[len(updates)-1]
 
