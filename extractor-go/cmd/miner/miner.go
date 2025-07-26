@@ -200,6 +200,7 @@ func processPatches(server *server.Server) {
 	}
 
 	processPatchesForLoader(server, loaders.NewItemLoader(server), updates)
+	processPatchesForLoader(server, loaders.NewQuestLoader(server), updates)
 }
 
 func main() {
