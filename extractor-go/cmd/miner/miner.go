@@ -207,18 +207,52 @@ func processPatches(server *server.Server) {
 	processPatchesForLoader(server, loaders.NewQuestLoader(server), updates)
 }
 
-func main() {
-	fmt.Println("RO Vis extractor - Miner")
-	conf.LoadExtractor()
-
-	// _ = downloadPatches // just to avoid complains from compiler
-
+func runMiningCycle() error {
 	// @TODO: server.GetServers()
 	for _, server := range []*server.Server{server.GetLATAM()} {
 		fmt.Println("------ Mining " + server.DatabaseName + " ------")
 		downloadPatches(server)
 		processPatches(server)
 	}
+	return nil
+}
 
-	fmt.Println("Success")
+func next7PM() time.Time {
+	now := time.Now()
+	// Calculate next 7 PM
+	next := time.Date(now.Year(), now.Month(), now.Day(), 19, 0, 0, 0, now.Location())
+	if now.After(next) {
+		// If it's already past 7 PM today, schedule for 7 PM tomorrow
+		next = next.Add(24 * time.Hour)
+	}
+	return next
+}
+
+func main() {
+	fmt.Println("RO Vis extractor - Miner")
+	conf.LoadExtractor()
+
+	// Run immediately on start
+	if err := runMiningCycle(); err != nil {
+		fmt.Printf("Error during initial mining cycle: %v\n", err)
+	}
+
+	// Function to calculate duration until next 7 PM
+	nextRun := next7PM()
+	fmt.Println("Next mining cycle at", nextRun.Format("2006-01-02 15:04:05"))
+
+	// Keep the application running and process mining on schedule
+	// Create a ticker that triggers every 24 hours
+	ticker := time.NewTicker(24 * time.Hour)
+	defer ticker.Stop()
+
+	// Then run on every tick
+	for t := range ticker.C {
+		fmt.Println("\n--- Starting scheduled mining cycle at", t.Format("2006-01-02 15:04:05"), "---")
+		if err := runMiningCycle(); err != nil {
+			fmt.Printf("Error during scheduled mining cycle: %v\n", err)
+		} else {
+			fmt.Println("Scheduled mining cycle completed successfully")
+		}
+	}
 }
