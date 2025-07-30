@@ -1,0 +1,7 @@
+# Live version of the miner container
+# Simply runs the binary inside it.
+
+# We need to use alpine here as we make HTTPS requests, thus need certificates
+FROM alpine:latest
+COPY extractor-go/miner /bin/miner
+ENTRYPOINT ["/bin/miner"]

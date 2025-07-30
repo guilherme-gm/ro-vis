@@ -1,0 +1,85 @@
+name: Build extractor-go API
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extractor-go
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'extractor-go/go.mod'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ${{ github.workspace }}/extractor-go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Install cross-compilation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf
+
+      - name: Build Lua for ARM
+        working-directory: extractor-go/lua514/src
+        run: |
+          make clean
+          make CC=arm-linux-gnueabihf-gcc AR="arm-linux-gnueabihf-ar rcu" \
+                RANLIB=arm-linux-gnueabihf-ranlib \
+                MYCFLAGS="-DLUA_USE_LINUX -fPIC -DLUA_USE_READLINE=0" \
+                generic
+
+      - name: Build Go applications
+        run: |
+          CC=arm-linux-gnueabihf-gcc GOARCH=arm go build -o api ./cmd/api
+          CC=arm-linux-gnueabihf-gcc GOARCH=arm go build -o migrate ./cmd/migrate
+          CC=arm-linux-gnueabihf-gcc GOARCH=arm CGO_ENABLED=1 CGO_LDFLAGS="-static" go build -tags luaa -o miner ./cmd/miner/miner.go
+
+      - name: Upload to server via SFTP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
+          username: ${{ secrets.SFTP_USER }}
+          key: ${{ secrets.SFTP_KEY }}
+          passphrase: ${{ secrets.SFTP_KEYPASS }}
+          source: "docker-compose.yml,extractor-go/api,Dockerfile.api.live,extractor-go/migrate,Dockerfile.migrate.live,migrations,extractor-go/miner,Dockerfile.miner.live"
+          target: "${{ secrets.SFTP_PATH }}"
+          overwrite: true
+          protocol: sftp
+
+      - name: Run container on server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          key: ${{ secrets.SFTP_KEY }}
+          passphrase: ${{ secrets.SFTP_KEYPASS }}
+          script: |
+            cd ${{ secrets.SFTP_PATH }}
+            echo "DB_URL=${{ secrets.DB_URL }}" > .env
+            echo "API_PORT=${{ secrets.API_PORT }}" >> .env
+            echo "MIGRATOR_DB_URL=${{ secrets.MIGRATOR_DB_URL }}" >> .env
+            echo "MINER_DB_URL=${{ secrets.MINER_DB_URL }}" >> .env
+            docker compose build
+            docker compose down
+            docker compose up -d
+            rm -f .env

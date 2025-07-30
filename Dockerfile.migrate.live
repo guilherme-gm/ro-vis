@@ -1,0 +1,7 @@
+# Live version of the migrate container
+# Simply runs the binary inside it.
+
+FROM scratch
+COPY extractor-go/migrate /migrate
+ADD migrations /migrations
+ENTRYPOINT ["/migrate"]

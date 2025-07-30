@@ -1,0 +1,52 @@
+services:
+  extractor-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate.live
+    image: extractor-migrate:live
+    container_name: extractor-migrate
+    restart: no
+    environment:
+      - DB_URL=${DB_URL}
+      - MIGRATOR_DB_URL=${MIGRATOR_DB_URL}
+    networks:
+      - ro-vis
+
+  extractor-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api.live
+    image: extractor-api:live
+    container_name: extractor-api
+    ports:
+      - "8500:3000"
+    restart: unless-stopped
+    environment:
+      - DB_URL=${DB_URL}
+      - API_PORT=${API_PORT}
+    networks:
+      - ro-vis
+    depends_on:
+      - extractor-migrate
+
+  extractor-miner:
+    build:
+      context: .
+      dockerfile: Dockerfile.miner.live
+    image: extractor-miner:live
+    container_name: extractor-miner
+    restart: unless-stopped
+    volumes:
+      - ./_data/rovis_patches:/patches
+    environment:
+      - DB_URL=${MINER_DB_URL}
+    networks:
+      - ro-vis
+    depends_on:
+      - extractor-api
+
+networks:
+  ro-vis:
+    external: true
+    driver: bridge
+    name: ro-vis

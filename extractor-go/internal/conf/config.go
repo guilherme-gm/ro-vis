@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -26,7 +27,13 @@ type apiConfig struct {
 var ApiConfig apiConfig
 
 func loadEnv() {
-	err := godotenv.Load()
+	// check if .env exists
+	_, err := os.Stat(".env")
+	if err != nil {
+		return
+	}
+
+	err = godotenv.Load()
 	if err != nil {
 		panic("Error loading .env file")
 	}
@@ -59,6 +66,9 @@ func LoadMigrator() {
 	MigratorConfig = migratorConfig{
 		DbUrl: os.Getenv("MIGRATOR_DB_URL"),
 	}
+
+	fmt.Println("Migrator config loaded:")
+	fmt.Println("DB URL: " + MigratorConfig.DbUrl)
 }
 
 func LoadApi() {
