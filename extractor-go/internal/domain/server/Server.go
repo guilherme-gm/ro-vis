@@ -62,8 +62,8 @@ func GetKROMain() *Server {
 	if kroMain == nil {
 		kroMain = New(
 			ServerTypeKROMain,
-			"", // @TODO: patch list url
-			"", // @TODO: patch folder url
+			"https://ropatch.gnjoy.com/PatchInfo/patch2.txt",
+			"http://ropatch.gnjoy.com/Patch/",
 			"kro",
 			"rovis-kro")
 	}
