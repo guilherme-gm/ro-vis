@@ -22,8 +22,6 @@ import (
 const notFoundString = "<?xml version='1.0' encoding='UTF-8'?><Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message></Error>"
 
 func downloadPatches(server *server.Server) {
-	fmt.Println("-- Checking for new updates")
-
 	latest, err := server.Repositories.PatchRepository.GetLatestPatch(nil)
 	if err != nil {
 		panic(err)
@@ -171,10 +169,11 @@ func processPatchesForLoader(server *server.Server, loader loaders.Loader, updat
 	}
 
 	for _, update := range updates {
-		fmt.Println("Processing " + update.Name())
 		if update.Date.Compare(latest) <= 0 {
 			continue
 		}
+
+		fmt.Println("Processing " + update.Name())
 
 		extractRelevantFiles(server, loader, update)
 
@@ -211,7 +210,10 @@ func runMiningCycle() error {
 	// @TODO: server.GetServers()
 	for _, server := range []*server.Server{server.GetLATAM()} {
 		fmt.Println("------ Mining " + server.DatabaseName + " ------")
+		fmt.Println("-- Checking for new updates")
 		downloadPatches(server)
+
+		fmt.Println("-- Processing patches")
 		processPatches(server)
 	}
 	return nil
