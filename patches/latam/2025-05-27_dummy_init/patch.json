@@ -1,0 +1,18 @@
+{
+	"Id": 315,
+	"Name": "2025-05-27_dummy_init",
+	"Date": "2025-05-27",
+	"Files": [
+		"data/bookitemnametable.txt",
+		"data/buyingstoreitemlist.txt",
+		"data/cardpostfixnametable.txt",
+		"data/cardprefixnametable.txt",
+		"data/itemmoveinfov5.txt",
+		"data/num2cardillustnametable.txt",
+		"System/iteminfo_new.lub",
+		"System/OngoingQuestInfoList_True.lub"
+	],
+	"status": "pending",
+	"createdAt": "2025-07-18 08: 37: 01",
+	"updatedat": "2025-07-30 23: 08: 34"
+}
