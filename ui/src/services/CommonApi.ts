@@ -58,7 +58,7 @@ export class CommonApi<Entity, MinEntity> {
 		try {
 			this.state.value = LoadState.Loading;
 
-			const items = await this.api.get<PaginatedResponse<PatchItem<Entity>>>(`${this.path}/${id}`, { start: ((page - 1) * 100) });
+			const items = await this.api.get<PaginatedResponse<PatchItem<Entity>>>(`${this.path}${id}`, { start: ((page - 1) * 100) });
 
 			this.historyTotal.value = items.total;
 
