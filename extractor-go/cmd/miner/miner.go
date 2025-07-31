@@ -37,6 +37,7 @@ func downloadPatches(server *server.Server) {
 			continue
 		}
 
+		fmt.Println("- Downloading " + patch.Name)
 		filePath := path.Join("..", "patches", server.LocalPatchFolder, "_raw", patch.Name)
 		if !patch.Disabled {
 			err := patchServer.DownloadPatch(&patch, filePath)
@@ -122,6 +123,7 @@ func downloadPatches(server *server.Server) {
 		}
 
 		server.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
+		fmt.Printf("Patch %s downloaded\n", patch.Name)
 	}
 }
 
