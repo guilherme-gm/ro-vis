@@ -15,9 +15,10 @@ jobs:
         with:
           node-version: 20
       - run: cd ui && npm ci
+      - run: echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> ui/.env
       - run: cd ui && npm run build
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v1.0.8
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ui/dist
 

@@ -1,9 +1,9 @@
 import { useServerStore } from '@/stores/server';
+import { API_URL } from '@/conf';
 
 const serverStore = useServerStore();
 
-// const baseUrl = 'https://ro-viz.c1.is/rovis/';
-const baseUrl = 'http://localhost:5173/api/';
+const baseUrl = API_URL;
 
 function buildSearchParams(searchParams: URLSearchParams, params?: Record<string, string | number>): void {
 	if (!params) {
