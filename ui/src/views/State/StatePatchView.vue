@@ -48,19 +48,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 		<BsAccordion v-if="newItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in newItems"
-				:key="val.To?.Id"
-				:title="`#${val.To?.Id} - ${val?.To?.Constant}`"
+				:key="val.To?.Data.Id"
+				:title="`#${val.To?.Data.Id} - ${val?.To?.Data.Constant}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Data.Id ?? val.From?.Data.Id } }"
 						target="_blank"
 					>
 						View State history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<StateCompareTable :current="val.To" />
+				<StateCompareTable :current="val.To?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No new states in this page</p>
@@ -69,19 +69,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 		<BsAccordion v-if="updatedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in updatedItems"
-				:key="val.To?.Id ?? val.From?.Id"
-				:title="`#${val.To?.Id ?? val.From?.Id} - ${val?.To?.Constant ?? val?.From?.Constant}`"
+				:key="val.To?.Data.Id ?? val.From?.Data.Id"
+				:title="`#${val.To?.Data.Id ?? val.From?.Data.Id} - ${val?.To?.Data.Constant ?? val?.From?.Data.Constant}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Data.Id ?? val.From?.Data.Id } }"
 						target="_blank"
 					>
 						View State history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<StateCompareTable :current="val.To" :previous="val.From" />
+				<StateCompareTable :current="val.To?.Data" :previous="val.From?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No updated states in this page</p>
@@ -90,19 +90,19 @@ const deletedItems = computed(() => list.value.filter((v) => v.From !== null && 
 		<BsAccordion v-if="deletedItems.length > 0">
 			<BsAccordionItem
 				v-for="(val) in deletedItems"
-				:key="val.From?.Id"
-				:title="`#${val.From?.Id} - ${val?.From?.Constant}`"
+				:key="val.From?.Data.Id"
+				:title="`#${val.From?.Data.Id} - ${val?.From?.Data.Constant}`"
 			>
 				<p>
-					<strong>Last update:</strong> {{ val.lastUpdate }}
+					<strong>Last update:</strong> {{ val.LastUpdate }}
 					<BsLink
-						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Id ?? val.From?.Id } }"
+						:to="{ name: RouteName.StateHistory, params: { stateId: val.To?.Data.Id ?? val.From?.Data.Id } }"
 						target="_blank"
 					>
 						View State history <BIconBoxArrowUpRight />
 					</BsLink>
 				</p>
-				<StateCompareTable :previous="val.From" />
+				<StateCompareTable :previous="val.From?.Data" />
 			</BsAccordionItem>
 		</BsAccordion>
 		<p v-else>No deleted states in this page</p>
