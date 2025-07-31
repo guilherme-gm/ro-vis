@@ -6,31 +6,16 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/conf"
-	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 )
 
-func dbCheck() {
-	migTool, err := database.NewMigrationTool()
-	if err != nil {
-		panic(err)
-	}
-
-	migTool.UpdateCheck()
-}
-
-type loader interface {
-	LoadPatch(tx *sql.Tx, basePath string, update domain.Update)
-}
-
-func load(server *server.Server, updates []domain.Update, loaderName string, loaderInstance loader, loaderControllerRepository *repository.LoaderControllerRepository) {
+func load(server *server.Server, updates []domain.Update, loaderName string, loaderInstance loaders.Loader, loaderControllerRepository *repository.LoaderControllerRepository) {
 	latest, err := loaderControllerRepository.GetLatestUpdate(nil, loaderName)
 	if err != nil {
 		panic(err)
@@ -61,19 +46,20 @@ func load(server *server.Server, updates []domain.Update, loaderName string, loa
 func main() {
 	fmt.Println("RO Vis extractor - DEV")
 	conf.LoadExtractor()
-	dbCheck()
 
-	// loaders.ExtractInitialPatchList()
+	loaders.NewPatchListLoader(server.GetKROMain()).ExtractInitialPatchList(nil)
 
-	server := server.GetKROMain()
+	_ = load
 
-	updates, err := server.Repositories.PatchRepository.ListUpdates(nil, repository.PaginateAll)
-	if err != nil {
-		panic(err)
-	}
+	// server := server.GetKROMain()
 
-	// load(updates, "quest", loaders.NewQuestLoader())
-	load(server, updates, "items", loaders.NewItemLoader(server), server.Repositories.LoaderControllerRepository)
+	// updates, err := server.Repositories.PatchRepository.ListUpdates(nil, repository.PaginateAll)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// // load(updates, "quest", loaders.NewQuestLoader())
+	// load(server, updates, "items", loaders.NewItemLoader(server), server.Repositories.LoaderControllerRepository)
 
 	fmt.Println("Success")
 }
