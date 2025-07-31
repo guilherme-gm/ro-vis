@@ -32,9 +32,10 @@ func (p *PatchFile) ToDomain() domain.Patch {
 	}
 
 	return domain.Patch{
-		Name:  p.Name,
-		Date:  p.PatchDate,
-		Files: files,
+		Name:   p.Name,
+		Date:   p.PatchDate,
+		Files:  files,
+		Status: domain.PatchStatusPending,
 	}
 }
 
@@ -45,9 +46,16 @@ var sakrayPatchExpressions = [4]*regexp.Regexp{
 	regexp.MustCompile(`(?i)ragexeRE`),            // 9999-12-31_ragExeRE.rgz
 }
 
-func shouldSkipPatch(rawPatch PatchFile) bool {
+func (l *PatchListLoader) shouldSkipPatch(rawPatch PatchFile) bool {
 	for _, exp := range sakrayPatchExpressions {
 		if exp.Match([]byte(rawPatch.Name)) {
+			return true
+		}
+	}
+
+	if l.server.Type == server.ServerTypeKROMain {
+		// 2020-02-25data_true_001.gpf is the first patch in kRO Server
+		if rawPatch.PatchDate.After(time.Date(2020, 02, 24, 0, 0, 0, 0, time.UTC)) {
 			return true
 		}
 	}
@@ -57,11 +65,13 @@ func shouldSkipPatch(rawPatch PatchFile) bool {
 
 type PatchListLoader struct {
 	repository *repository.PatchRepository
+	server     *server.Server
 }
 
 func NewPatchListLoader(server *server.Server) *PatchListLoader {
 	return &PatchListLoader{
 		repository: server.Repositories.PatchRepository,
+		server:     server,
 	}
 }
 
@@ -80,7 +90,7 @@ func (l *PatchListLoader) LoadFromJson(tx *sql.Tx, filePath string) error {
 	// Note: old code ignored places where hash was empty; not sure if this matter
 
 	for _, rawPatch := range patchList {
-		if shouldSkipPatch(rawPatch) {
+		if l.shouldSkipPatch(rawPatch) {
 			continue
 		}
 		patch := rawPatch.ToDomain()
@@ -103,24 +113,26 @@ func (l *PatchListLoader) LoadFromJson(tx *sql.Tx, filePath string) error {
  */
 func (l *PatchListLoader) ExtractInitialPatchList(tx *sql.Tx) {
 	files := [...]string{
-		"../patches/_plist/_init.json",
-		"../patches/_plist/2012.json",
-		"../patches/_plist/2013.json",
-		"../patches/_plist/2014.json",
-		"../patches/_plist/2015.json",
-		"../patches/_plist/2016.json",
-		"../patches/_plist/2017.json",
-		"../patches/_plist/2018.json",
-		"../patches/_plist/2019.json",
-		"../patches/_plist/2020.json",
-		"../patches/_plist/2021.json",
-		"../patches/_plist/2022.json",
-		"../patches/_plist/2023.json",
-		"../patches/_plist/2024.json",
-		"../patches/_plist/2025.json",
+		"../patches/kro/_plist/_init.json",
+		"../patches/kro/_plist/2012.json",
+		"../patches/kro/_plist/2013.json",
+		"../patches/kro/_plist/2014.json",
+		"../patches/kro/_plist/2015.json",
+		"../patches/kro/_plist/2016.json",
+		"../patches/kro/_plist/2017.json",
+		"../patches/kro/_plist/2018.json",
+		"../patches/kro/_plist/2019.json",
+		"../patches/kro/_plist/2020.json",
+		// "../patches/kro/_plist/2021.json",
+		// "../patches/kro/_plist/2022.json",
+		// "../patches/kro/_plist/2023.json",
+		// "../patches/kro/_plist/2024.json",
+		// "../patches/kro/_plist/2025.json",
 	}
 
 	for _, filePath := range files {
-		l.LoadFromJson(tx, filePath)
+		if err := l.LoadFromJson(tx, filePath); err != nil {
+			panic(err)
+		}
 	}
 }
