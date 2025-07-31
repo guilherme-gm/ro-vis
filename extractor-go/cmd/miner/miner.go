@@ -38,14 +38,11 @@ func downloadPatches(server *server.Server) {
 		}
 
 		filePath := path.Join("..", "patches", server.LocalPatchFolder, "_raw", patch.Name)
-		err := patchServer.DownloadPatch(&patch, filePath)
-		if err != nil {
-			panic(err)
-		}
-
-		fileContent, err := os.ReadFile(filePath)
-		if err != nil {
-			panic(err)
+		if !patch.Disabled {
+			err := patchServer.DownloadPatch(&patch, filePath)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		newPatch := domain.Patch{
@@ -55,15 +52,25 @@ func downloadPatches(server *server.Server) {
 			Files:  []string{},
 			Status: domain.PatchStatusPending,
 		}
+
+		if patch.Disabled {
+			// Disabled patches most of the time are Ragexes or broken updates
+			// We won't be extractign them anyway, and not downloading it will save a good amount of space
+			newPatch.Status = domain.PatchStatusSkipped
+			fmt.Printf("Patch %s is disabled - Skipping it\n", patch.Name)
+			server.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
+			continue
+		}
+
 		if newPatch.Date.IsZero() {
 			fmt.Printf("Unknown patch date: %s\n", patch.Name)
 			fmt.Printf("Stopping patch download for %s\n", server.Type)
 			return
 		}
 
-		if patch.Disabled {
-			newPatch.Status = domain.PatchStatusSkipped
-			fmt.Printf("Patch %s is disabled\n", patch.Name)
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			panic(err)
 		}
 
 		if string(fileContent) == notFoundString {
@@ -85,9 +92,9 @@ func downloadPatches(server *server.Server) {
 				panic(err)
 			}
 
-			fmt.Printf("Files in %s:\n", patch.Name)
+			// fmt.Printf("Files in %s:\n", patch.Name)
 			for _, entry := range rgzFile.Entries {
-				fmt.Printf("%s\n", entry.Name)
+				// fmt.Printf("%s\n", entry.Name)
 
 				if entry.EntryType == rgz.EntryType_File {
 					newPatch.Files = append(newPatch.Files, entry.Name)
@@ -99,9 +106,9 @@ func downloadPatches(server *server.Server) {
 				panic(err)
 			}
 
-			fmt.Printf("Files in %s:\n", patch.Name)
+			// fmt.Printf("Files in %s:\n", patch.Name)
 			for _, file := range gpfFile.FileTable.Files {
-				fmt.Printf("%s\n", file.FileName)
+				// fmt.Printf("%s\n", file.FileName)
 
 				if file.Flags == grf.EntryType_File {
 					newPatch.Files = append(newPatch.Files, file.FileName)
@@ -207,8 +214,7 @@ func processPatches(server *server.Server) {
 }
 
 func runMiningCycle() error {
-	// @TODO: server.GetServers()
-	for _, server := range []*server.Server{server.GetLATAM()} {
+	for _, server := range server.GetServers() {
 		fmt.Println("------ Mining " + server.DatabaseName + " ------")
 		fmt.Println("-- Checking for new updates")
 		downloadPatches(server)
