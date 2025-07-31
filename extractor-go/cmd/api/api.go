@@ -24,6 +24,8 @@ func main() {
 	if gin.Mode() == gin.ReleaseMode {
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = []string{"https://guilherme-gm.github.io"}
+		corsConfig.AllowHeaders = []string{"x-server"}
+		corsConfig.AllowMethods = []string{"GET", "OPTIONS"}
 		router.Use(cors.New(corsConfig))
 	} else {
 		router.Use(cors.Default())
