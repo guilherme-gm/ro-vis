@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -127,12 +128,46 @@ func downloadPatches(server *server.Server) {
 	}
 }
 
+func extractFileFromChange(server *server.Server, loader loaders.Loader, update domain.Update, change domain.UpdateChange, file *regexp.Regexp) {
+	patchFileExt := change.Patch[len(change.Patch)-4:]
+	if _, err := os.Stat(server.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
+		return
+	}
+
+	var patchFile patchfile.PatchFile
+	var err error
+	switch patchFileExt {
+	case ".rgz":
+		patchFile, err = rgz.Open(server.GetPatchFile(change.Patch))
+		if err != nil {
+			panic(err)
+		}
+	case ".gpf":
+		patchFile, err = grf.Open(server.GetPatchFile(change.Patch))
+		if err != nil {
+			panic(err)
+		}
+	default:
+		fmt.Printf("Unsupported patch format: %s\n", change.Patch)
+		return
+	}
+
+	fileList := patchFile.FileList()
+	for _, filePath := range fileList {
+		if file.MatchString(filePath) {
+			if err := patchFile.Extract(filePath, server.GetExtractedPatchFolder(change.Patch)); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
 // Extracts relevant files for a given update to the patch folder
 func extractRelevantFiles(server *server.Server, loader loaders.Loader, update domain.Update) {
 	relevantFiles := loader.GetRelevantFiles()
 
 	for _, file := range relevantFiles {
-		change, err := update.GetChangeForFile(file)
+		changes, err := update.GetChangesForFile(file)
 		if err != nil {
 			if errors.Is(err, domain.NewNotFoundError("")) {
 				continue
@@ -141,30 +176,8 @@ func extractRelevantFiles(server *server.Server, loader loaders.Loader, update d
 			panic(err)
 		}
 
-		patchFileExt := change.Patch[len(change.Patch)-4:]
-		if _, err := os.Stat(server.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
-			continue
-		}
-
-		var patchFile patchfile.PatchFile
-		switch patchFileExt {
-		case ".rgz":
-			patchFile, err = rgz.Open(server.GetPatchFile(change.Patch))
-			if err != nil {
-				panic(err)
-			}
-		case ".gpf":
-			patchFile, err = grf.Open(server.GetPatchFile(change.Patch))
-			if err != nil {
-				panic(err)
-			}
-		default:
-			fmt.Printf("Unsupported patch format: %s\n", change.Patch)
-			continue
-		}
-
-		if err := patchFile.Extract(file, server.GetExtractedPatchFolder(change.Patch)); err != nil {
-			panic(err)
+		for _, change := range changes {
+			extractFileFromChange(server, loader, update, change, file)
 		}
 	}
 }

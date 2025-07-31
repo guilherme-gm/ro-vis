@@ -2,6 +2,7 @@ package questParsers
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -34,9 +35,9 @@ func (p QuestV1Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.Before(time.Date(2018, time.March, 20, 0, 0, 0, 0, time.UTC))
 }
 
-func (p QuestV1Parser) GetRelevantFiles() []string {
-	return []string{
-		"data/questid2display.txt",
+func (p QuestV1Parser) GetRelevantFiles() []*regexp.Regexp {
+	return []*regexp.Regexp{
+		regexp.MustCompile("(?i)^data/questid2display.txt$"),
 	}
 }
 

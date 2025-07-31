@@ -147,3 +147,14 @@ func (rgzFile *RgzFile) Extract(filePath string, rootFolder string) error {
 
 	return fmt.Errorf("file %s not found", filePath)
 }
+
+func (rgzFile *RgzFile) FileList() []string {
+	var fileList []string
+	for _, entry := range rgzFile.Entries {
+		if entry.EntryType == EntryType_File {
+			fileList = append(fileList, entry.Name)
+		}
+	}
+
+	return fileList
+}

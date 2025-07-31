@@ -1,6 +1,8 @@
 package itemParsers
 
 import (
+	"regexp"
+
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	subparsers "github.com/guilherme-gm/ro-vis/extractor/internal/loaders/itemParsers/subParsers"
@@ -9,6 +11,25 @@ import (
 type txtEntry interface {
 	GetItemID() int32
 }
+
+var bookItemNameTable = regexp.MustCompile("(?i)^data/bookitemnametable.txt$")
+var buyingStoreItemList = regexp.MustCompile("(?i)^data/buyingstoreitemlist.txt$")
+var cardPostfixNameTable = regexp.MustCompile("(?i)^data/cardpostfixnametable.txt$")
+var cardPrefixNameTable = regexp.MustCompile("(?i)^data/cardprefixnametable.txt$")
+var idNum2ItemDescTable = regexp.MustCompile("(?i)^data/idnum2itemdesctable.txt$")
+var idNum2ItemDisplayNameTable = regexp.MustCompile("(?i)^data/idnum2itemdisplaynametable.txt$")
+var idNum2ItemResNameTable = regexp.MustCompile("(?i)^data/idnum2itemresnametable.txt$")
+var itemSlotCountTable = regexp.MustCompile("(?i)^data/itemslotcounttable.txt$")
+var num2CardIllustNameTable = regexp.MustCompile("(?i)^data/num2cardillustnametable.txt$")
+var num2ItemDescTable = regexp.MustCompile("(?i)^data/num2itemdesctable.txt$")
+var num2ItemDisplayNameTable = regexp.MustCompile("(?i)^data/num2itemdisplaynametable.txt$")
+var num2ItemResNameTable = regexp.MustCompile("(?i)^data/num2itemresnametable.txt$")
+var itemMoveInfoV5Table = regexp.MustCompile("(?i)^data/itemmoveinfov5.txt$")
+
+var itemInfoTable = regexp.MustCompile("(?i)^System/itemInfo.lub$")
+var itemInfoTrueTable = regexp.MustCompile("(?i)^System/itemInfo_true.lub$")
+
+// var itemInfoNewTable = regexp.MustCompile("(?i)^System/itemInfo_new.lub$")
 
 func loadTxtSubTable[T txtEntry](basePath string, update *domain.Update, newDB map[int32]*domain.Item, fileName string, parser func(string) (map[int32]T, error), mapper func(*domain.Item, *T)) {
 	change, err := update.GetChangeForFile(fileName)

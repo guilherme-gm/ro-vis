@@ -37,7 +37,7 @@ func TestItemLoader_GetRelevantFiles(t *testing.T) {
 	// Check that there are no duplicate files
 	fileMap := make(map[string]bool)
 	for _, file := range files {
-		assert.False(t, fileMap[file], "Duplicate file found in relevant files: %s", file)
-		fileMap[file] = true
+		assert.False(t, fileMap[file.String()], "Duplicate file found in relevant files: %s", file)
+		fileMap[file.String()] = true
 	}
 }

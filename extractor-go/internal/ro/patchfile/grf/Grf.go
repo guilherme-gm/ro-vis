@@ -53,3 +53,14 @@ func (grfFile *GrfFile) Extract(filePath string, rootFolder string) error {
 
 	return fmt.Errorf("file %s not found", filePath)
 }
+
+func (grfFile *GrfFile) FileList() []string {
+	var fileList []string
+	for _, file := range grfFile.FileTable.Files {
+		if file.Flags == EntryType_File {
+			fileList = append(fileList, file.FileName)
+		}
+	}
+
+	return fileList
+}

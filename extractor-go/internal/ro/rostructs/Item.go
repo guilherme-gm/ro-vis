@@ -17,6 +17,12 @@ type ItemV2 struct {
 	ClassNum                    int
 }
 
+// ItemV3 is the same as ItemV2, but got other files
+type ItemV3 ItemV2
+
+// ItemV4 is the same as ItemV2, but got other files
+type ItemV4 ItemV2
+
 /**
  * LUA part of ItemV5 (TXT part is handled by ItemV5Parser directly)
  */

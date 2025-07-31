@@ -2,6 +2,7 @@ package itemParsers
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -32,14 +33,14 @@ func (p ItemV2Parser) IsUpdateInRange(update *domain.Update) bool {
 		update.Date.Before(time.Date(2015, time.April, 21, 0, 0, 0, 0, time.UTC))
 }
 
-func (p ItemV2Parser) GetRelevantFiles() []string {
-	return []string{
-		"data/bookitemnametable.txt",
-		"data/buyingstoreitemlist.txt",
-		"data/cardpostfixnametable.txt",
-		"data/cardprefixnametable.txt",
-		"data/num2cardillustnametable.txt",
-		"System/itemInfo.lub",
+func (p ItemV2Parser) GetRelevantFiles() []*regexp.Regexp {
+	return []*regexp.Regexp{
+		bookItemNameTable,
+		buyingStoreItemList,
+		cardPostfixNameTable,
+		cardPrefixNameTable,
+		num2CardIllustNameTable,
+		itemInfoTable,
 	}
 }
 
@@ -49,7 +50,7 @@ func (p ItemV2Parser) HasFiles(update *domain.Update) bool {
 
 func (p ItemV2Parser) Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item {
 	newDB := make(map[int32]*domain.Item, len(existingDB))
-	if !update.HasChangedAnyFiles([]string{"System/itemInfo.lub"}) {
+	if !update.HasChangedAnyFiles([]*regexp.Regexp{itemInfoTable}) {
 		for k, v := range existingDB {
 			newItem := *v
 			newDB[k] = &newItem

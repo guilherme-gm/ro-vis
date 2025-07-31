@@ -2,6 +2,7 @@ package questParsers
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
@@ -26,9 +27,9 @@ func (p QuestV4Parser) IsUpdateInRange(update *domain.Update) bool {
 		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC)))
 }
 
-func (p QuestV4Parser) GetRelevantFiles() []string {
-	return []string{
-		"System/OngoingQuestInfoList_True.lub",
+func (p QuestV4Parser) GetRelevantFiles() []*regexp.Regexp {
+	return []*regexp.Regexp{
+		regexp.MustCompile("(?i)^System/OngoingQuestInfoList_True.lub$"),
 	}
 }
 

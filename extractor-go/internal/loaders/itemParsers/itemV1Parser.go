@@ -1,6 +1,7 @@
 package itemParsers
 
 import (
+	"regexp"
 	"strconv"
 	"time"
 
@@ -27,20 +28,20 @@ func (p ItemV1Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.Before(time.Date(2012, time.July, 11, 0, 0, 0, 0, time.UTC))
 }
 
-func (p ItemV1Parser) GetRelevantFiles() []string {
-	return []string{
-		"data/bookitemnametable.txt",
-		"data/buyingstoreitemlist.txt",
-		"data/cardpostfixnametable.txt",
-		"data/cardprefixnametable.txt",
-		"data/idnum2itemdesctable.txt",
-		"data/idnum2itemdisplaynametable.txt",
-		"data/idnum2itemresnametable.txt",
-		"data/itemslotcounttable.txt",
-		"data/num2cardillustnametable.txt",
-		"data/num2itemdesctable.txt",
-		"data/num2itemdisplaynametable.txt",
-		"data/num2itemresnametable.txt",
+func (p ItemV1Parser) GetRelevantFiles() []*regexp.Regexp {
+	return []*regexp.Regexp{
+		bookItemNameTable,
+		buyingStoreItemList,
+		cardPostfixNameTable,
+		cardPrefixNameTable,
+		idNum2ItemDescTable,
+		idNum2ItemDisplayNameTable,
+		idNum2ItemResNameTable,
+		itemSlotCountTable,
+		num2CardIllustNameTable,
+		num2ItemDescTable,
+		num2ItemDisplayNameTable,
+		num2ItemResNameTable,
 	}
 }
 
@@ -50,7 +51,7 @@ func (p ItemV1Parser) HasFiles(update *domain.Update) bool {
 
 func (p ItemV1Parser) Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item {
 	newDB := make(map[int32]*domain.Item, len(existingDB))
-	if !update.HasChangedAnyFiles([]string{"data/idnum2itemdisplaynametable.txt"}) {
+	if !update.HasChangedAnyFiles([]*regexp.Regexp{idNum2ItemDisplayNameTable}) {
 		for k, v := range existingDB {
 			newItem := *v
 			newDB[k] = &newItem

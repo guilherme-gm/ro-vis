@@ -2,6 +2,7 @@ package itemParsers
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -31,15 +32,15 @@ func (p ItemV4Parser) IsUpdateInRange(update *domain.Update) bool {
 		update.Date.Before(time.Date(2017, time.August, 1, 0, 0, 0, 0, time.UTC))
 }
 
-func (p ItemV4Parser) GetRelevantFiles() []string {
-	return []string{
-		"data/bookitemnametable.txt",
-		"data/buyingstoreitemlist.txt",
-		"data/cardpostfixnametable.txt",
-		"data/cardprefixnametable.txt",
-		"data/num2cardillustnametable.txt",
-		"System/itemInfo_true.lub",
-		"data/itemmoveinfov5.txt",
+func (p ItemV4Parser) GetRelevantFiles() []*regexp.Regexp {
+	return []*regexp.Regexp{
+		bookItemNameTable,
+		buyingStoreItemList,
+		cardPostfixNameTable,
+		cardPrefixNameTable,
+		num2CardIllustNameTable,
+		itemInfoTrueTable,
+		itemMoveInfoV5Table,
 	}
 }
 
@@ -49,7 +50,7 @@ func (p ItemV4Parser) HasFiles(update *domain.Update) bool {
 
 func (p ItemV4Parser) Parse(basePath string, update *domain.Update, existingDB map[int32]*domain.Item) []domain.Item {
 	newDB := make(map[int32]*domain.Item, len(existingDB))
-	if !update.HasChangedAnyFiles([]string{"System/itemInfo_true.lub"}) {
+	if !update.HasChangedAnyFiles([]*regexp.Regexp{itemInfoTrueTable}) {
 		for k, v := range existingDB {
 			newItem := *v
 			newDB[k] = &newItem
@@ -60,7 +61,7 @@ func (p ItemV4Parser) Parse(basePath string, update *domain.Update, existingDB m
 			panic(err)
 		}
 
-		itemTbl := []rostructs.ItemV2{}
+		itemTbl := []rostructs.ItemV4{}
 		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/System/itemInfo_true.lub", "tbl", &itemTbl, decoders.ConvertEucKrToUtf8)
 		if len(result.NotConsumedPaths) > 0 {
 			fmt.Println("Not all keys were consumed.", result.NotConsumedPaths)

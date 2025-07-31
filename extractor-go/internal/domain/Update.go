@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -27,14 +28,25 @@ func (u Update) GetChangeForFile(file string) (UpdateChange, error) {
 	return UpdateChange{}, NewNotFoundError(fmt.Sprintf("file '%s' not found in update", file))
 }
 
-func (u Update) HasChangedAnyFiles(files []string) bool {
-	for idx, file := range files {
-		files[idx] = strings.ToLower(file)
+func (u Update) GetChangesForFile(file *regexp.Regexp) ([]UpdateChange, error) {
+	var changes []UpdateChange
+	for _, change := range u.Changes {
+		if file.MatchString(change.File) {
+			changes = append(changes, change)
+		}
 	}
 
+	if len(changes) == 0 {
+		return changes, NewNotFoundError(fmt.Sprintf("file '%s' not found in update", file))
+	}
+
+	return changes, nil
+}
+
+func (u Update) HasChangedAnyFiles(files []*regexp.Regexp) bool {
 	for _, change := range u.Changes {
 		for _, targetFile := range files {
-			if strings.ToLower(change.File) == targetFile {
+			if targetFile.MatchString(change.File) {
 				return true
 			}
 		}

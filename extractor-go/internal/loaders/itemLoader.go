@@ -3,6 +3,7 @@ package loaders
 import (
 	"database/sql"
 	"fmt"
+	"regexp"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
@@ -17,14 +18,14 @@ type ItemLoader struct {
 
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
 // The list is deduplicated to avoid returning the same file path multiple times.
-func (l *ItemLoader) GetRelevantFiles() []string {
+func (l *ItemLoader) GetRelevantFiles() []*regexp.Regexp {
 	fileMap := make(map[string]bool)
-	var result []string
+	var result []*regexp.Regexp
 
 	for _, parser := range l.parsers {
 		for _, file := range parser.GetRelevantFiles() {
-			if !fileMap[file] {
-				fileMap[file] = true
+			if !fileMap[file.String()] {
+				fileMap[file.String()] = true
 				result = append(result, file)
 			}
 		}
