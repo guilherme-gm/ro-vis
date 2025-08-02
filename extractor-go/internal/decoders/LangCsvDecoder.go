@@ -6,10 +6,11 @@ import (
 	"encoding/csv"
 	"errors"
 	"os"
+	"strconv"
 )
 
 type LangCsvEntry struct {
-	Id         uint64
+	Id         string
 	KoreanText string
 	EnText     string
 	PtBrText   string
@@ -92,7 +93,7 @@ func DecodeLangCsv(filePath string) ([]LangCsvEntry, error) {
 		}
 
 		entry := LangCsvEntry{
-			Id:         id,
+			Id:         strconv.FormatUint(id, 10),
 			KoreanText: koreanText,
 			EnText:     engText,
 			PtBrText:   ptBrText,

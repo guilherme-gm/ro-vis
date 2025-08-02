@@ -112,7 +112,7 @@ INNER JOIN ` + "`" + `i18n_history` + "`" + ` ON ` + "`" + `i18ns` + "`" + `.` +
 type GetCurrentI18nsRow struct {
 	HistoryID         int64
 	PreviousHistoryID sql.NullInt64
-	I18nID            uint64
+	I18nID            string
 	FileVersion       int32
 	Update            string
 	ContainerFile     string
@@ -166,7 +166,7 @@ LIMIT ?, ?
 `
 
 type GetI18nHistoryParams struct {
-	I18nID uint64
+	I18nID string
 	Offset int32
 	Limit  int32
 }
@@ -233,7 +233,7 @@ type GetI18nListParams struct {
 }
 
 type GetI18nListRow struct {
-	I18nID     uint64
+	I18nID     string
 	PtBrText   string
 	Lastupdate string
 }
@@ -269,7 +269,7 @@ WHERE ` + "`" + `i18n_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
 
 type GetI18nsIdsInUpdateRow struct {
 	HistoryID int64
-	I18nID    uint64
+	I18nID    string
 }
 
 func (q *Queries) GetI18nsIdsInUpdate(ctx context.Context, update string) ([]GetI18nsIdsInUpdateRow, error) {
@@ -304,7 +304,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 type UpsertI18nParams struct {
-	I18nID          uint64
+	I18nID          string
 	LatestHistoryID int64
 	Deleted         bool
 }

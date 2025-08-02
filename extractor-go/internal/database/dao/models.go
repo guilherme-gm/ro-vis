@@ -10,8 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"github.com/LukaGiorgadze/gonull"
 )
 
 type PatchesStatus string
@@ -59,7 +57,7 @@ func (ns NullPatchesStatus) Value() (driver.Value, error) {
 }
 
 type I18n struct {
-	I18nID          uint64
+	I18nID          string
 	LatestHistoryID int64
 	Deleted         bool
 }
@@ -67,7 +65,7 @@ type I18n struct {
 type I18nHistory struct {
 	HistoryID         int64
 	PreviousHistoryID sql.NullInt64
-	I18nID            uint64
+	I18nID            string
 	FileVersion       int32
 	Update            string
 	ContainerFile     string
@@ -125,7 +123,7 @@ type Patch struct {
 type PreviousI18nHistoryVw struct {
 	HistoryID         sql.NullInt64
 	PreviousHistoryID sql.NullInt64
-	I18nID            gonull.Nullable[uint64]
+	I18nID            sql.NullString
 	FileVersion       sql.NullInt32
 	Update            sql.NullString
 	ContainerFile     sql.NullString

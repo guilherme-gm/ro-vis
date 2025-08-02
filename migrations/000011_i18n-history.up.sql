@@ -1,7 +1,7 @@
 CREATE TABLE `i18n_history` (
 	`history_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	`previous_history_id` bigint,
-	`i18n_id` bigint unsigned NOT NULL,
+	`i18n_id` varchar(255) NOT NULL,
 	`file_version` int NOT NULL,
 	`update` varchar(255) NOT NULL,
 	`container_file` varchar(255) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `i18n_history` (
 );
 
 CREATE TABLE `i18ns` (
-	`i18n_id` bigint unsigned NOT NULL PRIMARY KEY,
+	`i18n_id` varchar(255) NOT NULL PRIMARY KEY,
 	`latest_history_id` bigint NOT NULL,
 	`deleted` boolean NOT NULL
 );

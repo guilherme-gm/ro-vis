@@ -3,7 +3,7 @@ package domain
 type I18n struct {
 	PreviousHistoryID NullableInt64
 	HistoryID         NullableInt64
-	I18nId            uint64
+	I18nId            string
 	FileVersion       int32
 	ContainerFile     string
 	EnText            string

@@ -51,8 +51,8 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 		panic(err)
 	}
 
-	i18nMap := make(map[uint64]*domain.I18n)
-	i18nFileIds := make(map[string][]uint64)
+	i18nMap := make(map[string]*domain.I18n)
+	i18nFileIds := make(map[string][]string)
 	for _, q := range *currentI18ns {
 		i18nMap[q.I18nId] = &q
 		i18nFileIds[q.ContainerFile] = append(i18nFileIds[q.ContainerFile], q.I18nId)
@@ -98,7 +98,7 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 
 	var newI18ns []domain.I18n
 	var updatedI18ns []domain.I18n
-	var idsToDelete []uint64
+	var idsToDelete []string
 
 	// Load files
 	// @TODO: new records are not being activated. And files that got activated in the update is not being marked as such.
@@ -106,8 +106,8 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	targetParser := NewI18nV1Parser()
 	for _, change := range changes {
 		fileEntries := targetParser.Parse(basePath, &change)
-		fileIds := make(map[uint64]bool)
-		fileIdsToDelete := make(map[uint64]bool)
+		fileIds := make(map[string]bool)
+		fileIdsToDelete := make(map[string]bool)
 
 		for _, entry := range i18nFileIds[change.File] {
 			fileIdsToDelete[entry] = true

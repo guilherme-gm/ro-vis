@@ -42,7 +42,7 @@ func (r *I18nRepository) GetCurrentI18ns(tx *sql.Tx) (*[]domain.I18n, error) {
 func (r *I18nRepository) addI18nsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.I18n) error {
 	queries := r.DB.GetQueries(tx)
 	bulkParams := []dao.BulkInsertI18nHistoryParams{}
-	updatedIdMap := make(map[uint64]bool, len((*newHistories)))
+	updatedIdMap := make(map[string]bool, len((*newHistories)))
 	for _, it := range *newHistories {
 		updatedIdMap[it.I18nId] = true
 		bulkParams = append(bulkParams, dao.BulkInsertI18nHistoryParams{

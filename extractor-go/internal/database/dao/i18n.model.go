@@ -35,11 +35,19 @@ func (q *PreviousI18nHistoryVw) ToDomain() domain.I18n {
 	return domain.I18n{
 		PreviousHistoryID: domain.NullableInt64(q.PreviousHistoryID),
 		HistoryID:         domain.NullableInt64(q.HistoryID),
-		I18nId:            q.I18nID.Val,
+		I18nId:            q.I18nID.String,
 		FileVersion:       q.FileVersion.Int32,
 		ContainerFile:     q.ContainerFile.String,
 		EnText:            q.EnText.String,
 		PtBrText:          q.PtBrText.String,
 		Active:            q.Active.Bool,
+	}
+}
+
+func (q *GetI18nListRow) ToDomain() domain.MinI18n {
+	return domain.MinI18n{
+		I18nId:     q.I18nID,
+		LastUpdate: q.Lastupdate,
+		PtBrText:   q.PtBrText,
 	}
 }

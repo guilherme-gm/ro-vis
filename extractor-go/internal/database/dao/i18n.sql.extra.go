@@ -25,7 +25,7 @@ const bulkInsertI18nHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?),`
 
 type BulkInsertI18nHistoryParams struct {
 	PreviousHistoryID sql.NullInt64
-	I18nID            uint64
+	I18nID            string
 	FileVersion       int32
 	Update            string
 	ContainerFile     string
@@ -70,7 +70,7 @@ ON DUPLICATE KEY UPDATE
 	` + "`i18ns`.`deleted` = VALUES(`i18ns`.`deleted`)"
 
 type BulkUpsertI18nParams struct {
-	I18nID    uint64
+	I18nID    string
 	HistoryID int64
 	Deleted   bool
 }
