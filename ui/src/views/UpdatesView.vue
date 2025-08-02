@@ -44,6 +44,11 @@ const questTrackInfo: TrackInfo = {
 	label: 'Quest',
 };
 
+const i18nTrackInfo: TrackInfo = {
+	route: RouteName.I18nPatch,
+	label: 'I18n',
+};
+
 const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 	// ======= Item
 	["data/bookitemnametable.txt", itemTrackInfo],
@@ -65,18 +70,34 @@ const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 
 	// ====== Quest
 	["data/questid2display.txt", questTrackInfo],
-	["system/ongoingquestinfolist_true.lub", questTrackInfo]
+	["system/ongoingquestinfolist_true.lub", questTrackInfo],
+
+	// ====== I18n
+	// ["data/i18n/sc/(.*?).csv", i18nTrackInfo],
+	["data/i18n/sc/sc.json", i18nTrackInfo]
 ]);
 
 function isTrackedFile(fileName: string): boolean {
+	if (/^data\/i18n\/sc\/(.*?)\.csv$/i.test(fileName.toLocaleLowerCase())) {
+		return true;
+	}
+
 	return fileTrackInfo.has(fileName.toLocaleLowerCase());
 }
 
 function patchRoute(fileName: string): RouteName {
+	if (/^data\/i18n\/sc\/(.*?)\.csv$/i.test(fileName.toLocaleLowerCase())) {
+		return i18nTrackInfo.route;
+	}
+
 	return fileTrackInfo.get(fileName.toLocaleLowerCase())!.route;
 }
 
 function trackLabel(fileName: string): string {
+	if (/^data\/i18n\/sc\/(.*?)\.csv$/i.test(fileName.toLocaleLowerCase())) {
+		return i18nTrackInfo.label;
+	}
+
 	return fileTrackInfo.get(fileName.toLocaleLowerCase())!.label;
 }
 </script>

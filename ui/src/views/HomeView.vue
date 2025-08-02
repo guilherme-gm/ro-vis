@@ -28,6 +28,12 @@ document.title = "ROVis";
 				Quest log updates, for actual quest entries ("Recommended Quests" not included)
 			</div>
 		</BsListGroupItem>
+		<BsListGroupItem class="d-flex justify-content-between align-items-start">
+			<div class="ms-2 me-auto">
+				<div class="fw-bold"><BsLink :to="{ name: RouteName.I18nList }">i18n</BsLink></div>
+				Internationalization text entries and translations
+			</div>
+		</BsListGroupItem>
 		<!-- <BsListGroupItem class="d-flex justify-content-between align-items-start">
 			<div class="ms-2 me-auto">
 				<div class="fw-bold"><BsLink :to="{ name: RouteName.StateList }">States</BsLink></div>

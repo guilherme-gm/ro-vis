@@ -16,4 +16,9 @@ export enum RouteName {
 	StateList = "stateList",
 	StateHistory = "stateHistory",
 	StatePatch = "statePath",
+
+	// i18n
+	I18nList = "i18nList",
+	I18nHistory = "i18nHistory",
+	I18nPatch = "i18nPatch",
 }

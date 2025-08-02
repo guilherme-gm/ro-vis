@@ -70,6 +70,23 @@ const router = createRouter({
 			name: RouteName.StateHistory,
 			component: () => import("../views/State/StateHistoryView.vue"),
 		},
+
+		// i18n
+		{
+			path: '/i18n/',
+			name: RouteName.I18nList,
+			component: () => import("../views/I18n/I18nListView.vue"),
+		},
+		{
+			path: '/i18n/patch/:patch',
+			name: RouteName.I18nPatch,
+			component: () => import("../views/I18n/I18nPatchView.vue"),
+		},
+		{
+			path: '/i18n/:i18nId',
+			name: RouteName.I18nHistory,
+			component: () => import("../views/I18n/I18nHistoryView.vue"),
+		},
 	]
 })
 
