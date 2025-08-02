@@ -145,3 +145,124 @@ func (r *I18nRepository) AddDeletedI18n(tx *sql.Tx, update string, i18n *domain.
 
 	return err
 }
+
+// CountChangesInUpdate returns the number of i18n records changed in a specific update
+func (r *I18nRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	queries := r.DB.GetQueries(tx)
+	count, err := queries.CountChangedI18nsInUpdate(context.Background(), update)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
+// GetChangesInUpdate returns the list of i18n records changed in a specific update
+func (r *I18nRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.I18n], error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetChangedI18ns(context.Background(), dao.GetChangedI18nsParams{
+		Update: update,
+		Offset: int32(pagination.Offset),
+		Limit:  int32(pagination.Limit),
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.I18n]{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.I18n], len(res))
+	for i, item := range res {
+		records[i] = FromToRecord[domain.I18n]{
+			LastUpdate: domain.NullableString(item.Lastupdate),
+			To: &domain.Record[domain.I18n]{
+				Update: item.I18nHistory.Update,
+				Data:   item.I18nHistory.ToDomain(),
+			},
+		}
+
+		// Only set From if there's a previous version
+		if item.PreviousI18nHistoryVw.HistoryID.Valid {
+			records[i].From = &domain.Record[domain.I18n]{
+				Update: item.PreviousI18nHistoryVw.Update.String,
+				Data:   item.PreviousI18nHistoryVw.ToDomain(),
+			}
+		}
+	}
+
+	return records, nil
+}
+
+// GetI18nHistory returns the history of a specific i18n record
+func (r *I18nRepository) GetI18nHistory(tx *sql.Tx, i18nId string, pagination Pagination) ([]FromToRecord[domain.I18n], error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetI18nHistory(context.Background(), dao.GetI18nHistoryParams{
+		I18nID: i18nId,
+		Offset: int32(pagination.Offset),
+		Limit:  int32(pagination.Limit),
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.I18n]{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.I18n], len(res))
+	for i, item := range res {
+		records[i] = FromToRecord[domain.I18n]{
+			To: &domain.Record[domain.I18n]{
+				Update: item.I18nHistory.Update,
+				Data:   item.I18nHistory.ToDomain(),
+			},
+		}
+
+		// Only set From if there's a previous version
+		if item.PreviousI18nHistoryVw.HistoryID.Valid {
+			records[i].From = &domain.Record[domain.I18n]{
+				Update: item.PreviousI18nHistoryVw.Update.String,
+				Data:   item.PreviousI18nHistoryVw.ToDomain(),
+			}
+		}
+	}
+
+	return records, nil
+}
+
+// CountI18ns returns the number of i18n records
+func (r *I18nRepository) CountI18ns(tx *sql.Tx) (int32, error) {
+	queries := r.DB.GetQueries(tx)
+
+	res, err := queries.CountItems(context.Background())
+	if err == sql.ErrNoRows {
+		return int32(res), nil
+	}
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(res), nil
+}
+
+// GetI18ns returns the list of i18n records
+func (r *I18nRepository) GetI18ns(tx *sql.Tx, pagination Pagination) ([]domain.MinI18n, error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetI18nList(context.Background(), dao.GetI18nListParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []domain.MinI18n{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	i18ns := make([]domain.MinI18n, len(res))
+	for idx, qmodel := range res {
+		i18ns[idx] = qmodel.ToDomain()
+	}
+
+	return i18ns, nil
+}

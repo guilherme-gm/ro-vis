@@ -19,3 +19,9 @@ func (i *I18n) Equals(otherI18n I18n) bool {
 		i.PtBrText == otherI18n.PtBrText &&
 		i.Active == otherI18n.Active)
 }
+
+type MinI18n struct {
+	I18nId     string
+	LastUpdate string
+	PtBrText   string
+}
