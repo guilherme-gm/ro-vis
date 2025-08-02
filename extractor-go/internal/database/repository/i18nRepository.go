@@ -228,7 +228,7 @@ func (r *I18nRepository) GetI18nHistory(tx *sql.Tx, i18nId string, pagination Pa
 func (r *I18nRepository) CountI18ns(tx *sql.Tx) (int32, error) {
 	queries := r.DB.GetQueries(tx)
 
-	res, err := queries.CountItems(context.Background())
+	res, err := queries.CountI18ns(context.Background())
 	if err == sql.ErrNoRows {
 		return int32(res), nil
 	}
