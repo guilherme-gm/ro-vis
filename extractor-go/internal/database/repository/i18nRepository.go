@@ -93,11 +93,6 @@ func (r *I18nRepository) AddI18nsToHistory(tx *sql.Tx, update string, newHistori
 		return nil
 	}
 
-	// _, err := r.DB.Connection.Exec("USE `rovis-latam`;")
-	// if err != nil {
-	// 	return err
-	// }
-
 	pageSize := 500
 	steps := (len(*newHistories) / pageSize)
 

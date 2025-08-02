@@ -44,7 +44,7 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 
 	fmt.Println("> Decoding...")
 
-	// Get items currently loaded
+	// Get i18ns currently loaded
 	fmt.Println("> Fetching current list...")
 	currentI18ns, err := l.repository.GetCurrentI18ns(tx)
 	if err != nil {
@@ -91,7 +91,7 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 
 	// Find CSVs to load
 	fmt.Println("> Fetching changes...")
-	changes, err := update.GetChangesForFile(scFiles)
+	updatedFiles, err := update.GetChangesForFile(scFiles)
 	if err != nil {
 		panic(err)
 	}
@@ -99,23 +99,25 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	var newI18ns []domain.I18n
 	var updatedI18ns []domain.I18n
 	var idsToDelete []string
+	var updatedFileMap = make(map[string]bool)
 
 	// Load files
-	// @TODO: new records are not being activated. And files that got activated in the update is not being marked as such.
 	fmt.Println("> Loading files...")
 	targetParser := NewI18nV1Parser()
-	for _, change := range changes {
-		fileEntries := targetParser.Parse(basePath, &change)
-		fileIds := make(map[string]bool)
+	for _, updatedFile := range updatedFiles {
+		updatedFileMap[updatedFile.File] = true
+		fileEntries := targetParser.Parse(basePath, &updatedFile)
 		fileIdsToDelete := make(map[string]bool)
 
-		for _, entry := range i18nFileIds[change.File] {
+		// Mark all entries from this file to be deleted, so we can just clean up the ones to keep
+		for _, entry := range i18nFileIds[updatedFile.File] {
 			fileIdsToDelete[entry] = true
 		}
 
+		// Process the new file entries
 		for _, fileEntry := range fileEntries {
-			fileIds[fileEntry.I18nId] = true
-			delete(fileIdsToDelete, fileEntry.I18nId)
+			fileEntry.Active = activeFiles[updatedFile.File]
+			delete(fileIdsToDelete, fileEntry.I18nId) // mark this entry to be kept
 
 			existingEntry := i18nMap[fileEntry.I18nId]
 			if existingEntry == nil {
@@ -135,19 +137,34 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	}
 
 	// Inactivate files that are not used
-	fmt.Println("> Inactivating files...")
+	fmt.Println("> Updating active status...")
 	for fileName, ids := range i18nFileIds {
-		if _, ok := activeFiles[fileName]; !ok {
+		// This file has already been updated, we don't have to do it again
+		if _, ok := updatedFileMap[fileName]; ok {
+			continue
+		}
+
+		// nothing to update
+		if len(ids) == 0 {
+			continue
+		}
+
+		// is it active now?
+		_, active := activeFiles[fileName]
+
+		// do we need to update active flag? based on the first item
+		if i18nMap[ids[0]].Active != active {
+			// We do, update all records
 			for _, id := range ids {
 				existingEntry := i18nMap[id]
 				if existingEntry == nil {
-					continue
+					panic("Could not find i18n entry for id " + id)
 				}
 
 				newEntry := *existingEntry
 				newEntry.HistoryID = domain.NullableInt64{Valid: false}
 				newEntry.PreviousHistoryID = existingEntry.HistoryID
-				newEntry.Active = false
+				newEntry.Active = active
 				updatedI18ns = append(updatedI18ns, newEntry)
 			}
 		}
