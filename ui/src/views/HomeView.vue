@@ -3,8 +3,11 @@ import BsLink from '@/components/bootstrap/BsLink.vue';
 import BsListGroup from '@/components/bootstrap/ListGroup/BsListGroup.vue';
 import BsListGroupItem from '@/components/bootstrap/ListGroup/BsListGroupItem.vue';
 import { RouteName } from '@/router/RouteName';
+import { useServerStore } from '@/stores/server';
 
 document.title = "ROVis";
+
+const serverStore = useServerStore();
 
 </script>
 
@@ -28,7 +31,10 @@ document.title = "ROVis";
 				Quest log updates, for actual quest entries ("Recommended Quests" not included)
 			</div>
 		</BsListGroupItem>
-		<BsListGroupItem class="d-flex justify-content-between align-items-start">
+		<BsListGroupItem
+			v-if="serverStore.currentServer === 'latam'"
+			class="d-flex justify-content-between align-items-start"
+		>
 			<div class="ms-2 me-auto">
 				<div class="fw-bold"><BsLink :to="{ name: RouteName.I18nList }">i18n</BsLink></div>
 				Internationalization text entries and translations
