@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/csv"
+	"errors"
 	"os"
 )
 
-type ROCsvEntry struct {
-	Id         int
+type LangCsvEntry struct {
+	Id         uint64
 	KoreanText string
-	EngText    string
+	EnText     string
 	PtBrText   string
 	EsText     string
 }
@@ -22,13 +23,21 @@ func padBase64String(base64Str string) string {
 	return base64Str
 }
 
-func decodeBase64ToUInt32(base64Str string) (uint32, error) {
+func decodeBase64ToUInt64(base64Str string) (uint64, error) {
 	data, err := base64.StdEncoding.DecodeString(padBase64String(base64Str))
 	if err != nil {
 		return 0, err
 	}
 
-	return binary.LittleEndian.Uint32(data), nil
+	if len(data) < 8 {
+		// Padding with 0s - little endian should receive the 0 at start
+		data = append(make([]byte, 8-len(data)), data...)
+	}
+	if len(data) > 8 {
+		return 0, errors.New("data is too long")
+	}
+
+	return binary.LittleEndian.Uint64(data), nil
 }
 
 func decodeBase64ToStr(base64Str string) (string, error) {
@@ -40,7 +49,7 @@ func decodeBase64ToStr(base64Str string) (string, error) {
 	return string(data), nil
 }
 
-func DecodeLangCsv(filePath string) ([]ROCsvEntry, error) {
+func DecodeLangCsv(filePath string) ([]LangCsvEntry, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -59,9 +68,9 @@ func DecodeLangCsv(filePath string) ([]ROCsvEntry, error) {
 		return nil, err
 	}
 
-	var entries []ROCsvEntry
+	var entries []LangCsvEntry
 	for _, line := range lines {
-		id, err := decodeBase64ToUInt32(line[0])
+		id, err := decodeBase64ToUInt64(line[0])
 		if err != nil {
 			return nil, err
 		}
@@ -82,10 +91,10 @@ func DecodeLangCsv(filePath string) ([]ROCsvEntry, error) {
 			return nil, err
 		}
 
-		entry := ROCsvEntry{
-			Id:         int(id),
+		entry := LangCsvEntry{
+			Id:         id,
 			KoreanText: koreanText,
-			EngText:    engText,
+			EnText:     engText,
 			PtBrText:   ptBrText,
 			EsText:     esText,
 		}

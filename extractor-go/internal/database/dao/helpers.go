@@ -11,3 +11,7 @@ func ToNullableString(val string) domain.NullableString {
 func ToNullableInt32(val int32) domain.NullableInt32 {
 	return domain.NullableInt32{Int32: val, Valid: true}
 }
+
+func ToNullableInt64(val int64) domain.NullableInt64 {
+	return domain.NullableInt64{Int64: val, Valid: true}
+}

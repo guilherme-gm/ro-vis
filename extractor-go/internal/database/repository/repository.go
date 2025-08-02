@@ -16,6 +16,7 @@ type Repository struct {
 	LoaderControllerRepository *LoaderControllerRepository
 	PatchRepository            *PatchRepository
 	QuestRepository            *QuestRepository
+	I18nRepository             *I18nRepository
 }
 
 // NewRepository creates a new repository instance with the provided database connection
@@ -25,5 +26,6 @@ func NewRepository(db *database.Database) *Repository {
 		LoaderControllerRepository: NewLoaderControllerRepository(db),
 		PatchRepository:            NewPatchRepository(db),
 		QuestRepository:            NewQuestRepository(db),
+		I18nRepository:             NewI18nRepository(db),
 	}
 }
