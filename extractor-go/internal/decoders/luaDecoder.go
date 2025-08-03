@@ -6,7 +6,9 @@ package decoders
 //#cgo LDFLAGS: -L${SRCDIR}/../../lua514/src -llua -lm
 import "C"
 import (
+	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/aarzilli/golua/lua"
@@ -63,12 +65,16 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 	fieldList := make(map[string]bool)
 	d.L.PushNil()
 	for d.L.Next(-2) != 0 {
-		if d.L.Type(-2) != lua.LUA_TSTRING {
-			panic("Object key is not string")
+		switch d.L.Type(-2) {
+		case lua.LUA_TSTRING:
+			fieldName := d.L.ToString(-2)
+			fieldList[fieldName] = true
+		case lua.LUA_TNUMBER:
+			fieldName := fmt.Sprintf("$$numeric:%d", d.L.ToInteger(-2))
+			fieldList[fieldName] = true
+		default:
+			panic(fmt.Errorf("object key is not string. Found: %v", d.L.Type(-2)))
 		}
-
-		fieldName := d.L.ToString(-2)
-		fieldList[fieldName] = true
 
 		d.L.Pop(1)
 	}
@@ -78,6 +84,8 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 		fieldValue := structObj.Field(fldNum)
 
 		fieldName := fieldType.Name
+		isKeyNumeric := false
+		keyIndex := -1
 		if alias := fieldType.Tag.Get("lua"); alias != "" {
 			if alias == "@index" {
 				if ctx.tableIndex == -1 {
@@ -89,11 +97,24 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 			}
 
 			fieldName = alias
+			if strings.HasPrefix(alias, "$$numeric:") {
+				isKeyNumeric = true
+				var err error
+				keyIndex, err = strconv.Atoi(alias[10:])
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
 
 		delete(fieldList, fieldName)
 
-		d.L.GetField(-1, fieldName)
+		if isKeyNumeric {
+			d.L.PushInteger(int64(keyIndex))
+			d.L.GetTable(-2)
+		} else {
+			d.L.GetField(-1, fieldName)
+		}
 		if d.L.IsNil(-1) {
 			d.L.Pop(1)
 			continue
