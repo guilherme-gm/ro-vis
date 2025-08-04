@@ -24,7 +24,7 @@ func padBase64String(base64Str string) string {
 	return base64Str
 }
 
-func decodeBase64ToUInt64(base64Str string) (uint64, error) {
+func DecodeBase64ToUInt64(base64Str string) (uint64, error) {
 	data, err := base64.StdEncoding.DecodeString(padBase64String(base64Str))
 	if err != nil {
 		return 0, err
@@ -41,7 +41,7 @@ func decodeBase64ToUInt64(base64Str string) (uint64, error) {
 	return binary.LittleEndian.Uint64(data), nil
 }
 
-func decodeBase64ToStr(base64Str string) (string, error) {
+func DecodeBase64ToStr(base64Str string) (string, error) {
 	data, err := base64.StdEncoding.DecodeString(padBase64String(base64Str))
 	if err != nil {
 		return "", err
@@ -71,23 +71,23 @@ func DecodeLangCsv(filePath string) ([]LangCsvEntry, error) {
 
 	var entries []LangCsvEntry
 	for _, line := range lines {
-		id, err := decodeBase64ToUInt64(line[0])
+		id, err := DecodeBase64ToUInt64(line[0])
 		if err != nil {
 			return nil, err
 		}
-		koreanText, err := decodeBase64ToStr(line[1])
+		koreanText, err := DecodeBase64ToStr(line[1])
 		if err != nil {
 			return nil, err
 		}
-		engText, err := decodeBase64ToStr(line[2])
+		engText, err := DecodeBase64ToStr(line[2])
 		if err != nil {
 			return nil, err
 		}
-		ptBrText, err := decodeBase64ToStr(line[7])
+		ptBrText, err := DecodeBase64ToStr(line[7])
 		if err != nil {
 			return nil, err
 		}
-		esText, err := decodeBase64ToStr(line[9])
+		esText, err := DecodeBase64ToStr(line[9])
 		if err != nil {
 			return nil, err
 		}

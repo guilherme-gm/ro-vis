@@ -110,6 +110,28 @@ type LoaderController struct {
 	LastUpdateDate time.Time
 }
 
+type Map struct {
+	MapID           string
+	LatestHistoryID int32
+	Deleted         bool
+	UpdatedAt       sql.NullTime
+}
+
+type MapsHistory struct {
+	HistoryID         int32
+	PreviousHistoryID sql.NullInt32
+	MapID             string
+	FileVersion       int32
+	Update            string
+	Name              sql.NullString
+	SpecialCode       sql.NullInt32
+	Mp3Name           sql.NullString
+	Npcs              []byte
+	Warps             []byte
+	Spawns            []byte
+	CreatedAt         sql.NullTime
+}
+
 type Patch struct {
 	ID        int32
 	Name      string
@@ -155,6 +177,21 @@ type PreviousItemHistoryVw struct {
 	EffectID                sql.NullInt32
 	PackageID               sql.NullInt32
 	MoveInfo                []byte
+}
+
+type PreviousMapHistoryVw struct {
+	HistoryID         sql.NullInt32
+	PreviousHistoryID sql.NullInt32
+	MapID             sql.NullString
+	FileVersion       sql.NullInt32
+	Update            sql.NullString
+	Name              sql.NullString
+	SpecialCode       sql.NullInt32
+	Mp3Name           sql.NullString
+	Npcs              []byte
+	Warps             []byte
+	Spawns            []byte
+	CreatedAt         sql.NullTime
 }
 
 type PreviousQuestHistoryVw struct {

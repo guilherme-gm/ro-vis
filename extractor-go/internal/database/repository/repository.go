@@ -17,6 +17,7 @@ type Repository struct {
 	PatchRepository            *PatchRepository
 	QuestRepository            *QuestRepository
 	I18nRepository             *I18nRepository
+	MapRepository              *MapRepository
 }
 
 // NewRepository creates a new repository instance with the provided database connection
@@ -27,5 +28,6 @@ func NewRepository(db *database.Database) *Repository {
 		PatchRepository:            NewPatchRepository(db),
 		QuestRepository:            NewQuestRepository(db),
 		I18nRepository:             NewI18nRepository(db),
+		MapRepository:              NewMapRepository(db),
 	}
 }
