@@ -1,12 +1,11 @@
 package decoders
 
 import (
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/csv"
-	"errors"
 	"os"
 	"strconv"
+
+	base64Utils "github.com/guilherme-gm/ro-vis/extractor/internal/utils/base64Utils"
 )
 
 type LangCsvEntry struct {
@@ -15,39 +14,6 @@ type LangCsvEntry struct {
 	EnText     string
 	PtBrText   string
 	EsText     string
-}
-
-func padBase64String(base64Str string) string {
-	for len(base64Str)%4 != 0 {
-		base64Str += "="
-	}
-	return base64Str
-}
-
-func DecodeBase64ToUInt64(base64Str string) (uint64, error) {
-	data, err := base64.StdEncoding.DecodeString(padBase64String(base64Str))
-	if err != nil {
-		return 0, err
-	}
-
-	if len(data) < 8 {
-		// Padding with 0s - little endian should receive the 0 at start
-		data = append(make([]byte, 8-len(data)), data...)
-	}
-	if len(data) > 8 {
-		return 0, errors.New("data is too long")
-	}
-
-	return binary.LittleEndian.Uint64(data), nil
-}
-
-func DecodeBase64ToStr(base64Str string) (string, error) {
-	data, err := base64.StdEncoding.DecodeString(padBase64String(base64Str))
-	if err != nil {
-		return "", err
-	}
-
-	return string(data), nil
 }
 
 func DecodeLangCsv(filePath string) ([]LangCsvEntry, error) {
@@ -71,23 +37,23 @@ func DecodeLangCsv(filePath string) ([]LangCsvEntry, error) {
 
 	var entries []LangCsvEntry
 	for _, line := range lines {
-		id, err := DecodeBase64ToUInt64(line[0])
+		id, err := base64Utils.DecodeBase64ToUInt64(line[0])
 		if err != nil {
 			return nil, err
 		}
-		koreanText, err := DecodeBase64ToStr(line[1])
+		koreanText, err := base64Utils.DecodeBase64ToStr(line[1])
 		if err != nil {
 			return nil, err
 		}
-		engText, err := DecodeBase64ToStr(line[2])
+		engText, err := base64Utils.DecodeBase64ToStr(line[2])
 		if err != nil {
 			return nil, err
 		}
-		ptBrText, err := DecodeBase64ToStr(line[7])
+		ptBrText, err := base64Utils.DecodeBase64ToStr(line[7])
 		if err != nil {
 			return nil, err
 		}
-		esText, err := DecodeBase64ToStr(line[9])
+		esText, err := base64Utils.DecodeBase64ToStr(line[9])
 		if err != nil {
 			return nil, err
 		}

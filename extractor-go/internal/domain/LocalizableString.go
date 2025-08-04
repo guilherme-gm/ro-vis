@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/utils/base64Utils"
 )
 
 type StringKind string
@@ -27,7 +27,7 @@ func NewLocalizableStringFromNavi(name string) LocalizableString {
 			panic("Invalid name1")
 		}
 
-		value, err := decoders.DecodeBase64ToUInt64(name[1 : len(name)-1])
+		value, err := base64Utils.DecodeBase64ToUInt64(name[1 : len(name)-1])
 		if err != nil {
 			fmt.Println("Error decoding name1:", err)
 			panic(err)
