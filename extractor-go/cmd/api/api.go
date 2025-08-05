@@ -37,6 +37,7 @@ func main() {
 	questController := controllers.QuestController{}
 	updatesController := controllers.UpdatesController{}
 	i18nController := controllers.I18nController{}
+	mapsController := controllers.MapsController{}
 
 	router.Group("api/items/").
 		GET("/", controllers.GlobalHandler(itemsController.List)).
@@ -53,6 +54,11 @@ func main() {
 		GET("/", controllers.GlobalHandler(i18nController.List)).
 		GET("/update/:update", controllers.GlobalHandler(i18nController.ListForUpdate)).
 		GET("/:i18nId", controllers.GlobalHandler(i18nController.ListForI18n))
+
+	router.Group("api/maps/").
+		GET("/", controllers.GlobalHandler(mapsController.List)).
+		GET("/update/:update", controllers.GlobalHandler(mapsController.ListForUpdate)).
+		GET("/:mapId", controllers.GlobalHandler(mapsController.ListForItem))
 
 	router.Run(fmt.Sprintf(":%d", conf.ApiConfig.Port))
 }

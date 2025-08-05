@@ -128,3 +128,123 @@ func (r *MapRepository) AddMapsToHistory(tx *sql.Tx, update string, newMaps []*d
 
 	return nil
 }
+
+func (r *MapRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.CountChangedMapsInUpdate(context.Background(), update)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
+}
+
+func (r *MapRepository) sqlRecordToDomain(dbFrom dao.PreviousMapHistoryVw, dbTo dao.MapsHistory, lastUpdate sql.NullString) FromToRecord[domain.Map] {
+	var from *domain.Record[domain.Map] = nil
+	var to *domain.Record[domain.Map] = nil
+
+	if dbFrom.HistoryID.Valid {
+		from = &domain.Record[domain.Map]{
+			Update: dbFrom.Update.String,
+			Data:   dbFrom.ToDomain(),
+		}
+	}
+
+	if dbTo.HistoryID != 0 {
+		to = &domain.Record[domain.Map]{
+			Update: dbTo.Update,
+			Data:   dbTo.ToDomain(),
+		}
+	}
+
+	return FromToRecord[domain.Map]{
+		LastUpdate: domain.NullableString(lastUpdate),
+		From:       from,
+		To:         to,
+	}
+}
+
+func (r *MapRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Map], error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetChangedMaps(context.Background(), dao.GetChangedMapsParams{
+		Update: update,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Map]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Map], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousMapHistoryVw, qmodel.MapsHistory, qmodel.Lastupdate)
+	}
+
+	return records, nil
+}
+
+func (r *MapRepository) GetMapHistory(tx *sql.Tx, mapId string, pagination Pagination) ([]FromToRecord[domain.Map], error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetMapHistory(context.Background(), dao.GetMapHistoryParams{
+		MapID:  mapId,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Map]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Map], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousMapHistoryVw, qmodel.MapsHistory, sql.NullString{})
+	}
+
+	return records, nil
+}
+
+func (r *MapRepository) CountMaps(tx *sql.Tx) (int32, error) {
+	queries := r.DB.GetQueries(tx)
+
+	res, err := queries.CountMaps(context.Background())
+	if err == sql.ErrNoRows {
+		return int32(res), nil
+	}
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(res), nil
+}
+
+func (r *MapRepository) GetMaps(tx *sql.Tx, pagination Pagination) ([]domain.MinMap, error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetMapList(context.Background(), dao.GetMapListParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []domain.MinMap{}, nil
+	}
+	if err != nil {
+		return []domain.MinMap{}, nil
+	}
+
+	maps := make([]domain.MinMap, len(res))
+	for idx, val := range res {
+		maps[idx] = domain.MinMap{
+			MapID:      val.MapID,
+			LastUpdate: dao.ToNullableString(val.Lastupdate),
+			Name:       domain.NullableString(val.Name),
+		}
+	}
+	return maps, nil
+}

@@ -19,6 +19,12 @@ type Map struct {
 	Spawns            []MapSpawn
 }
 
+type MinMap struct {
+	MapID      string
+	LastUpdate NullableString
+	Name       NullableString
+}
+
 type NpcType string
 
 const (
