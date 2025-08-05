@@ -3,3 +3,15 @@
 .pre-preserve {
 	white-space: preserve;
 }
+
+.diff-removed {
+	color: rgb(236, 85, 85);
+}
+
+.diff-added {
+	color: rgb(89, 189, 114);
+}
+
+.diff-unchanged {
+	color: grey;
+}
