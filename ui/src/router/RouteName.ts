@@ -21,4 +21,9 @@ export enum RouteName {
 	I18nList = "i18nList",
 	I18nHistory = "i18nHistory",
 	I18nPatch = "i18nPatch",
+
+	// Maps
+	MapList = "mapList",
+	MapHistory = "mapHistory",
+	MapPatch = "mapPatch",
 }

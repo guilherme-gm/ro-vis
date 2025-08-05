@@ -40,6 +40,12 @@ const serverStore = useServerStore();
 				Internationalization text entries and translations
 			</div>
 		</BsListGroupItem>
+		<BsListGroupItem class="d-flex justify-content-between align-items-start">
+			<div class="ms-2 me-auto">
+				<div class="fw-bold"><BsLink :to="{ name: RouteName.MapList }">Maps</BsLink></div>
+				Map information changes, like names, descriptions, etc.
+			</div>
+		</BsListGroupItem>
 		<!-- <BsListGroupItem class="d-flex justify-content-between align-items-start">
 			<div class="ms-2 me-auto">
 				<div class="fw-bold"><BsLink :to="{ name: RouteName.StateList }">States</BsLink></div>

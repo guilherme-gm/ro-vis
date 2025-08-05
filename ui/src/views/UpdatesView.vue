@@ -49,6 +49,11 @@ const i18nTrackInfo: TrackInfo = {
 	label: 'I18n',
 };
 
+const mapTrackInfo: TrackInfo = {
+	route: RouteName.MapPatch,
+	label: 'Map',
+};
+
 const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 	// ======= Item
 	["data/bookitemnametable.txt", itemTrackInfo],
@@ -74,7 +79,19 @@ const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 
 	// ====== I18n
 	// ["data/i18n/sc/(.*?).csv", i18nTrackInfo],
-	["data/i18n/sc/sc.json", i18nTrackInfo]
+	["data/i18n/sc/sc.json", i18nTrackInfo],
+
+	// ====== Map
+	["data/mapnametable.txt", mapTrackInfo],
+	["data/mp3nametable.txt", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_link_br.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_link_kr.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_map_br.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_map_kr.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_mob_br.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_mob_kr.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_npc_br.lub", mapTrackInfo],
+	["data/luafiles514/lua files/navigation/navi_npc_kr.lub", mapTrackInfo],
 ]);
 
 function isTrackedFile(fileName: string): boolean {

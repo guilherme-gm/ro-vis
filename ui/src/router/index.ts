@@ -87,6 +87,23 @@ const router = createRouter({
 			name: RouteName.I18nHistory,
 			component: () => import("../views/I18n/I18nHistoryView.vue"),
 		},
+
+		// Maps
+		{
+			path: '/maps/',
+			name: RouteName.MapList,
+			component: () => import("../views/Map/MapListView.vue"),
+		},
+		{
+			path: '/maps/patch/:patch',
+			name: RouteName.MapPatch,
+			component: () => import("../views/Map/MapPatchView.vue"),
+		},
+		{
+			path: '/maps/:mapId',
+			name: RouteName.MapHistory,
+			component: () => import("../views/Map/MapHistoryView.vue"),
+		},
 	]
 })
 
