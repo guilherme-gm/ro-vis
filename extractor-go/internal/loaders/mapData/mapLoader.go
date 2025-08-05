@@ -55,6 +55,7 @@ func (u *mapUpdater) getForEdit(mapId string) *domain.Map {
 
 	if m, ok := u.currentMaps[mapId]; ok {
 		newMap := *m
+		newMap.PreviousHistoryID = m.HistoryID
 		u.mapsToUpdate = append(u.mapsToUpdate, &newMap)
 		u.dirtyMaps[mapId] = &newMap
 		return &newMap
