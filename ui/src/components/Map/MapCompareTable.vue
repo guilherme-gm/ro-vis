@@ -6,6 +6,8 @@ import ListCell from "./ListCell.vue";
 import ListDiffCell from "./ListDiffCell.vue";
 import { MapNpcFormatter, MapSpawnFormatter, MapWarpFormatter } from "./formatters";
 import MapNpcItem from "./MapNpcItem.vue";
+import MapWarpItem from "./MapWarpItem.vue";
+import MapSpawnItem from "./MapSpawnItem.vue";
 
 const props = defineProps<{
 	previous?: Map | null;
@@ -79,25 +81,49 @@ const mapWarpFormatter = MapWarpFormatter.use();
 			<tr>
 				<th>Warps</th>
 				<td v-if="showNew">
-					<ListCell :formatter="mapWarpFormatter" :value="current?.Warps" />
+					<ListCell :formatter="mapWarpFormatter" :value="current?.Warps">
+						<template #default="{ item }">
+							<MapWarpItem :warp="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showPrevious">
-					<ListCell :formatter="mapWarpFormatter" :value="previous?.Warps" />
+					<ListCell :formatter="mapWarpFormatter" :value="previous?.Warps">
+						<template #default="{ item }">
+							<MapWarpItem :warp="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showDiff">
-					<ListDiffCell :formatter="mapWarpFormatter" :from="previous?.Warps" :to="current?.Warps" />
+					<ListDiffCell :formatter="mapWarpFormatter" :from="previous?.Warps" :to="current?.Warps">
+						<template #default="{ item, kind }">
+							<MapWarpItem :warp="item.value" :kind="kind" />
+						</template>
+					</ListDiffCell>
 				</td>
 			</tr>
 			<tr>
 				<th>Spawns</th>
 				<td v-if="showNew">
-					<ListCell :formatter="mapSpawnFormatter" :value="current?.Spawns" />
+					<ListCell :formatter="mapSpawnFormatter" :value="current?.Spawns">
+						<template #default="{ item }">
+							<MapSpawnItem :spawn="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showPrevious">
-					<ListCell :formatter="mapSpawnFormatter" :value="previous?.Spawns" />
+					<ListCell :formatter="mapSpawnFormatter" :value="previous?.Spawns">
+						<template #default="{ item }">
+							<MapSpawnItem :spawn="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showDiff">
-					<ListDiffCell :formatter="mapSpawnFormatter" :from="previous?.Spawns" :to="current?.Spawns" />
+					<ListDiffCell :formatter="mapSpawnFormatter" :from="previous?.Spawns" :to="current?.Spawns">
+						<template #default="{ item, kind }">
+							<MapSpawnItem :spawn="item.value" :kind="kind" />
+						</template>
+					</ListDiffCell>
 				</td>
 			</tr>
 		</tbody>
