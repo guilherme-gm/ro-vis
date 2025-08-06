@@ -2,8 +2,9 @@
 import DiffedValue from "@/components/DiffedValue.vue";
 import { computed, ref } from "vue";
 import type { Map, MapSpawn, MapWarp } from "@/models/Map";
-import NpcsCell from "./NpcsCell.vue";
-import NpcsDiffCell from "./NpcsDiffCell.vue";
+import ListCell from "./ListCell.vue";
+import ListDiffCell from "./ListDiffCell.vue";
+import { MapNpcFormatter } from "./formatters";
 
 const props = defineProps<{
 	previous?: Map | null;
@@ -63,6 +64,8 @@ const formatToSpawns = computed(() => {
 	return props.current.Spawns?.map(formatSpawn).sort().join("\n");
 });
 
+const mapNpcFormatter = MapNpcFormatter.use();
+
 </script>
 
 
@@ -77,27 +80,51 @@ const formatToSpawns = computed(() => {
 			</tr>
 			<tr v-for="(info) of fields" :key="info[1]">
 				<th>{{ info[0] }}</th>
-				<td v-if="showNew"><pre class="pre-preserve">{{ current?.[info[1]] ?? "-" }}</pre></td>
-				<td v-if="showPrevious"><pre class="pre-preserve">{{ previous?.[info[1]] ?? "-" }}</pre></td>
-				<td v-if="showDiff"><DiffedValue :from="previous![info[1]]" :to="current![info[1]]" /></td>
+				<td v-if="showNew">
+					<pre class="pre-preserve">{{ current?.[info[1]] ?? "-" }}</pre>
+				</td>
+				<td v-if="showPrevious">
+					<pre class="pre-preserve">{{ previous?.[info[1]] ?? "-" }}</pre>
+				</td>
+				<td v-if="showDiff">
+					<DiffedValue :from="previous![info[1]]" :to="current![info[1]]" />
+				</td>
 			</tr>
 			<tr>
 				<th>Npcs</th>
-				<td v-if="showNew"><pre class="pre-preserve"><NpcsCell :value="current?.Npcs" /></pre></td>
-				<td v-if="showPrevious"><pre class="pre-preserve"><NpcsCell :value="previous?.Npcs" /></pre></td>
-				<td v-if="showDiff"><NpcsDiffCell :from="previous?.Npcs" :to="current?.Npcs" /></td>
+				<td v-if="showNew">
+					<ListCell :formatter="mapNpcFormatter" :value="current?.Npcs" />
+				</td>
+				<td v-if="showPrevious">
+					<ListCell :formatter="mapNpcFormatter" :value="previous?.Npcs" />
+				</td>
+				<td v-if="showDiff">
+					<ListDiffCell :formatter="mapNpcFormatter" :from="previous?.Npcs" :to="current?.Npcs" />
+				</td>
 			</tr>
 			<tr>
 				<th>Warps</th>
-				<td v-if="showNew"><pre class="pre-preserve">{{ formatToWarps }}</pre></td>
-				<td v-if="showPrevious"><pre class="pre-preserve">{{ formatFromWarps }}</pre></td>
-				<td v-if="showDiff"><DiffedValue :from="formatFromWarps" :to="formatToWarps" /></td>
+				<td v-if="showNew">
+					<pre class="pre-preserve">{{ formatToWarps }}</pre>
+				</td>
+				<td v-if="showPrevious">
+					<pre class="pre-preserve">{{ formatFromWarps }}</pre>
+				</td>
+				<td v-if="showDiff">
+					<DiffedValue :from="formatFromWarps" :to="formatToWarps" />
+				</td>
 			</tr>
 			<tr>
 				<th>Spawns</th>
-				<td v-if="showNew"><pre class="pre-preserve">{{ formatToSpawns }}</pre></td>
-				<td v-if="showPrevious"><pre class="pre-preserve">{{ formatFromSpawns }}</pre></td>
-				<td v-if="showDiff"><DiffedValue :from="formatFromSpawns" :to="formatToSpawns" /></td>
+				<td v-if="showNew">
+					<pre class="pre-preserve">{{ formatToSpawns }}</pre>
+				</td>
+				<td v-if="showPrevious">
+					<pre class="pre-preserve">{{ formatFromSpawns }}</pre>
+				</td>
+				<td v-if="showDiff">
+					<DiffedValue :from="formatFromSpawns" :to="formatToSpawns" />
+				</td>
 			</tr>
 		</tbody>
 	</table>

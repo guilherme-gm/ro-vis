@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { MapNpc } from "@/models/Map";
-import { MapNpcFormatter } from "./formatters";
+import { ListFormatter, MapNpcFormatter } from "./formatters";
 
 const props = defineProps<{
 	value?: MapNpc[];
 }>();
 
 const formatter = MapNpcFormatter.use();
+const listFormatter = ListFormatter.use(formatter);
 
-const npcList = computed(() => formatter.formatList(props.value));
+const npcList = computed(() => listFormatter.formatList(props.value));
 </script>
 
 <template>

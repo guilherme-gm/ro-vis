@@ -1,6 +1,5 @@
-import type { MapNpc } from "@/models/Map";
 import { computed, type ComputedRef } from "vue";
-import { MapNpcFormatter } from "./formatters";
+import type { Formatter } from "./formatters";
 
 type DiffResult<T> = {
 	added: T[];
@@ -8,20 +7,20 @@ type DiffResult<T> = {
 	unchanged: T[];
 }
 
-export class MapNpcDiffer {
-	private from: ComputedRef<MapNpc[]>;
+export class ListDiffer<T> {
+	private from: ComputedRef<T[]>;
 
-	private to: ComputedRef<MapNpc[]>;
+	private to: ComputedRef<T[]>;
 
-	private formatter: MapNpcFormatter;
+	private formatter: Formatter<T>;
 
-	constructor(from: ComputedRef<MapNpc[]>, to: ComputedRef<MapNpc[]>) {
+	constructor(from: ComputedRef<T[]>, to: ComputedRef<T[]>, formatter: Formatter<T>) {
 		this.from = from;
 		this.to = to;
-		this.formatter = MapNpcFormatter.use();
+		this.formatter = formatter;
 	}
 
-	public diff = computed((): DiffResult<MapNpc> => {
+	public diff = computed((): DiffResult<T> => {
 		if (!this.from.value) {
 			return { added: this.to.value ?? [], removed: [], unchanged: [] };
 		}
@@ -41,7 +40,7 @@ export class MapNpcDiffer {
 		return { added, removed, unchanged };
 	});
 
-	static use(from: ComputedRef<MapNpc[]>, to: ComputedRef<MapNpc[]>): MapNpcDiffer {
-		return new MapNpcDiffer(from, to);
+	static use<T>(from: ComputedRef<T[]>, to: ComputedRef<T[]>, formatter: Formatter<T>): ListDiffer<T> {
+		return new ListDiffer(from, to, formatter);
 	}
 }
