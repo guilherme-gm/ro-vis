@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 )
@@ -95,4 +96,24 @@ func (ctlr *I18nController) ListForI18n(c *gin.Context, params ListForI18nParams
 	}
 
 	c.JSON(http.StatusOK, gin.H{"total": len(history), "list": history})
+}
+
+func (ctlr *I18nController) ListStrings(c *gin.Context) {
+	i18nRepo := c.MustGet("x-server").(*server.Server).Repositories.I18nRepository
+
+	var params struct {
+		Ids []string `form:"ids" binding:"required"`
+	}
+	if err := c.ShouldBindBodyWith(&params, binding.JSON); err != nil {
+		c.Error(NewBadRequestError("failed to parse query parameters", err))
+		return
+	}
+
+	strings, err := i18nRepo.GetStrings(nil, params.Ids)
+	if err != nil {
+		c.Error(NewInternalServerError("failed to fetch i18n strings", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"strings": strings})
 }

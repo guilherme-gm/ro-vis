@@ -25,3 +25,8 @@ type MinI18n struct {
 	LastUpdate string
 	PtBrText   string
 }
+
+type I18nValue struct {
+	I18nId   string
+	PtBrText string
+}

@@ -261,3 +261,25 @@ func (r *I18nRepository) GetI18ns(tx *sql.Tx, pagination Pagination) ([]domain.M
 
 	return i18ns, nil
 }
+
+// GetStrings returns the list of i18n records
+func (r *I18nRepository) GetStrings(tx *sql.Tx, ids []string) ([]domain.I18nValue, error) {
+	queries := r.DB.GetQueries(tx)
+	res, err := queries.GetStrings(context.Background(), ids)
+	if err == sql.ErrNoRows {
+		return []domain.I18nValue{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	i18ns := make([]domain.I18nValue, len(res))
+	for idx, qmodel := range res {
+		i18ns[idx] = domain.I18nValue{
+			I18nId:   qmodel.I18nID,
+			PtBrText: qmodel.PtBrText,
+		}
+	}
+
+	return i18ns, nil
+}

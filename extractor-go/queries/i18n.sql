@@ -51,3 +51,9 @@ SELECT COUNT(*)
 FROM `i18ns`
 INNER JOIN `i18n_history` ON `i18n_history`.`history_id` = `i18ns`.`latest_history_id`
 WHERE `i18ns`.`deleted` = FALSE;
+
+-- name: GetStrings :many
+SELECT `i18n_history`.`i18n_id`, `i18n_history`.`pt_br_text`
+FROM `i18ns`
+INNER JOIN `i18n_history` ON `i18n_history`.`history_id` = `i18ns`.`latest_history_id`
+WHERE `i18ns`.`i18n_id` IN (sqlc.slice('ids'));

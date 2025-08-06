@@ -8,6 +8,7 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"strings"
 )
 
 const countChangedI18nsInUpdate = `-- name: CountChangedI18nsInUpdate :one
@@ -282,6 +283,51 @@ func (q *Queries) GetI18nsIdsInUpdate(ctx context.Context, update string) ([]Get
 	for rows.Next() {
 		var i GetI18nsIdsInUpdateRow
 		if err := rows.Scan(&i.HistoryID, &i.I18nID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getStrings = `-- name: GetStrings :many
+SELECT ` + "`" + `i18n_history` + "`" + `.` + "`" + `i18n_id` + "`" + `, ` + "`" + `i18n_history` + "`" + `.` + "`" + `pt_br_text` + "`" + `
+FROM ` + "`" + `i18ns` + "`" + `
+INNER JOIN ` + "`" + `i18n_history` + "`" + ` ON ` + "`" + `i18n_history` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `i18ns` + "`" + `.` + "`" + `latest_history_id` + "`" + `
+WHERE ` + "`" + `i18ns` + "`" + `.` + "`" + `i18n_id` + "`" + ` IN (/*SLICE:ids*/?)
+`
+
+type GetStringsRow struct {
+	I18nID   string
+	PtBrText string
+}
+
+func (q *Queries) GetStrings(ctx context.Context, ids []string) ([]GetStringsRow, error) {
+	query := getStrings
+	var queryParams []interface{}
+	if len(ids) > 0 {
+		for _, v := range ids {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:ids*/?", strings.Repeat(",?", len(ids))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:ids*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetStringsRow
+	for rows.Next() {
+		var i GetStringsRow
+		if err := rows.Scan(&i.I18nID, &i.PtBrText); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

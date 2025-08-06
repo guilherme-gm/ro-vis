@@ -53,6 +53,7 @@ func main() {
 	router.Group("api/i18n/").
 		GET("/", controllers.GlobalHandler(i18nController.List)).
 		GET("/update/:update", controllers.GlobalHandler(i18nController.ListForUpdate)).
+		POST("/text", controllers.GlobalHandler(i18nController.ListStrings)).
 		GET("/:i18nId", controllers.GlobalHandler(i18nController.ListForI18n))
 
 	router.Group("api/maps/").
