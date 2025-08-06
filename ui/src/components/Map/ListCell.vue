@@ -1,20 +1,20 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { computed } from "vue";
-import type { MapNpc } from "@/models/Map";
-import { ListFormatter, MapNpcFormatter } from "./formatters";
+import { ListFormatter } from "./formatters";
+import type { Formatter } from "./formatters";
 
 const props = defineProps<{
-	value?: MapNpc[];
+	value?: T[];
+	formatter: Formatter<T>;
 }>();
 
-const formatter = MapNpcFormatter.use();
-const listFormatter = ListFormatter.use(formatter);
+const listFormatter = ListFormatter.use(props.formatter);
 
-const npcList = computed(() => listFormatter.formatList(props.value));
+const list = computed(() => listFormatter.formatList(props.value));
 </script>
 
 <template>
 	<ul>
-		<li v-for="(npc, index) of npcList" :key="index">{{ npc }}</li>
+		<li v-for="(item, index) of list" :key="index">{{ item }}</li>
 	</ul>
 </template>

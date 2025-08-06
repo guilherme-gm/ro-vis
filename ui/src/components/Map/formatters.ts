@@ -1,4 +1,4 @@
-import type { MapNpc } from "@/models/Map";
+import type { MapNpc, MapSpawn, MapWarp } from "@/models/Map";
 import type { ListDiffer } from "./differs";
 
 export type DiffRecord = {
@@ -28,6 +28,34 @@ export class MapNpcFormatter implements Formatter<MapNpc> {
 
 	static use(): MapNpcFormatter {
 		return new MapNpcFormatter();
+	}
+}
+
+export class MapSpawnFormatter implements Formatter<MapSpawn> {
+	public createId = (spawn: MapSpawn) => {
+		return `${spawn.Name1.Value}#${spawn.Name2}#${spawn.Type}#${spawn.SpriteId}#${spawn.Level}#${spawn.Amount}#${spawn.Element}#${spawn.Size}#${spawn.Race}`;
+	}
+
+	public format = (spawn: MapSpawn): string => {
+		return `[${spawn.Type}] ${spawn.Name1.Value} (${spawn.SpriteId} / ${spawn.Name2}) Lv ${spawn.Level} x ${spawn.Amount} (${spawn.Element} / ${spawn.Size} / ${spawn.Race})`;
+	};
+
+	static use(): MapSpawnFormatter {
+		return new MapSpawnFormatter();
+	}
+}
+
+export class MapWarpFormatter implements Formatter<MapWarp> {
+	public createId = (warp: MapWarp) => {
+		return `${warp.From.MapId}#${warp.From.X}#${warp.From.Y}#${warp.To.MapId}#${warp.To.X}#${warp.To.Y}#${warp.WarpType}#${warp.SpriteId}`;
+	}
+
+	public format = (warp: MapWarp): string => {
+		return `${warp.From.MapId} (${warp.From.X}, ${warp.From.Y}) -> ${warp.To.MapId} (${warp.To.X}, ${warp.To.Y}) (${warp.WarpType}) (${warp.SpriteId}) ${warp.Name1.Value} (${warp.Name2})`;
+	};
+
+	static use(): MapWarpFormatter {
+		return new MapWarpFormatter();
 	}
 }
 

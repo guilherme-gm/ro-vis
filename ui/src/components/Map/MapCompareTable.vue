@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import DiffedValue from "@/components/DiffedValue.vue";
 import { computed, ref } from "vue";
-import type { Map, MapSpawn, MapWarp } from "@/models/Map";
+import type { Map } from "@/models/Map";
 import ListCell from "./ListCell.vue";
 import ListDiffCell from "./ListDiffCell.vue";
-import { MapNpcFormatter } from "./formatters";
+import { MapNpcFormatter, MapSpawnFormatter, MapWarpFormatter } from "./formatters";
 
 const props = defineProps<{
 	previous?: Map | null;
@@ -24,48 +24,9 @@ const showNew = computed(() => props.current);
 const showPrevious = computed(() => props.previous);
 const showDiff = computed(() => props.previous && props.current);
 
-function formatWarp(warp: MapWarp) {
-	return `${warp.Name1}`;
-}
-
-const formatFromWarps = computed(() => {
-	if (!props.previous) {
-		return "-";
-	}
-
-	return props.previous.Warps?.map(formatWarp).sort().join("\n");
-});
-
-const formatToWarps = computed(() => {
-	if (!props.current) {
-		return "-";
-	}
-
-	return props.current.Warps?.map(formatWarp).sort().join("\n");
-});
-
-function formatSpawn(spawn: MapSpawn) {
-	return `${spawn.Name1}`;
-}
-
-const formatFromSpawns = computed(() => {
-	if (!props.previous) {
-		return "-";
-	}
-
-	return props.previous.Spawns?.map(formatSpawn).sort().join("\n");
-});
-
-const formatToSpawns = computed(() => {
-	if (!props.current) {
-		return "-";
-	}
-
-	return props.current.Spawns?.map(formatSpawn).sort().join("\n");
-});
-
 const mapNpcFormatter = MapNpcFormatter.use();
-
+const mapSpawnFormatter = MapSpawnFormatter.use();
+const mapWarpFormatter = MapWarpFormatter.use();
 </script>
 
 
@@ -105,25 +66,25 @@ const mapNpcFormatter = MapNpcFormatter.use();
 			<tr>
 				<th>Warps</th>
 				<td v-if="showNew">
-					<pre class="pre-preserve">{{ formatToWarps }}</pre>
+					<ListCell :formatter="mapWarpFormatter" :value="current?.Warps" />
 				</td>
 				<td v-if="showPrevious">
-					<pre class="pre-preserve">{{ formatFromWarps }}</pre>
+					<ListCell :formatter="mapWarpFormatter" :value="previous?.Warps" />
 				</td>
 				<td v-if="showDiff">
-					<DiffedValue :from="formatFromWarps" :to="formatToWarps" />
+					<ListDiffCell :formatter="mapWarpFormatter" :from="previous?.Warps" :to="current?.Warps" />
 				</td>
 			</tr>
 			<tr>
 				<th>Spawns</th>
 				<td v-if="showNew">
-					<pre class="pre-preserve">{{ formatToSpawns }}</pre>
+					<ListCell :formatter="mapSpawnFormatter" :value="current?.Spawns" />
 				</td>
 				<td v-if="showPrevious">
-					<pre class="pre-preserve">{{ formatFromSpawns }}</pre>
+					<ListCell :formatter="mapSpawnFormatter" :value="previous?.Spawns" />
 				</td>
 				<td v-if="showDiff">
-					<DiffedValue :from="formatFromSpawns" :to="formatToSpawns" />
+					<ListDiffCell :formatter="mapSpawnFormatter" :from="previous?.Spawns" :to="current?.Spawns" />
 				</td>
 			</tr>
 		</tbody>
