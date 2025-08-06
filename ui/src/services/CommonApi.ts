@@ -25,9 +25,9 @@ export class CommonApi<Entity, MinEntity> {
 
 	public state = ref<LoadState>(LoadState.None);
 
-	private api = useApi();
+	protected api = useApi();
 
-	private path: string;
+	protected path: string;
 
 	constructor(path: string) {
 		this.path = path;
