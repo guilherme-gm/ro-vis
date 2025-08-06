@@ -15,6 +15,8 @@ const list = computed(() => listFormatter.formatList(props.value));
 
 <template>
 	<ul>
-		<li v-for="(item, index) of list" :key="index">{{ item }}</li>
+		<li v-for="(item, index) of list" :key="index">
+			<slot :item="item">{{ item.stringValue }}</slot>
+		</li>
 	</ul>
 </template>

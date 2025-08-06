@@ -1,13 +1,20 @@
 import type { MapNpc, MapSpawn, MapWarp } from "@/models/Map";
 import type { ListDiffer } from "./differs";
 
-export type DiffRecord = {
+export type DiffRecord<T> = {
 	id: string;
 	diffType: 'added' | 'removed' | 'unchanged';
-	value: string;
+	stringValue: string;
+	value: T;
 };
 
-export type DiffedList = DiffRecord[];
+export type ListData<T> = {
+	id: string;
+	stringValue: string;
+	value: T;
+}
+
+export type DiffedList<T> = DiffRecord<T>[];
 
 export interface Formatter<T> {
 	createId(item: T): string;
@@ -66,14 +73,18 @@ export class ListFormatter<T> {
 		this.formatter = formatter;
 	}
 
-	public formatList = (items?: T[]): string[] => {
+	public formatList = (items?: T[]): ListData<T>[] => {
 		if (!items) {
 			return [];
 		}
 
 		return items
 			.sort((a, b) => this.formatter.createId(a).localeCompare(this.formatter.createId(b)))
-			.map((item) => this.formatter.format(item));
+			.map((item) => ({
+				id: this.formatter.createId(item),
+				stringValue: this.formatter.format(item),
+				value: item
+			}));
 	};
 
 	static use<T>(formatter: Formatter<T>): ListFormatter<T> {
@@ -92,28 +103,31 @@ export class ListDiffFormatter<T> {
 		this.specificFormatter = specificFormatter;
 	}
 
-	public formatList = (): DiffedList => {
-		const diffedList: DiffedList = [];
+	public formatList = (): DiffedList<T> => {
+		const diffedList: DiffedList<T> = [];
 
 		const addedEntries = this.differ.diff.value.added
-			.map((npc): DiffRecord => ({
+			.map((npc): DiffRecord<T> => ({
 				id: this.specificFormatter.createId(npc),
-				value: this.specificFormatter.format(npc),
-				diffType: 'added'
+				stringValue: this.specificFormatter.format(npc),
+				value: npc,
+				diffType: 'added',
 			}));
 
 		const removedEntries = this.differ.diff.value.removed
-			.map((npc): DiffRecord => ({
+			.map((npc): DiffRecord<T> => ({
 				id: this.specificFormatter.createId(npc),
-				value: this.specificFormatter.format(npc),
-				diffType: 'removed'
+				stringValue: this.specificFormatter.format(npc),
+				value: npc,
+				diffType: 'removed',
 			}));
 
 		const unchangedEntries = this.differ.diff.value.unchanged
-			.map((npc): DiffRecord => ({
+			.map((npc): DiffRecord<T> => ({
 				id: this.specificFormatter.createId(npc),
-				value: this.specificFormatter.format(npc),
-				diffType: 'unchanged'
+				stringValue: this.specificFormatter.format(npc),
+				value: npc,
+				diffType: 'unchanged',
 			}));
 
 		diffedList.push(...addedEntries)

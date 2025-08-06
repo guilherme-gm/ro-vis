@@ -5,6 +5,7 @@ import type { Map } from "@/models/Map";
 import ListCell from "./ListCell.vue";
 import ListDiffCell from "./ListDiffCell.vue";
 import { MapNpcFormatter, MapSpawnFormatter, MapWarpFormatter } from "./formatters";
+import MapNpcItem from "./MapNpcItem.vue";
 
 const props = defineProps<{
 	previous?: Map | null;
@@ -54,13 +55,25 @@ const mapWarpFormatter = MapWarpFormatter.use();
 			<tr>
 				<th>Npcs</th>
 				<td v-if="showNew">
-					<ListCell :formatter="mapNpcFormatter" :value="current?.Npcs" />
+					<ListCell :formatter="mapNpcFormatter" :value="current?.Npcs">
+						<template #default="{ item }">
+							<MapNpcItem :npc="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showPrevious">
-					<ListCell :formatter="mapNpcFormatter" :value="previous?.Npcs" />
+					<ListCell :formatter="mapNpcFormatter" :value="previous?.Npcs">
+						<template #default="{ item }">
+							<MapNpcItem :npc="item.value" />
+						</template>
+					</ListCell>
 				</td>
 				<td v-if="showDiff">
-					<ListDiffCell :formatter="mapNpcFormatter" :from="previous?.Npcs" :to="current?.Npcs" />
+					<ListDiffCell :formatter="mapNpcFormatter" :from="previous?.Npcs" :to="current?.Npcs">
+						<template #default="{ item, kind }">
+							<MapNpcItem :npc="item.value" :kind="kind" />
+						</template>
+					</ListDiffCell>
 				</td>
 			</tr>
 			<tr>

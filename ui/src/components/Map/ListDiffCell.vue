@@ -18,11 +18,12 @@ const diffFormatter = ListDiffFormatter.use(differ, listFormatter, props.formatt
 <template>
 	<ul>
 		<li
-			v-for="(npc, index) of diffFormatter.formatList()"
+			v-for="(item, index) of diffFormatter.formatList()"
 			:key="index"
-			:class="{ [`diff-${npc.diffType}`]: true }"
 		>
-			{{ npc.value }}
+			<slot :item="item" :kind="item.diffType">
+				<span :class="{ [`diff-${item.diffType}`]: true }">{{ item.stringValue }}</span>
+			</slot>
 		</li>
 	</ul>
 </template>
