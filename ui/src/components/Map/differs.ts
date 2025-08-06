@@ -35,7 +35,7 @@ export class ListDiffer<T> {
 
 		const added = this.to.value.filter((r) => !existingIds.has(this.formatter.createId(r)));
 		const removed = this.from.value.filter((r) => !newIds.has(this.formatter.createId(r)));
-		const unchanged = this.from.value.filter((r) => existingIds.has(this.formatter.createId(r)));
+		const unchanged = this.from.value.filter((r) => newIds.has(this.formatter.createId(r)));
 
 		return { added, removed, unchanged };
 	});
