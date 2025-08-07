@@ -56,7 +56,7 @@ type NaviMob struct {
 	MapId      string `lua:"$$numeric:1"`
 	UniqueCode int    `lua:"$$numeric:2"`
 	Type       int    `lua:"$$numeric:3"`
-	IdAmount   int    `lua:"$$numeric:4"`
+	IdAmount   int    `lua:"$$numeric:4"` // On 2012-03-26 it did not include amount yet
 	Name1      string `lua:"$$numeric:5"`
 	Name2      string `lua:"$$numeric:6"`
 	Level      int    `lua:"$$numeric:7"`

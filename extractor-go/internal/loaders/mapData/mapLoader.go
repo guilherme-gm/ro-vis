@@ -20,12 +20,16 @@ type MapLoader struct {
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
 func (l *MapLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
+		// since start(?)
 		mapNameTableRegex,
 		mp3NameTableRegex,
-		naviMapRegex,
-		naviNpcRegex,
-		naviMobRegex,
-		naviLinkRegex,
+
+		// 2012-03-26 (actually, 2012-03-28)
+		naviLinkLatamRegex,
+		naviMapLatamRegex,
+		naviMobLatamRegex, // amount was introduced later, but structure is the same
+		naviNpcLatamRegex,
+		// scroll
 	}
 }
 
@@ -128,7 +132,7 @@ func (l *MapLoader) loadMp3Names(basePath string, update domain.Update, updater 
 }
 
 func (l *MapLoader) loadSpecialCodes(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviMap)
+	change, err := update.GetChangeForFile(naviMapLatam)
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -150,7 +154,7 @@ func (l *MapLoader) loadSpecialCodes(basePath string, update domain.Update, upda
 }
 
 func (l *MapLoader) loadNpcs(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviNpc)
+	change, err := update.GetChangeForFile(naviNpcLatam)
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -196,7 +200,7 @@ func (l *MapLoader) loadNpcs(basePath string, update domain.Update, updater *map
 }
 
 func (l *MapLoader) loadSpawns(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviMob)
+	change, err := update.GetChangeForFile(naviMobLatam)
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -242,7 +246,7 @@ func (l *MapLoader) loadSpawns(basePath string, update domain.Update, updater *m
 }
 
 func (l *MapLoader) loadWarps(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviLink)
+	change, err := update.GetChangeForFile(naviLinkLatam)
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return

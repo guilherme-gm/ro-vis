@@ -29,7 +29,7 @@ func (p NaviNpcV1Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p NaviNpcV1Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		naviNpcRegex,
+		naviNpcLatamRegex,
 	}
 }
 

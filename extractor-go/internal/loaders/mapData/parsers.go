@@ -12,14 +12,14 @@ var mapNameTableRegex = regexp.MustCompile(`(?i)^` + mapNameTable + `$`)
 var mp3NameTable = "data/mp3nametable.txt"
 var mp3NameTableRegex = regexp.MustCompile(`(?i)^` + mp3NameTable + `$`)
 
-var naviLink = "data/luafiles514/lua files/navigation/navi_link_br.lub"
-var naviLinkRegex = regexp.MustCompile(`(?i)^` + naviLink + `$`)
-var naviMap = "data/luafiles514/lua files/navigation/navi_map_br.lub"
-var naviMapRegex = regexp.MustCompile(`(?i)^` + naviMap + `$`)
-var naviMob = "data/luafiles514/lua files/navigation/navi_mob_br.lub"
-var naviMobRegex = regexp.MustCompile(`(?i)^` + naviMob + `$`)
-var naviNpc = "data/luafiles514/lua files/navigation/navi_npc_br.lub"
-var naviNpcRegex = regexp.MustCompile(`(?i)^` + naviNpc + `$`)
+var naviLinkLatam = "data/luafiles514/lua files/navigation/navi_link_br.lub"
+var naviLinkLatamRegex = regexp.MustCompile(`(?i)^` + naviLinkLatam + `$`)
+var naviMapLatam = "data/luafiles514/lua files/navigation/navi_map_br.lub"
+var naviMapLatamRegex = regexp.MustCompile(`(?i)^` + naviMapLatam + `$`)
+var naviMobLatam = "data/luafiles514/lua files/navigation/navi_mob_br.lub"
+var naviMobLatamRegex = regexp.MustCompile(`(?i)^` + naviMobLatam + `$`)
+var naviNpcLatam = "data/luafiles514/lua files/navigation/navi_npc_br.lub"
+var naviNpcLatamRegex = regexp.MustCompile(`(?i)^` + naviNpcLatam + `$`)
 
 type NaviMapParser interface {
 	IsUpdateInRange(update *domain.Update) bool

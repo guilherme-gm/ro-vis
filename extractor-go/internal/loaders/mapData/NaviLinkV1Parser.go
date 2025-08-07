@@ -29,7 +29,7 @@ func (p NaviLinkV1Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p NaviLinkV1Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		naviLinkRegex,
+		naviLinkLatamRegex,
 	}
 }
 
