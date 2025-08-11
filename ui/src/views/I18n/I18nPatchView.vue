@@ -5,7 +5,7 @@ import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
 import BsLink from '@/components/bootstrap/BsLink.vue';
 import { RouteName } from '@/router/RouteName';
-import { I18nApi, type I18nFromToRecord } from '@/services/I18nApi';
+import { I18nApi, type I18nPatch } from '@/services/I18nApi';
 import { BIconBoxArrowUpRight } from 'bootstrap-icons-vue';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -21,7 +21,7 @@ const {
 	getPatchItems,
 } = I18nApi.use();
 
-const list = ref<I18nFromToRecord[]>([]);
+const list = ref<I18nPatch[]>([]);
 const currentPage = ref(0);
 
 async function loadPage(page: number): Promise<void> {

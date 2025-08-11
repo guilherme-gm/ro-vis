@@ -3,7 +3,7 @@ import ListingBase from '@/components/ListingBase.vue';
 import I18nCompareTable from '@/components/I18n/I18nCompareTable.vue';
 import BsAccordion from '@/components/bootstrap/Accordion/BsAccordion.vue';
 import BsAccordionItem from '@/components/bootstrap/Accordion/BsAccordionItem.vue';
-import { I18nApi, type I18nFromToRecord } from '@/services/I18nApi';
+import { I18nApi, type I18nPatch } from '@/services/I18nApi';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -18,12 +18,12 @@ const {
 	getItemHistory,
 } = I18nApi.use();
 
-const list = ref<I18nFromToRecord[]>([]);
+const list = ref<I18nPatch[]>([]);
 const currentPage = ref(0);
 
 async function loadPage(page: number): Promise<void> {
 	currentPage.value = page;
-	list.value = await getItemHistory(parseInt(i18nId), page);
+	list.value = await getItemHistory(i18nId, page);
 }
 
 loadPage(1);
