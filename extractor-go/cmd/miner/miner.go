@@ -14,6 +14,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/i18n"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/mapData"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/patchDownloader"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/patchfile"

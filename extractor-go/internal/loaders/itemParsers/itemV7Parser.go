@@ -92,7 +92,7 @@ func (p ItemV7Parser) Parse(basePath string, update *domain.Update, existingDB m
 			stringDecoder = decoders.ConvertNoop // LATAM already encodes in UTF-8
 		}
 
-		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+p.GetItemInfoPath(), "tbl", &itemTbl, stringDecoder)
+		result := decoders.DecodeLuaTable(basePath+"/"+change.Patch+"/"+change.File, "tbl", &itemTbl, stringDecoder)
 		p.checkNotConsumedPaths(result)
 
 		for _, entry := range itemTbl {

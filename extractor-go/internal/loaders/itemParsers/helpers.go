@@ -108,7 +108,12 @@ func loadCardPostfix(basePath string, update *domain.Update, newDB map[int32]*do
 }
 
 func loadItemMoveInfoV5(basePath string, update *domain.Update, newDB map[int32]*domain.Item) {
-	loadTxtSubTable(basePath, update, newDB, "data/itemmoveinfov5.txt", subparsers.ParseItemMoveInfoV5, func(item *domain.Item, entry *subparsers.ItemMoveInfoV5Entry) {
+	change, err := update.GetChangeForFile("data/itemmoveinfov5.txt")
+	if err != nil {
+		return
+	}
+
+	loadTxtSubTable(basePath, update, newDB, change.File, subparsers.ParseItemMoveInfoV5, func(item *domain.Item, entry *subparsers.ItemMoveInfoV5Entry) {
 		if entry == nil {
 			item.MoveInfo = domain.NewItemMoveInfo()
 			return
