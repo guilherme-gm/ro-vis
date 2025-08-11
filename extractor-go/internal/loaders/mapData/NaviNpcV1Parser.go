@@ -28,8 +28,14 @@ func (p NaviNpcV1Parser) IsUpdateInRange(update *domain.Update) bool {
 }
 
 func (p NaviNpcV1Parser) GetRelevantFiles() []*regexp.Regexp {
-	return []*regexp.Regexp{
-		naviNpcLatamRegex,
+	if p.server.Type == server.ServerTypeLATAM {
+		return []*regexp.Regexp{
+			regexp.MustCompile(`(?i)^` + naviNpcLatam + `$`),
+		}
+	} else {
+		return []*regexp.Regexp{
+			regexp.MustCompile(`(?i)^` + naviNpcKro + `$`),
+		}
 	}
 }
 

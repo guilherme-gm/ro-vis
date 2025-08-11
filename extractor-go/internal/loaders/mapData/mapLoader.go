@@ -17,6 +17,38 @@ type MapLoader struct {
 	server     *server.Server
 }
 
+func (l *MapLoader) getNaviLinkName() string {
+	if l.server.Type == server.ServerTypeLATAM {
+		return naviLinkLatam
+	}
+
+	return naviLinkKro
+}
+
+func (l *MapLoader) getNaviMapName() string {
+	if l.server.Type == server.ServerTypeLATAM {
+		return naviMapLatam
+	}
+
+	return naviMapKro
+}
+
+func (l *MapLoader) getNaviMobName() string {
+	if l.server.Type == server.ServerTypeLATAM {
+		return naviMobLatam
+	}
+
+	return naviMobKro
+}
+
+func (l *MapLoader) getNaviNpcName() string {
+	if l.server.Type == server.ServerTypeLATAM {
+		return naviNpcLatam
+	}
+
+	return naviNpcKro
+}
+
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
 func (l *MapLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
@@ -25,10 +57,10 @@ func (l *MapLoader) GetRelevantFiles() []*regexp.Regexp {
 		mp3NameTableRegex,
 
 		// 2012-03-26 (actually, 2012-03-28)
-		naviLinkLatamRegex,
-		naviMapLatamRegex,
-		naviMobLatamRegex, // amount was introduced later, but structure is the same
-		naviNpcLatamRegex,
+		regexp.MustCompile(`(?i)^` + l.getNaviLinkName() + `$`),
+		regexp.MustCompile(`(?i)^` + l.getNaviMapName() + `$`),
+		regexp.MustCompile(`(?i)^` + l.getNaviMobName() + `$`),
+		regexp.MustCompile(`(?i)^` + l.getNaviNpcName() + `$`),
 		// scroll
 	}
 }
@@ -132,7 +164,7 @@ func (l *MapLoader) loadMp3Names(basePath string, update domain.Update, updater 
 }
 
 func (l *MapLoader) loadSpecialCodes(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviMapLatam)
+	change, err := update.GetChangeForFile(l.getNaviMapName())
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -154,7 +186,7 @@ func (l *MapLoader) loadSpecialCodes(basePath string, update domain.Update, upda
 }
 
 func (l *MapLoader) loadNpcs(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviNpcLatam)
+	change, err := update.GetChangeForFile(l.getNaviNpcName())
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -200,7 +232,7 @@ func (l *MapLoader) loadNpcs(basePath string, update domain.Update, updater *map
 }
 
 func (l *MapLoader) loadSpawns(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviMobLatam)
+	change, err := update.GetChangeForFile(l.getNaviMobName())
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
@@ -246,7 +278,7 @@ func (l *MapLoader) loadSpawns(basePath string, update domain.Update, updater *m
 }
 
 func (l *MapLoader) loadWarps(basePath string, update domain.Update, updater *mapUpdater) {
-	change, err := update.GetChangeForFile(naviLinkLatam)
+	change, err := update.GetChangeForFile(l.getNaviLinkName())
 	if err != nil {
 		if errors.Is(err, domain.NewNotFoundError("")) {
 			return
