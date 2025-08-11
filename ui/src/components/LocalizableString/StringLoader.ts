@@ -55,7 +55,9 @@ export class StringLoader {
 		}
 
 		this.queueResolution = new Promise((resolve, reject) => {
-			this.timer = setTimeout(async () => {
+			// for some reason TS compiler things `setTimeout` is the Node one,
+			// so we have to use window. here so it gets the right one.
+			this.timer = window.setTimeout(async () => {
 				const queue = this.queue;
 				this.queue = new Set<string>();
 				this.timer = null;
