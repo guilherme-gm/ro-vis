@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -14,12 +15,8 @@ type Database struct {
 }
 
 func NewDatabase(databaseName string) *Database {
-	dbConn, err := sql.Open("mysql", conf.Config.DbUrl)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = dbConn.Exec("USE `" + databaseName + "`;")
+	dbUrl := strings.Replace(conf.Config.DbUrl, "@DATABASE@", databaseName, 1)
+	dbConn, err := sql.Open("mysql", dbUrl)
 	if err != nil {
 		panic(err)
 	}
