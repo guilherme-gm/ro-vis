@@ -24,13 +24,13 @@ import (
 
 const notFoundString = "<?xml version='1.0' encoding='UTF-8'?><Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message></Error>"
 
-func downloadPatches(server *server.Server) {
-	latest, err := server.Repositories.PatchRepository.GetLatestPatch(nil)
+func downloadPatches(currentServer *server.Server) {
+	latest, err := currentServer.Repositories.PatchRepository.GetLatestPatch(nil)
 	if err != nil {
 		panic(err)
 	}
 
-	patchServer, err := patchDownloader.NewPatchServer(server.PatchListUrl, server.PatchFolderUrl)
+	patchServer, err := patchDownloader.NewPatchServer(currentServer.PatchListUrl, currentServer.PatchFolderUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +41,7 @@ func downloadPatches(server *server.Server) {
 		}
 
 		fmt.Println("- Downloading " + patch.Name)
-		filePath := path.Join("..", "patches", server.LocalPatchFolder, "_raw", patch.Name)
+		filePath := path.Join("..", "patches", currentServer.LocalPatchFolder, "_raw", patch.Name)
 		if !patch.Disabled {
 			err := patchServer.DownloadPatch(&patch, filePath)
 			if err != nil {
@@ -49,10 +49,17 @@ func downloadPatches(server *server.Server) {
 			}
 		}
 
+		// LATAM makes files with many dates and later release all at once, so extracting from the file
+		// name makes we lose reference to the maintenance. Thus, it is better to get the day we identified it.
+		patchDate := time.Now()
+		if currentServer.Type != server.ServerTypeLATAM {
+			patchDate = domain.TryGetPatchDate(patch.Name)
+		}
+
 		newPatch := domain.Patch{
 			Id:     int32(patch.Id),
 			Name:   patch.Name,
-			Date:   domain.TryGetPatchDate(patch.Name),
+			Date:   patchDate,
 			Files:  []string{},
 			Status: domain.PatchStatusPending,
 		}
@@ -62,13 +69,13 @@ func downloadPatches(server *server.Server) {
 			// We won't be extractign them anyway, and not downloading it will save a good amount of space
 			newPatch.Status = domain.PatchStatusSkipped
 			fmt.Printf("Patch %s is disabled - Skipping it\n", patch.Name)
-			server.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
+			currentServer.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
 			continue
 		}
 
 		if newPatch.Date.IsZero() {
 			fmt.Printf("Unknown patch date: %s\n", patch.Name)
-			fmt.Printf("Stopping patch download for %s\n", server.Type)
+			fmt.Printf("Stopping patch download for %s\n", currentServer.Type)
 			return
 		}
 
@@ -85,7 +92,7 @@ func downloadPatches(server *server.Server) {
 
 			newPatch.Status = domain.PatchStatusGone
 			fmt.Printf("Patch %s not found, but it was disabled already\n", patch.Name)
-			server.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
+			currentServer.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
 
 			continue
 		}
@@ -121,11 +128,11 @@ func downloadPatches(server *server.Server) {
 		} else {
 			// @TODO: Add some kind of alert for this
 			fmt.Printf("Unsupported patch format: %s\n", patch.Name)
-			fmt.Printf("Stopping patch download for %s\n", server.Type)
+			fmt.Printf("Stopping patch download for %s\n", currentServer.Type)
 			return
 		}
 
-		server.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
+		currentServer.Repositories.PatchRepository.InsertPatch(nil, &newPatch)
 		fmt.Printf("Patch %s downloaded\n", patch.Name)
 	}
 }
