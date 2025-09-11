@@ -12,6 +12,10 @@ type UpdateChange struct {
 	File  string `json:"file"`
 }
 
+func (u UpdateChange) String() string {
+	return fmt.Sprintf("'%s'/'%s'", u.Patch, u.File)
+}
+
 type Update struct {
 	Date    time.Time      `json:"date"`
 	Changes []UpdateChange `json:"changes"`

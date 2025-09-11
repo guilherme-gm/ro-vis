@@ -1,6 +1,7 @@
 package i18n
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
@@ -34,6 +35,7 @@ func (p I18nV1Parser) HasFiles(update *domain.Update) bool {
 func (p I18nV1Parser) Parse(basePath string, change *domain.UpdateChange) []domain.I18n {
 	result, err := decoders.DecodeLangCsv(basePath + "/" + change.Patch + "/" + change.File)
 	if err != nil {
+		err = fmt.Errorf("failed to parse %s. %w", change, err)
 		panic(err)
 	}
 

@@ -281,46 +281,46 @@ func (ft *FileTableEntry) Extract(grfPath string, toPath string) error {
 
 	file, err := os.Open(grfPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open grf file. %w", err)
 	}
 	defer file.Close()
 
 	if _, err := file.Seek(ft.ExactOffset, 0); err != nil {
-		return err
+		return fmt.Errorf("failed to get to position in container. %w", err)
 	}
 
 	buffer := make([]byte, ft.CompressedSizeAlignment)
 	if _, err := io.ReadFull(file, buffer); err != nil {
-		return err
+		return fmt.Errorf("failed to read compressed data. %w", err)
 	}
 
 	grf_decode(&buffer, ft)
 
-	data, err := zlib.NewReader(bytes.NewReader(buffer))
+	compressedReader := bytes.NewReader(buffer)
+	zlibReader, err := zlib.NewReader(compressedReader)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create zlib reader: %w", err)
 	}
+	defer zlibReader.Close()
 
-	defer data.Close()
-
-	// read all data
-	dataBytes, err := io.ReadAll(data)
+	// Read all data
+	dataBytes, err := io.ReadAll(zlibReader)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decompress data: %w", err)
 	}
 
 	if err := os.MkdirAll(path.Dir(toPath), 0755); err != nil {
-		return err
+		return fmt.Errorf("failed to create extraction directory. %w", err)
 	}
 
 	outFile, err := os.Create(toPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create target file. %w", err)
 	}
 	defer outFile.Close()
 
 	if _, err := outFile.Write(dataBytes); err != nil {
-		return err
+		return fmt.Errorf("failed to write new file. %w", err)
 	}
 
 	return nil

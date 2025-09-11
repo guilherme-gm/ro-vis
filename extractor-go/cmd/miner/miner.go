@@ -137,9 +137,9 @@ func downloadPatches(currentServer *server.Server) {
 	}
 }
 
-func extractFileFromChange(server *server.Server, loader loaders.Loader, update domain.Update, change domain.UpdateChange, file *regexp.Regexp) {
+func extractFileFromChange(currentServer *server.Server, loader loaders.Loader, update domain.Update, change domain.UpdateChange, file *regexp.Regexp) {
 	patchFileExt := change.Patch[len(change.Patch)-4:]
-	if _, err := os.Stat(server.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(currentServer.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
 		return
 	}
 
@@ -147,12 +147,12 @@ func extractFileFromChange(server *server.Server, loader loaders.Loader, update 
 	var err error
 	switch patchFileExt {
 	case ".rgz":
-		patchFile, err = rgz.Open(server.GetPatchFile(change.Patch))
+		patchFile, err = rgz.Open(currentServer.GetPatchFile(change.Patch))
 		if err != nil {
 			panic(err)
 		}
 	case ".gpf":
-		patchFile, err = grf.Open(server.GetPatchFile(change.Patch))
+		patchFile, err = grf.Open(currentServer.GetPatchFile(change.Patch))
 		if err != nil {
 			panic(err)
 		}
@@ -164,7 +164,15 @@ func extractFileFromChange(server *server.Server, loader loaders.Loader, update 
 	fileList := patchFile.FileList()
 	for _, filePath := range fileList {
 		if file.MatchString(filePath) {
-			if err := patchFile.Extract(filePath, server.GetExtractedPatchFolder(change.Patch)); err != nil {
+			// @FIXME: For some reason, change.File is something else
+			if server.ShouldSkipFile(currentServer, change.Patch, filePath) {
+				fmt.Printf("Skipping file '%s'/'%s'. It is in the skip list.\n", change.Patch, filePath)
+				return
+			}
+
+			if err := patchFile.Extract(filePath, currentServer.GetExtractedPatchFolder(change.Patch)); err != nil {
+				fmt.Printf("Failed to extract file from Change '%s', file name: '%s'\n", change.Patch, filePath)
+				fmt.Print(err)
 				panic(err)
 			}
 		}

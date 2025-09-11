@@ -15,6 +15,7 @@ import (
 
 type I18nLoader struct {
 	repository *repository.I18nRepository
+	server     *server.Server
 }
 
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
@@ -28,6 +29,7 @@ func (l *I18nLoader) GetRelevantFiles() []*regexp.Regexp {
 func NewI18nLoader(server *server.Server) *I18nLoader {
 	return &I18nLoader{
 		repository: server.Repositories.I18nRepository,
+		server:     server,
 	}
 }
 
@@ -105,8 +107,8 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	fmt.Println("> Loading files...")
 	targetParser := NewI18nV1Parser()
 	for _, updatedFile := range updatedFiles {
+		// @TODO: Implement skip file here too
 		updatedFileMap[updatedFile.File] = true
-		fileEntries := targetParser.Parse(basePath, &updatedFile)
 		fileIdsToDelete := make(map[string]bool)
 
 		// Mark all entries from this file to be deleted, so we can just clean up the ones to keep
@@ -114,21 +116,27 @@ func (l *I18nLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 			fileIdsToDelete[entry] = true
 		}
 
-		// Process the new file entries
-		for _, fileEntry := range fileEntries {
-			fileEntry.Active = activeFiles[updatedFile.File]
-			delete(fileIdsToDelete, fileEntry.I18nId) // mark this entry to be kept
+		if !server.ShouldSkipFile(l.server, updatedFile.Patch, updatedFile.File) {
+			fileEntries := targetParser.Parse(basePath, &updatedFile)
 
-			existingEntry := i18nMap[fileEntry.I18nId]
-			if existingEntry == nil {
-				newI18ns = append(newI18ns, fileEntry)
-				continue
-			}
+			// Process the new file entries
+			for _, fileEntry := range fileEntries {
+				fileEntry.Active = activeFiles[updatedFile.File]
+				delete(fileIdsToDelete, fileEntry.I18nId) // mark this entry to be kept
 
-			if !existingEntry.Equals(fileEntry) {
-				fileEntry.PreviousHistoryID = existingEntry.HistoryID
-				updatedI18ns = append(updatedI18ns, fileEntry)
+				existingEntry := i18nMap[fileEntry.I18nId]
+				if existingEntry == nil {
+					newI18ns = append(newI18ns, fileEntry)
+					continue
+				}
+
+				if !existingEntry.Equals(fileEntry) {
+					fileEntry.PreviousHistoryID = existingEntry.HistoryID
+					updatedI18ns = append(updatedI18ns, fileEntry)
+				}
 			}
+		} else {
+			fmt.Printf("Ignoring (and considering as deleted) %s as it is in the ignore list.\n", updatedFile)
 		}
 
 		for deletedId := range fileIdsToDelete {
