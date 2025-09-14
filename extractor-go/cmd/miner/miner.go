@@ -285,7 +285,8 @@ func main() {
 
 	// Keep the application running and process mining on schedule
 	// Create a ticker that triggers every 24 hours
-	ticker := time.NewTicker(24 * time.Hour)
+	remainTime := time.Until(nextRun)
+	ticker := time.NewTicker(remainTime)
 	defer ticker.Stop()
 
 	// Then run on every tick
