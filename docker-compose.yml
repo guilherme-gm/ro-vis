@@ -36,7 +36,10 @@ services:
       dockerfile: Dockerfile.miner.live
     image: extractor-miner:live
     container_name: extractor-miner
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     volumes:
       - ./_data/rovis_patches:/patches
     environment:
