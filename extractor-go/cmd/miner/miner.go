@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 	"time"
 
@@ -137,9 +136,15 @@ func downloadPatches(currentServer *server.Server) {
 	}
 }
 
-func extractFileFromChange(currentServer *server.Server, loader loaders.Loader, update domain.Update, change domain.UpdateChange, file *regexp.Regexp) {
+func extractFileFromChange(currentServer *server.Server, change domain.UpdateChange) {
 	patchFileExt := change.Patch[len(change.Patch)-4:]
 	if _, err := os.Stat(currentServer.GetPatchFile(change.Patch)); errors.Is(err, os.ErrNotExist) {
+		return
+	}
+
+	shouldSkip := server.ShouldSkipFile(currentServer, change.Patch, change.File)
+	if shouldSkip {
+		fmt.Printf("Skipping file '%s'/'%s'. It is in the skip list.\n", change.Patch, change.File)
 		return
 	}
 
@@ -163,20 +168,19 @@ func extractFileFromChange(currentServer *server.Server, loader loaders.Loader, 
 
 	fileList := patchFile.FileList()
 	for _, filePath := range fileList {
-		if file.MatchString(filePath) {
-			// @FIXME: For some reason, change.File is something else
-			if server.ShouldSkipFile(currentServer, change.Patch, filePath) {
-				fmt.Printf("Skipping file '%s'/'%s'. It is in the skip list.\n", change.Patch, filePath)
-				return
-			}
-
-			if err := patchFile.Extract(filePath, currentServer.GetExtractedPatchFolder(change.Patch)); err != nil {
+		if filePath == change.File {
+			rootFolder := currentServer.GetExtractedPatchFolder(change.Patch)
+			if err := patchFile.Extract(filePath, rootFolder); err != nil {
 				fmt.Printf("Failed to extract file from Change '%s', file name: '%s'\n", change.Patch, filePath)
 				fmt.Print(err)
 				panic(err)
 			}
+
+			return // File was extracted, we no longer need to stay in the loop
 		}
 	}
+
+	panic(fmt.Errorf("file not found: %s/%s", change.Patch, change.File))
 }
 
 // Extracts relevant files for a given update to the patch folder
@@ -193,8 +197,11 @@ func extractRelevantFiles(server *server.Server, loader loaders.Loader, update d
 			panic(err)
 		}
 
+		// @TODO: Optmize this. extractFileFromChange needs to load the entire GPF/RGZ to extract 1 file.
+		//        And we might want to extract N files from this same GPF/RGZ.
+		//        It would be better to send all files from this patch at once and extract it in one go.
 		for _, change := range changes {
-			extractFileFromChange(server, loader, update, change, file)
+			extractFileFromChange(server, change)
 		}
 	}
 }
@@ -206,6 +213,8 @@ func processPatchesForLoader(server *server.Server, loader loaders.Loader, updat
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("\n\n--------------------- Processing patches for loader %s\n", loader.Name())
 
 	for _, update := range updates {
 		if update.Date.Compare(latest) <= 0 {
