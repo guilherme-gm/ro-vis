@@ -38,7 +38,7 @@ func loadTxtSubTable[T txtEntry](basePath string, update *domain.Update, newDB m
 		return
 	}
 
-	itemVal, err := parser(basePath + "/" + change.Patch + "/" + fileName)
+	itemVal, err := parser(basePath + "/" + change.Patch + "/" + change.File)
 	if err != nil {
 		panic(err)
 	}
