@@ -12,8 +12,8 @@ func TestItemLoader_GetRelevantFiles(t *testing.T) {
 	// Create a new ItemLoader with default parsers
 	loader := loaders.NewItemLoader(server.GetTestServer()) // We pass nil for server since we don't need it for this test
 
-	// Get the list of relevant files
-	files := loader.GetRelevantFiles()
+	// Get the list of relevant fileMatchers
+	fileMatchers := loader.GetRelevantFiles()
 
 	// We expect all the files from all item parsers
 	expectedFiles := []string{
@@ -31,13 +31,20 @@ func TestItemLoader_GetRelevantFiles(t *testing.T) {
 
 	// Check that all expected files are in the result
 	for _, expectedFile := range expectedFiles {
-		assert.Contains(t, files, expectedFile, "Expected file %s not found in relevant files", expectedFile)
+		found := false
+		for _, fileMatcher := range fileMatchers {
+			if fileMatcher.MatchString(expectedFile) {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected file '%s' to be matched by relevant files, but it was not", expectedFile)
 	}
 
 	// Check that there are no duplicate files
 	fileMap := make(map[string]bool)
-	for _, file := range files {
-		assert.False(t, fileMap[file.String()], "Duplicate file found in relevant files: %s", file)
-		fileMap[file.String()] = true
+	for _, fileMatcher := range fileMatchers {
+		assert.False(t, fileMap[fileMatcher.String()], "Duplicate file found in relevant files: %s", fileMatcher)
+		fileMap[fileMatcher.String()] = true
 	}
 }
