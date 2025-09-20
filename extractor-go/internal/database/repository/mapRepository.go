@@ -22,7 +22,7 @@ func NewMapRepository(db *database.Database) *MapRepository {
 }
 
 func (r *MapRepository) GetCurrentMaps(tx *sql.Tx) (*[]domain.Map, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetCurrentMaps(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Map{}, nil
@@ -41,7 +41,7 @@ func (r *MapRepository) GetCurrentMaps(tx *sql.Tx) (*[]domain.Map, error) {
 }
 
 func (r *MapRepository) addMapsToHistory_sub(tx *sql.Tx, update string, newMaps []*domain.Map) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	bulkParams := []dao.BulkInsertMapHistoryParams{}
 	updatedIdMap := make(map[string]bool, len(newMaps))
 	for _, it := range newMaps {
@@ -130,7 +130,7 @@ func (r *MapRepository) AddMapsToHistory(tx *sql.Tx, update string, newMaps []*d
 }
 
 func (r *MapRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.CountChangedMapsInUpdate(context.Background(), update)
 	if err != nil {
 		return 0, err
@@ -165,7 +165,7 @@ func (r *MapRepository) sqlRecordToDomain(dbFrom dao.PreviousMapHistoryVw, dbTo 
 }
 
 func (r *MapRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Map], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetChangedMaps(context.Background(), dao.GetChangedMapsParams{
 		Update: update,
 		Offset: pagination.Offset,
@@ -188,7 +188,7 @@ func (r *MapRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination
 }
 
 func (r *MapRepository) GetMapHistory(tx *sql.Tx, mapId string, pagination Pagination) ([]FromToRecord[domain.Map], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetMapHistory(context.Background(), dao.GetMapHistoryParams{
 		MapID:  mapId,
 		Offset: pagination.Offset,
@@ -211,7 +211,7 @@ func (r *MapRepository) GetMapHistory(tx *sql.Tx, mapId string, pagination Pagin
 }
 
 func (r *MapRepository) CountMaps(tx *sql.Tx) (int32, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 
 	res, err := queries.CountMaps(context.Background())
 	if err == sql.ErrNoRows {
@@ -226,7 +226,7 @@ func (r *MapRepository) CountMaps(tx *sql.Tx) (int32, error) {
 }
 
 func (r *MapRepository) GetMaps(tx *sql.Tx, pagination Pagination) ([]domain.MinMap, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetMapList(context.Background(), dao.GetMapListParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,

@@ -21,7 +21,7 @@ func NewLoaderControllerRepository(db *database.Database) *LoaderControllerRepos
 }
 
 func (r *LoaderControllerRepository) GetLatestUpdate(tx *sql.Tx, name string) (time.Time, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetLatestUpdate(context.Background(), name)
 	if err == sql.ErrNoRows {
 		return time.Time{}, nil
@@ -35,7 +35,7 @@ func (r *LoaderControllerRepository) GetLatestUpdate(tx *sql.Tx, name string) (t
 }
 
 func (r *LoaderControllerRepository) SetLatestPatch(tx *sql.Tx, name string, date time.Time) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	err := queries.UpsertLatestUpdate(context.Background(), dao.UpsertLatestUpdateParams{
 		Name:           name,
 		LastUpdateDate: date,

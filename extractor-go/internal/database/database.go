@@ -24,7 +24,7 @@ func NewDatabase(databaseName string) *Database {
 	return &Database{Connection: dbConn}
 }
 
-func (db *Database) GetQueries(tx *sql.Tx) *dao.Queries {
+func (db *Database) GetDAO(tx *sql.Tx) dao.IDAO {
 	conn := db.Connection
 	queries := dao.New(conn)
 	if tx != nil {

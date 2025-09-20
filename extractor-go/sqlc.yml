@@ -7,6 +7,7 @@ sql:
       go:
         package: "dao"
         out: "internal/database/dao"
+        emit_interface: true
         overrides:
           # Due to a bug in SQLC - https://github.com/sqlc-dev/sqlc/issues/129
           # This PR should fix it: https://github.com/sqlc-dev/sqlc/pull/3356

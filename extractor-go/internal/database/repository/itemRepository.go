@@ -22,7 +22,7 @@ func NewItemRepository(db *database.Database) *ItemRepository {
 }
 
 func (r *ItemRepository) GetCurrentItems(tx *sql.Tx) (*[]domain.Item, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetCurrentItems(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Item{}, nil
@@ -41,7 +41,7 @@ func (r *ItemRepository) GetCurrentItems(tx *sql.Tx) (*[]domain.Item, error) {
 }
 
 func (r *ItemRepository) addItemsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.Item) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	bulkParams := []dao.BulkInsertItemHistoryParams{}
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
 	for _, it := range *newHistories {
@@ -131,7 +131,7 @@ func (r *ItemRepository) AddItemsToHistory(tx *sql.Tx, patch string, newHistorie
 }
 
 func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.Item) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
 		PreviousHistoryID: sql.NullInt32(Item.HistoryID),
 		ItemID:            Item.ItemID,
@@ -160,7 +160,7 @@ func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.I
 }
 
 func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.CountChangedItemsInUpdate(context.Background(), update)
 	if err != nil {
 		return 0, err
@@ -195,7 +195,7 @@ func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbT
 }
 
 func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Item], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetChangedItems(context.Background(), dao.GetChangedItemsParams{
 		Update: update,
 		Offset: pagination.Offset,
@@ -218,7 +218,7 @@ func (r *ItemRepository) GetChangesInUpdate(tx *sql.Tx, update string, paginatio
 }
 
 func (r *ItemRepository) GetItemHistory(tx *sql.Tx, itemId int32, pagination Pagination) ([]FromToRecord[domain.Item], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetItemHistory(context.Background(), dao.GetItemHistoryParams{
 		ItemID: itemId,
 		Offset: pagination.Offset,
@@ -241,7 +241,7 @@ func (r *ItemRepository) GetItemHistory(tx *sql.Tx, itemId int32, pagination Pag
 }
 
 func (r *ItemRepository) CountItems(tx *sql.Tx) (int32, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 
 	res, err := queries.CountItems(context.Background())
 	if err == sql.ErrNoRows {
@@ -256,7 +256,7 @@ func (r *ItemRepository) CountItems(tx *sql.Tx) (int32, error) {
 }
 
 func (r *ItemRepository) GetItems(tx *sql.Tx, pagination Pagination) ([]domain.MinItem, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetItemList(context.Background(), dao.GetItemListParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,

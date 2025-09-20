@@ -22,7 +22,7 @@ func NewQuestRepository(db *database.Database) *QuestRepository {
 }
 
 func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetCurrentQuests(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Quest{}, nil
@@ -41,7 +41,7 @@ func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) 
 }
 
 func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.Quest) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	bulkParams := []dao.BulkInsertQuestHistoryParams{}
 	updatedIdMap := make(map[int32]bool, len((*newHistories)))
 	for _, it := range *newHistories {
@@ -127,7 +127,7 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHisto
 }
 
 func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, update string, quest *domain.Quest) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
 		PreviousHistoryID: sql.NullInt32(quest.HistoryID),
 		QuestID:           quest.QuestID,
@@ -156,7 +156,7 @@ func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, update string, quest *doma
 }
 
 func (r *QuestRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.CountChangedQuestsInUpdate(context.Background(), update)
 	if err != nil {
 		return 0, err
@@ -191,7 +191,7 @@ func (r *QuestRepository) sqlRecordToDomain(dbFrom dao.PreviousQuestHistoryVw, d
 }
 
 func (r *QuestRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Quest], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetChangedQuests(context.Background(), dao.GetChangedQuestsParams{
 		Update: update,
 		Offset: pagination.Offset,
@@ -214,7 +214,7 @@ func (r *QuestRepository) GetChangesInUpdate(tx *sql.Tx, update string, paginati
 }
 
 func (r *QuestRepository) GetQuestHistory(tx *sql.Tx, questId int32, pagination Pagination) ([]FromToRecord[domain.Quest], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetQuestHistory(context.Background(), dao.GetQuestHistoryParams{
 		QuestID: questId,
 		Offset:  pagination.Offset,
@@ -237,7 +237,7 @@ func (r *QuestRepository) GetQuestHistory(tx *sql.Tx, questId int32, pagination 
 }
 
 func (r *QuestRepository) CountQuests(tx *sql.Tx) (int32, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 
 	res, err := queries.CountItems(context.Background())
 	if err == sql.ErrNoRows {
@@ -252,7 +252,7 @@ func (r *QuestRepository) CountQuests(tx *sql.Tx) (int32, error) {
 }
 
 func (r *QuestRepository) GetQuests(tx *sql.Tx, pagination Pagination) ([]domain.MinQuest, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetQuestList(context.Background(), dao.GetQuestListParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,

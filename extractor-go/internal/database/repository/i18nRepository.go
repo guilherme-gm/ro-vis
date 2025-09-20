@@ -21,7 +21,7 @@ func NewI18nRepository(db *database.Database) *I18nRepository {
 }
 
 func (r *I18nRepository) GetCurrentI18ns(tx *sql.Tx) (*[]domain.I18n, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetCurrentI18ns(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.I18n{}, nil
@@ -40,7 +40,7 @@ func (r *I18nRepository) GetCurrentI18ns(tx *sql.Tx) (*[]domain.I18n, error) {
 }
 
 func (r *I18nRepository) addI18nsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.I18n) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	bulkParams := []dao.BulkInsertI18nHistoryParams{}
 	updatedIdMap := make(map[string]bool, len((*newHistories)))
 	for _, it := range *newHistories {
@@ -113,7 +113,7 @@ func (r *I18nRepository) AddI18nsToHistory(tx *sql.Tx, update string, newHistori
 }
 
 func (r *I18nRepository) AddDeletedI18n(tx *sql.Tx, update string, i18n *domain.I18n) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.BulkInsertI18nHistory(context.Background(), []dao.BulkInsertI18nHistoryParams{{
 		PreviousHistoryID: sql.NullInt64(i18n.HistoryID),
 		I18nID:            i18n.I18nId,
@@ -143,7 +143,7 @@ func (r *I18nRepository) AddDeletedI18n(tx *sql.Tx, update string, i18n *domain.
 
 // CountChangesInUpdate returns the number of i18n records changed in a specific update
 func (r *I18nRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	count, err := queries.CountChangedI18nsInUpdate(context.Background(), update)
 	if err != nil {
 		return 0, err
@@ -153,7 +153,7 @@ func (r *I18nRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, e
 
 // GetChangesInUpdate returns the list of i18n records changed in a specific update
 func (r *I18nRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.I18n], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetChangedI18ns(context.Background(), dao.GetChangedI18nsParams{
 		Update: update,
 		Offset: int32(pagination.Offset),
@@ -190,7 +190,7 @@ func (r *I18nRepository) GetChangesInUpdate(tx *sql.Tx, update string, paginatio
 
 // GetI18nHistory returns the history of a specific i18n record
 func (r *I18nRepository) GetI18nHistory(tx *sql.Tx, i18nId string, pagination Pagination) ([]FromToRecord[domain.I18n], error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetI18nHistory(context.Background(), dao.GetI18nHistoryParams{
 		I18nID: i18nId,
 		Offset: int32(pagination.Offset),
@@ -226,7 +226,7 @@ func (r *I18nRepository) GetI18nHistory(tx *sql.Tx, i18nId string, pagination Pa
 
 // CountI18ns returns the number of i18n records
 func (r *I18nRepository) CountI18ns(tx *sql.Tx) (int32, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 
 	res, err := queries.CountI18ns(context.Background())
 	if err == sql.ErrNoRows {
@@ -242,7 +242,7 @@ func (r *I18nRepository) CountI18ns(tx *sql.Tx) (int32, error) {
 
 // GetI18ns returns the list of i18n records
 func (r *I18nRepository) GetI18ns(tx *sql.Tx, pagination Pagination) ([]domain.MinI18n, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetI18nList(context.Background(), dao.GetI18nListParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,
@@ -264,7 +264,7 @@ func (r *I18nRepository) GetI18ns(tx *sql.Tx, pagination Pagination) ([]domain.M
 
 // GetStrings returns the list of i18n records
 func (r *I18nRepository) GetStrings(tx *sql.Tx, ids []string) ([]domain.I18nValue, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetStrings(context.Background(), ids)
 	if err == sql.ErrNoRows {
 		return []domain.I18nValue{}, nil

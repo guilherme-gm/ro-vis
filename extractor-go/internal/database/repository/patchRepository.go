@@ -23,7 +23,7 @@ func NewPatchRepository(db *database.Database) *PatchRepository {
 }
 
 func (r *PatchRepository) ListPatches(tx *sql.Tx, untilDate time.Time) ([]domain.Patch, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.ListPatches(context.Background(), untilDate)
 	if err == sql.ErrNoRows {
 		return []domain.Patch{}, nil
@@ -43,7 +43,7 @@ func (r *PatchRepository) ListPatches(tx *sql.Tx, untilDate time.Time) ([]domain
 
 // Returns the most recent patch applied to this server
 func (r *PatchRepository) GetLatestPatch(tx *sql.Tx) (*domain.Patch, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetLatestPatch(context.Background())
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -58,7 +58,7 @@ func (r *PatchRepository) GetLatestPatch(tx *sql.Tx) (*domain.Patch, error) {
 }
 
 func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) ([]domain.Patch, error) {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	res, err := queries.ListUpdatesPatches(context.Background(), dao.ListUpdatesPatchesParams{
 		Offset: pagination.Offset,
 		Limit:  pagination.Limit,
@@ -80,7 +80,7 @@ func (r *PatchRepository) listUpdatesPatches(tx *sql.Tx, pagination Pagination) 
 }
 
 func (r *PatchRepository) GetUpdateCount(tx *sql.Tx) (int32, error) {
-	count, err := r.DB.GetQueries(tx).GetUpdatesCount(context.Background())
+	count, err := r.DB.GetDAO(tx).GetUpdatesCount(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -149,7 +149,7 @@ func (r *PatchRepository) ListUpdates(tx *sql.Tx, untilDate time.Time, paginatio
 }
 
 func (r *PatchRepository) InsertPatch(tx *sql.Tx, patch *domain.Patch) error {
-	queries := r.DB.GetQueries(tx)
+	queries := r.DB.GetDAO(tx)
 	jsonMsg, err := json.Marshal(patch.Files)
 	if err != nil {
 		return err
