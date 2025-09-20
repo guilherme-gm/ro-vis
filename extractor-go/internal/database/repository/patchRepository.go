@@ -12,11 +12,11 @@ import (
 )
 
 type PatchRepository struct {
-	DB *database.Database
+	DB database.IDatabase
 }
 
 // NewPatchRepository creates a new PatchRepository instance
-func NewPatchRepository(db *database.Database) *PatchRepository {
+func NewPatchRepository(db database.IDatabase) *PatchRepository {
 	return &PatchRepository{
 		DB: db,
 	}

@@ -37,3 +37,6 @@ func (db *Database) GetDAO(tx *sql.Tx) dao.IDAO {
 func (db *Database) BeginTx() (*sql.Tx, error) {
 	return db.Connection.Begin()
 }
+
+// Ensure Database implements IDatabase at compile-time.
+var _ IDatabase = (*Database)(nil)

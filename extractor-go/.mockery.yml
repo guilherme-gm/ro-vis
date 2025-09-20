@@ -1,0 +1,21 @@
+all: false
+dir: '{{.InterfaceDir}}'
+filename: mocks_test.go
+force-file-write: true
+formatter: goimports
+include-auto-generated: true
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  github.com/guilherme-gm/ro-vis/extractor/internal/database/dao:
+    interfaces:
+      # Mock IDAO is needed by our mock database, so we need to expose it, and Go doesn't expose _test files
+      IDAO:
+        config:
+          filename: mockIDAO.go
+
