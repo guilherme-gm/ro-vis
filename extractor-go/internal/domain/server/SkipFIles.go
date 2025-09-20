@@ -13,6 +13,12 @@ var skipFiles = map[ServerType]map[string][]string{
 			"data/i18n/sc/a104a179a7789db1b0c7c40e9bd45ab137c2e9f9e639d2f28b5033a65c02dece.csv",
 			"data/i18n/sc/fed3811f813f6a737a213a57464f694ad9a61fa41dce38b31eeb0d1d5ebf6214.csv",
 		},
+		"2025-09-12_live_client_1058_1059_1757645955.gpf": {
+			// This file failed checksum check on 2025-09-12, it was the only patch for it, and the file looks ok
+			// but implementing a bypass for the checksum here is too much work, it is a single sentence,
+			// so we can leave without it.
+			"data/i18n/sc/fed3811f813f6a737a213a57464f694ad9a61fa41dce38b31eeb0d1d5ebf6214.csv",
+		},
 	},
 }
 
