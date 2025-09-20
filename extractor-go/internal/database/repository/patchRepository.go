@@ -126,6 +126,13 @@ func (r *PatchRepository) ListUpdates(tx *sql.Tx, untilDate time.Time, paginatio
 			if ok {
 				ptr.Patch = patch.Name
 				ptr.File = file
+				fileMap[file] = ptr
+
+				for idx, change := range update.Changes {
+					if change.File == file {
+						update.Changes[idx] = *ptr
+					}
+				}
 			} else {
 				change := domain.UpdateChange{
 					Patch: patch.Name,
