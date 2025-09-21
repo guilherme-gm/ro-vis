@@ -112,6 +112,13 @@ func (l *PatchListLoader) LoadFromJson(tx *sql.Tx, filePath string) error {
  * but not 100% garanteed to be the correct one. But it is the best we can get.
  *
  * This should only be used once, to populate the initial patch list.
+ *
+ * Note: there is also some manual changes on db to adjust file names, specially:
+ * - ItemMoveInfoV5.txt -> itemmoveinfov5.txt
+ * - buyingstoreItemList.txt -> buyingstoreitemlist.txt
+ * - mapNameTable.txt -> mapnametable.txt
+ *
+ * That's because the dump of the old files were made via git/probably windows and lost proper case
  */
 func (l *PatchListLoader) ExtractInitialPatchList(tx *sql.Tx) {
 	files := [...]string{
