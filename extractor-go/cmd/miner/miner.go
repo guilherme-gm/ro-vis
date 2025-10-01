@@ -288,23 +288,29 @@ func main() {
 		fmt.Printf("Error during initial mining cycle: %v\n", err)
 	}
 
-	// Function to calculate duration until next 7 PM
-	nextRun := next7PM()
-	fmt.Println("Next mining cycle at", nextRun.Format("2006-01-02 15:04:05"))
+	for {
+		// Function to calculate duration until next 7 PM
+		nextRun := next7PM()
+		fmt.Println("Next mining cycle at", nextRun.Format("2006-01-02 15:04:05"))
 
-	// Keep the application running and process mining on schedule
-	// Create a ticker that triggers every 24 hours
-	remainTime := time.Until(nextRun)
-	ticker := time.NewTicker(remainTime)
-	defer ticker.Stop()
+		// Keep the application running and process mining on schedule
+		// Create a ticker that triggers every 24 hours
+		remainTime := time.Until(nextRun)
+		ticker := time.NewTicker(remainTime)
+		defer ticker.Stop()
 
-	// Then run on every tick
-	for t := range ticker.C {
-		fmt.Println("\n--- Starting scheduled mining cycle at", t.Format("2006-01-02 15:04:05"), "---")
-		if err := runMiningCycle(); err != nil {
-			fmt.Printf("Error during scheduled mining cycle: %v\n", err)
-		} else {
-			fmt.Println("Scheduled mining cycle completed successfully")
+		// Then run on every tick
+		for t := range ticker.C {
+			fmt.Println("\n--- Starting scheduled mining cycle at", t.Format("2006-01-02 15:04:05"), "---")
+			if err := runMiningCycle(); err != nil {
+				fmt.Printf("Error during scheduled mining cycle: %v\n", err)
+			} else {
+				fmt.Println("Scheduled mining cycle completed successfully")
+			}
+
+			break
 		}
+
+		ticker.Stop()
 	}
 }
