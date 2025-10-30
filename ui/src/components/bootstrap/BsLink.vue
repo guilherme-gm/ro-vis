@@ -40,7 +40,7 @@ const resolvedTo = computed<RouterLinkProps['to'] | undefined>(() => {
 </script>
 
 <template>
-	<RouterLink v-if="to" :to="resolvedTo" :class="{ [colorClass]: true }">
+	<RouterLink v-if="resolvedTo" :to="resolvedTo" :class="{ [colorClass]: true }">
 		<slot />
 	</RouterLink>
 	<a v-else :href="href" :class="{ [colorClass]: true }">
