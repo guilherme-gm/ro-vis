@@ -25,7 +25,7 @@ const errorMesage = ref('');
 		</div>
 	</main>
 	<main v-else class="flex-shrink-0 h-100 p-4">
-		<RouterView />
+		<RouterView :key="$route.fullPath" />
 	</main>
 </template>
 
