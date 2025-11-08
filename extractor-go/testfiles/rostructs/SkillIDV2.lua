@@ -1,0 +1,19 @@
+-- Trimmed down version of data/luafiles514/lua files/skillinfoz/SkillID.lub
+-- contains only a small set of data to be used in tests
+
+SKID = {
+	NV_BASIC = 1,
+	AL_RUWACH = 24,
+	AC_CONCENTRATION = 45,
+	AC_DOUBLE = 46,
+	AC_SHOWER = 47,
+	BS_HILTBINDING = 105,
+	BS_SKINTEMPER = 109,
+	BS_WEAPONRESEARCH = 107,
+	BS_OVERTHRUST = 113,
+	BA_MUSICALSTRIKE = 316,
+	DC_THROWARROW = 324,
+	SN_WINDWALK = 383,
+	WS_MELTDOWN = 384,
+	CG_ARROWVULCAN = 394,
+}
