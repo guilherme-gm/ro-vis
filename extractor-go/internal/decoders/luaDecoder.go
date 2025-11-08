@@ -41,42 +41,42 @@ func (c luaDecContextInfo) setTableIndex(index int) luaDecContextInfo {
 	return c
 }
 
-func (d *luaDecoder) decodeSlice(slice reflect.Value, ctx luaDecContextInfo) {
+func (decoder *luaDecoder) decodeSlice(slice reflect.Value, ctx luaDecContextInfo) {
 	sliceType := slice.Type()
 	sliceItemType := sliceType.Elem()
 
 	newSlice := reflect.MakeSlice(sliceType, 0, 0)
 
-	d.L.PushNil()
-	for d.L.Next(-2) != 0 {
+	decoder.L.PushNil()
+	for decoder.L.Next(-2) != 0 {
 		sliceItem := reflect.New(sliceItemType).Elem()
-		d.decode(sliceItem, newLuaDecContextInfo().setTableIndex(d.L.ToInteger(-2)))
+		decoder.decode(sliceItem, newLuaDecContextInfo().setTableIndex(decoder.L.ToInteger(-2)))
 		newSlice = reflect.Append(newSlice, sliceItem)
 
-		d.L.Pop(1)
+		decoder.L.Pop(1)
 	}
 
 	slice.Set(newSlice)
 }
 
-func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo) {
+func (decoder *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo) {
 	structType := structObj.Type()
 
 	fieldList := make(map[string]bool)
-	d.L.PushNil()
-	for d.L.Next(-2) != 0 {
-		switch d.L.Type(-2) {
+	decoder.L.PushNil()
+	for decoder.L.Next(-2) != 0 {
+		switch decoder.L.Type(-2) {
 		case lua.LUA_TSTRING:
-			fieldName := d.L.ToString(-2)
+			fieldName := decoder.L.ToString(-2)
 			fieldList[fieldName] = true
 		case lua.LUA_TNUMBER:
-			fieldName := fmt.Sprintf("$$numeric:%d", d.L.ToInteger(-2))
+			fieldName := fmt.Sprintf("$$numeric:%d", decoder.L.ToInteger(-2))
 			fieldList[fieldName] = true
 		default:
-			panic(fmt.Errorf("object key is not string. Found: %v", d.L.Type(-2)))
+			panic(fmt.Errorf("object key is not string. Found: %v", decoder.L.Type(-2)))
 		}
 
-		d.L.Pop(1)
+		decoder.L.Pop(1)
 	}
 
 	for fldNum := range structType.NumField() {
@@ -110,49 +110,49 @@ func (d *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo
 		delete(fieldList, fieldName)
 
 		if isKeyNumeric {
-			d.L.PushInteger(int64(keyIndex))
-			d.L.GetTable(-2)
+			decoder.L.PushInteger(int64(keyIndex))
+			decoder.L.GetTable(-2)
 		} else {
-			d.L.GetField(-1, fieldName)
+			decoder.L.GetField(-1, fieldName)
 		}
-		if d.L.IsNil(-1) {
-			d.L.Pop(1)
+		if decoder.L.IsNil(-1) {
+			decoder.L.Pop(1)
 			continue
 		}
 
-		d.path.Push(fieldName)
-		d.decode(fieldValue, newLuaDecContextInfo())
-		d.path.Pop()
+		decoder.path.Push(fieldName)
+		decoder.decode(fieldValue, newLuaDecContextInfo())
+		decoder.path.Pop()
 
-		d.L.Pop(1)
+		decoder.L.Pop(1)
 	}
 
 	for k := range fieldList {
-		d.notConsumedPaths[strings.Join(d.path.ToSlice(), "/")+"/"+k] = true
+		decoder.notConsumedPaths[strings.Join(decoder.path.ToSlice(), "/")+"/"+k] = true
 	}
 }
 
-func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
+func (decoder *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	dataType := dataValue.Type()
 	dataKind := dataType.Kind()
 
 	switch dataKind {
 	case reflect.Slice:
-		d.decodeSlice(dataValue, ctx)
+		decoder.decodeSlice(dataValue, ctx)
 
 	case reflect.Struct:
-		d.decodeStruct(dataValue, ctx)
+		decoder.decodeStruct(dataValue, ctx)
 
 	case reflect.String:
-		str := d.L.ToString(-1)
-		dataValue.SetString(d.reencoder(str))
+		str := decoder.L.ToString(-1)
+		dataValue.SetString(decoder.reencoder(str))
 
 	case reflect.Int:
-		val := d.L.ToInteger(-1)
+		val := decoder.L.ToInteger(-1)
 		dataValue.SetInt(int64(val))
 
 	case reflect.Bool:
-		val := d.L.ToBoolean(-1)
+		val := decoder.L.ToBoolean(-1)
 		dataValue.SetBool(val)
 
 	case reflect.Int8:
@@ -170,18 +170,20 @@ func (d *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo) {
 	}
 }
 
-func newLuaDecoder(reencoder StringReencoder) *luaDecoder {
-	return &luaDecoder{
+func NewLuaDecoder(reencoder StringReencoder) *luaDecoder {
+	decoder := &luaDecoder{
 		L:                lua.NewState(),
 		reencoder:        reencoder,
 		path:             stack.NewStack[string](),
 		notConsumedPaths: make(map[string]bool),
-	}
 }
 
-func DecodeLuaTable(filePath string, tableName string, dst any, reencoder StringReencoder) LuaDecoderResult {
-	decoder := newLuaDecoder(reencoder)
 	decoder.L.OpenLibs()
+
+	return decoder
+}
+
+func (decoder *luaDecoder) DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult {
 	defer decoder.L.Close()
 
 	err := decoder.L.DoFile(filePath)
@@ -205,4 +207,9 @@ func DecodeLuaTable(filePath string, tableName string, dst any, reencoder String
 	return LuaDecoderResult{
 		NotConsumedPaths: notConsumedPaths,
 	}
+}
+
+func DecodeLuaTable(filePath string, tableName string, dst any, reencoder StringReencoder) LuaDecoderResult {
+	decoder := NewLuaDecoder(reencoder)
+	return decoder.DecodeLuaTable(filePath, tableName, dst)
 }
