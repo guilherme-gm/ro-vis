@@ -183,6 +183,20 @@ func NewLuaDecoder(reencoder StringReencoder) *luaDecoder {
 	return decoder
 }
 
+// creates a table with string keys and int values
+// this allows you to add custom tables that the parser will use when decoding a file
+func (decoder *luaDecoder) CreateIntTable(tableName string, values map[string]int) {
+	decoder.L.CreateTable(0, len(values)) // pushes the new table into stack
+
+	for k, v := range values {
+		decoder.L.PushString(k)         // Table key
+		decoder.L.PushInteger(int64(v)) // Table value
+		decoder.L.SetTable(-3)          // Makes t[key] = value and pops key and value
+	}
+
+	decoder.L.SetGlobal(tableName) // Pops the table from stack and set it to a variable
+}
+
 func (decoder *luaDecoder) DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult {
 	defer decoder.L.Close()
 
