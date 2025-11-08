@@ -18,12 +18,27 @@ type myTableWithIds struct {
 	Value int
 }
 
+type myTableWithSliceValue struct {
+	Id   int `lua:"@index"`
+	Data []struct {
+		FieldA string
+		FieldB string
+	} `lua:"@sliceValue"`
+}
+
+type myTableWithSlices struct {
+	Id    int `lua:"@index"`
+	Name  string
+	Value []myTableWithSliceValue
+}
+
 type myTableWithConsts struct {
 	Id    int `lua:"@index"`
 	Name  string
 	Value int
 }
 
+// Tests decoding a simple table into a struct
 func TestLuaInstanceDecodeTableArray(t *testing.T) {
 	var dst []myTable
 
@@ -37,6 +52,7 @@ func TestLuaInstanceDecodeTableArray(t *testing.T) {
 	assert.Equal(t, 2, dst[1].Value)
 }
 
+// Tests decoding tables indexes as fields with `lua:"@index"`
 func TestLuaInstanceDecodeTableWithIds(t *testing.T) {
 	var dst []myTableWithIds
 
@@ -54,6 +70,32 @@ func TestLuaInstanceDecodeTableWithIds(t *testing.T) {
 	assert.Equal(t, 2, dst[1].Value)
 }
 
+// Tests decoding inner slices with `lua:"@sliceValue"`
+func TestLuaInstanceDecodeTableWithSlices(t *testing.T) {
+	var dst []myTableWithSlices
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_tables.lua"), "MY_TABLE_SLICES", &dst)
+
+	assert.Equal(t, 2, len(dst))
+
+	assert.Equal(t, 1005, dst[0].Id)
+	assert.Equal(t, "Test", dst[0].Name)
+	assert.Equal(t, 2, len(dst[0].Value))
+	assert.Equal(t, 100, dst[0].Value[0].Id)
+	assert.Equal(t, "DataA", dst[0].Value[0].Data[0].FieldA)
+	assert.Equal(t, "DataB", dst[0].Value[0].Data[0].FieldB)
+
+	assert.Equal(t, 101, dst[0].Value[1].Id)
+	assert.Equal(t, "DataC", dst[0].Value[1].Data[0].FieldA)
+	assert.Equal(t, "DataD", dst[0].Value[1].Data[0].FieldB)
+
+	assert.Equal(t, 1006, dst[1].Id)
+	assert.Equal(t, "Test2", dst[1].Name)
+	assert.Equal(t, 0, len(dst[1].Value))
+}
+
+// Tests decoding a table with extra constants provided via code
 func TestLuaInstanceDecodeTableWithExtraConsts(t *testing.T) {
 	var dst []myTableWithConsts
 

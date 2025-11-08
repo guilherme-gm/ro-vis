@@ -96,6 +96,17 @@ func (decoder *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecConte
 				continue
 			}
 
+			if alias == "@sliceValue" {
+				decoder.decodeSlice(fieldValue, newLuaDecContextInfo())
+				// remove all $$numeric from fieldList, as they were likely handled by this slice
+				for k := range fieldList {
+					if strings.HasPrefix(k, "$$numeric:") {
+						delete(fieldList, k)
+					}
+				}
+				continue
+			}
+
 			fieldName = alias
 			if strings.HasPrefix(alias, "$$numeric:") {
 				isKeyNumeric = true
@@ -176,7 +187,7 @@ func NewLuaDecoder(reencoder StringReencoder) *luaDecoder {
 		reencoder:        reencoder,
 		path:             stack.NewStack[string](),
 		notConsumedPaths: make(map[string]bool),
-}
+	}
 
 	decoder.L.OpenLibs()
 
