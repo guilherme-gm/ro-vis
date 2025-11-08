@@ -145,3 +145,39 @@ func TestLuaInstanceDecodeTableWithExtraConsts(t *testing.T) {
 	assert.Equal(t, "Test2", dst[1].Name)
 	assert.Equal(t, 20000, dst[1].Value)
 }
+
+func TestLuaInstanceDecodeConstantsTable(t *testing.T) {
+	var dstTable struct {
+		Values []struct {
+			Id    string `lua:"@index"`
+			Value int    `lua:"@plainValue"`
+		} `lua:"@plain"`
+	}
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_tables.lua"), "MY_TABLE_INT", &dstTable)
+
+	assert.Equal(t, 2, len(dstTable.Values))
+	assert.Equal(t, "Key1", dstTable.Values[0].Id)
+	assert.Equal(t, 1, dstTable.Values[0].Value)
+	assert.Equal(t, "Key2", dstTable.Values[1].Id)
+	assert.Equal(t, 2, dstTable.Values[1].Value)
+}
+
+func TestLuaInstanceDecodeTableWithMetaindex(t *testing.T) {
+	var dstTable struct {
+		Values []struct {
+			Id    string `lua:"@index"`
+			Value int    `lua:"@plainValue"`
+		} `lua:"@plain"`
+	}
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_tables.lua"), "MY_TABLE_INT_METATABLE", &dstTable)
+
+	assert.Equal(t, 2, len(dstTable.Values))
+	assert.Equal(t, "Key1", dstTable.Values[0].Id)
+	assert.Equal(t, 1, dstTable.Values[0].Value)
+	assert.Equal(t, "Key2", dstTable.Values[1].Id)
+	assert.Equal(t, 2, dstTable.Values[1].Value)
+}

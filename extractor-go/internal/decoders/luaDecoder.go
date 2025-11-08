@@ -58,6 +58,23 @@ import (
  *          } `lua:"@sliceValue"` -- !!! Expand the values of 100/101 as elements of this struct.
  *       }
  *    }
+ *
+ * - `lua:"@plain"`: used to mark that a slice actually represents a dynamic list of key/value pairs.
+ *    Usually used together with `lua:"@index"` and `lua:"@plainValue"` to read data.
+ *
+ *   For example:
+ *   tbl = {
+ *      Key1 = 1,
+ *      Key2 = 2,
+ *   }
+ *
+ *   Could be represented as:
+ *   type MyTable struct {
+ *      Values []struct {
+ *         Key string `lua:"@index"` -- "Key1", "Key2"
+ *         Value int `lua:"@plainValue"` -- 1, 2
+ *      } `lua:"@plain"`
+ *   }
  */
 
 type luaDecoder struct {
@@ -72,17 +89,36 @@ type LuaDecoderResult struct {
 }
 
 type luaDecContextInfo struct {
-	tableIndex int
+	tableIndexType lua.LuaValType
+	tableIndexStr  string
+	tableIndex     int
+	isPlain        bool
 }
 
-func newLuaDecContextInfo() luaDecContextInfo {
-	return luaDecContextInfo{
-		tableIndex: -1,
+func newLuaDecContextInfo(previousCtx *luaDecContextInfo) luaDecContextInfo {
+	newCtx := luaDecContextInfo{
+		tableIndexType: lua.LUA_TNIL,
 	}
+
+	if previousCtx != nil {
+		newCtx.isPlain = previousCtx.isPlain
+	}
+
+	return newCtx
 }
 
-func (c luaDecContextInfo) setTableIndex(index int) luaDecContextInfo {
-	c.tableIndex = index
+func (c luaDecContextInfo) setTableIndex(L *lua.State, index int) luaDecContextInfo {
+	switch L.Type(index) {
+	case lua.LUA_TSTRING:
+		c.tableIndexStr = L.ToString(index)
+		c.tableIndexType = lua.LUA_TSTRING
+	case lua.LUA_TNUMBER:
+		c.tableIndex = L.ToInteger(index)
+		c.tableIndexType = lua.LUA_TNUMBER
+	default:
+		panic(fmt.Errorf("unexpected table index type: %v", L.Type(index)))
+	}
+
 	return c
 }
 
@@ -92,10 +128,18 @@ func (decoder *luaDecoder) decodeSlice(slice reflect.Value, ctx luaDecContextInf
 
 	newSlice := reflect.MakeSlice(sliceType, 0, 0)
 
+	// fmt.Println("Decoding slice: " + sliceType.String())
 	decoder.L.PushNil()
 	for decoder.L.Next(-2) != 0 {
+		newCtx := newLuaDecContextInfo(&ctx).setTableIndex(decoder.L, -2)
+		// __newindex is a metatable field, we don't mind them
+		if newCtx.tableIndexType == lua.LUA_TSTRING && newCtx.tableIndexStr == "__newindex" {
+			decoder.L.Pop(1)
+			continue
+		}
+
 		sliceItem := reflect.New(sliceItemType).Elem()
-		decoder.decode(sliceItem, newLuaDecContextInfo().setTableIndex(decoder.L.ToInteger(-2)))
+		decoder.decode(sliceItem, newCtx)
 		newSlice = reflect.Append(newSlice, sliceItem)
 
 		decoder.L.Pop(1)
@@ -106,30 +150,40 @@ func (decoder *luaDecoder) decodeSlice(slice reflect.Value, ctx luaDecContextInf
 
 func (decoder *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecContextInfo) {
 	structType := structObj.Type()
+	// fmt.Println("Decoding struct: " + structType.String())
+	// fmt.Println("-- CTX: int: " + fmt.Sprintf("%d", ctx.tableIndex))
+	// fmt.Println("-- CTX: string: " + ctx.tableIndexStr)
+	// fmt.Println("-- CTX: plain: " + fmt.Sprintf("%t", ctx.isPlain))
 
 	fieldList := make(map[string]bool)
-	decoder.L.PushNil()
-	for decoder.L.Next(-2) != 0 {
-		switch decoder.L.Type(-2) {
-		case lua.LUA_TSTRING:
-			fieldName := decoder.L.ToString(-2)
-			fieldList[fieldName] = true
-		case lua.LUA_TNUMBER:
-			fieldName := fmt.Sprintf("$$numeric:%d", decoder.L.ToInteger(-2))
-			fieldList[fieldName] = true
-		default:
-			panic(fmt.Errorf("object key is not string. Found: %v", decoder.L.Type(-2)))
-		}
+	// Plain structures must not be enumerated, as they are not tables
+	if !ctx.isPlain {
+		decoder.L.PushNil()
+		for decoder.L.Next(-2) != 0 {
+			switch decoder.L.Type(-2) {
+			case lua.LUA_TSTRING:
+				fieldName := decoder.L.ToString(-2)
+				fieldList[fieldName] = true
+			case lua.LUA_TNUMBER:
+				fieldName := fmt.Sprintf("$$numeric:%d", decoder.L.ToInteger(-2))
+				fieldList[fieldName] = true
+			default:
+				panic(fmt.Errorf("object key is not string. Found: %v", decoder.L.Type(-2)))
+			}
 
-		decoder.L.Pop(1)
+			decoder.L.Pop(1)
+		}
 	}
 
 	for fldNum := range structType.NumField() {
+		// fmt.Println("Decoding field: " + structType.Field(fldNum).Name)
+
 		fieldType := structType.Field(fldNum)
 		fieldValue := structObj.Field(fldNum)
 
 		fieldName := fieldType.Name
 		isKeyNumeric := false
+		isPlain := false
 		keyIndex := -1
 		if alias := fieldType.Tag.Get("lua"); alias != "" {
 			if alias == "@index" {
@@ -137,12 +191,36 @@ func (decoder *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecConte
 					panic("Trying to get index of non-table")
 				}
 
-				fieldValue.SetInt(int64(ctx.tableIndex))
+				switch fieldType.Type.Kind() {
+				case reflect.Int:
+					if ctx.tableIndexType != lua.LUA_TNUMBER {
+						panic(fmt.Sprintf("Incompatible type for @index. Go Type: %s | Lua TYPE: %d | String value: %s", fieldType.Type.String(), ctx.tableIndexType, ctx.tableIndexStr))
+					}
+					fieldValue.SetInt(int64(ctx.tableIndex))
+
+				case reflect.String:
+					if ctx.tableIndexType != lua.LUA_TSTRING {
+						panic(fmt.Sprintf("Incompatible type for @index. Go Type: %s | Lua TYPE: %d", fieldType.Type.String(), ctx.tableIndexType))
+					}
+					fieldValue.SetString(ctx.tableIndexStr)
+
+				default:
+					panic("Unsupported type for @index: " + fieldType.Type.String())
+				}
+				continue
+			}
+
+			if alias == "@plain" {
+				isPlain = true
+			}
+
+			if alias == "@plainValue" {
+				decoder.decode(fieldValue, newLuaDecContextInfo(&ctx))
 				continue
 			}
 
 			if alias == "@sliceValue" {
-				decoder.decodeSlice(fieldValue, newLuaDecContextInfo())
+				decoder.decodeSlice(fieldValue, newLuaDecContextInfo(&ctx))
 				// remove all $$numeric from fieldList, as they were likely handled by this slice
 				for k := range fieldList {
 					if strings.HasPrefix(k, "$$numeric:") {
@@ -168,16 +246,21 @@ func (decoder *luaDecoder) decodeStruct(structObj reflect.Value, ctx luaDecConte
 		if isKeyNumeric {
 			decoder.L.PushInteger(int64(keyIndex))
 			decoder.L.GetTable(-2)
+		} else if isPlain {
+			/* do nothing */
 		} else {
 			decoder.L.GetField(-1, fieldName)
 		}
+
 		if decoder.L.IsNil(-1) {
 			decoder.L.Pop(1)
 			continue
 		}
 
 		decoder.path.Push(fieldName)
-		decoder.decode(fieldValue, newLuaDecContextInfo())
+		newCtx := newLuaDecContextInfo(&ctx)
+		newCtx.isPlain = true
+		decoder.decode(fieldValue, newCtx)
 		decoder.path.Pop()
 
 		decoder.L.Pop(1)
@@ -192,6 +275,7 @@ func (decoder *luaDecoder) decode(dataValue reflect.Value, ctx luaDecContextInfo
 	dataType := dataValue.Type()
 	dataKind := dataType.Kind()
 
+	// fmt.Println("Decoding type: " + dataType.String())
 	switch dataKind {
 	case reflect.Slice:
 		decoder.decodeSlice(dataValue, ctx)
@@ -265,7 +349,7 @@ func (decoder *luaDecoder) DecodeLuaTable(filePath string, tableName string, dst
 	decoder.path.Push(tableName)
 
 	qv := reflect.ValueOf(dst)
-	decoder.decode(qv.Elem(), newLuaDecContextInfo())
+	decoder.decode(qv.Elem(), newLuaDecContextInfo(nil))
 
 	decoder.path.Pop()
 

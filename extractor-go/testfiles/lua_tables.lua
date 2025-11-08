@@ -42,3 +42,16 @@ MY_TABLE_INDEXED = {
 	[1005] = { "Value1", 10 },
 	[1006] = { "Value2", 20 },
 }
+
+MY_TABLE_INT = {
+	Key1 = 1,
+	Key2 = 2,
+}
+
+MY_TABLE_INT_METATABLE = {
+	Key1 = 1,
+	Key2 = 2,
+	__newindex = function()
+		error("unknown state")
+	end
+}
