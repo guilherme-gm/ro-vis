@@ -26,6 +26,12 @@ type myTableWithSliceValue struct {
 	} `lua:"@sliceValue"`
 }
 
+type myTableIndexedValue struct {
+	Id        int    `lua:"@index"`
+	FirstVal  string `lua:"$$numeric:1"`
+	SecondVal int    `lua:"$$numeric:2"`
+}
+
 type myTableWithSlices struct {
 	Id    int `lua:"@index"`
 	Name  string
@@ -68,6 +74,24 @@ func TestLuaInstanceDecodeTableWithIds(t *testing.T) {
 	assert.Equal(t, 1006, dst[1].Id)
 	assert.Equal(t, "Test2", dst[1].Name)
 	assert.Equal(t, 2, dst[1].Value)
+}
+
+// Tests decoding a table entry where values are simply indexed as an "array", using $$numeric
+func TestLuaInstanceDecodeTableWithIndexedValue(t *testing.T) {
+	var dst []myTableIndexedValue
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_tables.lua"), "MY_TABLE_INDEXED", &dst)
+
+	assert.Equal(t, 2, len(dst))
+
+	assert.Equal(t, 1005, dst[0].Id)
+	assert.Equal(t, "Value1", dst[0].FirstVal)
+	assert.Equal(t, 10, dst[0].SecondVal)
+
+	assert.Equal(t, 1006, dst[1].Id)
+	assert.Equal(t, "Value2", dst[1].FirstVal)
+	assert.Equal(t, 20, dst[1].SecondVal)
 }
 
 // Tests decoding inner slices with `lua:"@sliceValue"`

@@ -37,3 +37,8 @@ MY_TABLE_SLICES = {
 		Value = {}
 	}
 }
+
+MY_TABLE_INDEXED = {
+	[1005] = { "Value1", 10 },
+	[1006] = { "Value2", 20 },
+}
