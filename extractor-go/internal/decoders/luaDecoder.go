@@ -15,6 +15,51 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/utils/stack"
 )
 
+/**
+ * General purpose Lua file decoder.
+ *
+ * It executes Lua files and is able to extract Lua tables into Go structs, by scanning Lua VM's data.
+ *
+ * The provided struct must represent the table structure, both in field names and use the right types.
+ *
+ * The following tags are supported:
+ * - `lua:"<name>"`: used to provide the corresponding name in Lua table (when it does not match the struct field name)
+ *
+ * - `lua:"@index"`: used to mark that the field should be populated with the table item "index"
+ *    For example, given this table: tbl = { [1001] = { Value = "A" } }
+ *    The struct field marked as `lua:"@index"` will be populated with 1001
+ *
+ * - `lua:"$$numeric:<pos>"`: used to mark that the field should be populated with the value at index <pos>
+ *    For example, given this table: tbl = { [1001] = { "A", "B" } }
+ *    The struct field marked as `lua:"$$numeric:2"` will be populated with "B"
+ *
+ * - `lua:"@sliceValue"`: used to mark that this field should expand the current table item as an array, where each item is a struct
+ *    For example, given this table:
+ *    tbl = {
+ *       [1001] = {
+ *          Values = {
+ *             [100] = { -- !!! This is an array of structs
+ *                { FieldA = "DataA", FieldB = "DataB" },
+ *                { FieldA = "DataA", FieldB = "DataB" },
+ *             },
+ *             [101] = { }
+ *          }
+ *       }
+ *    }
+ *
+ *    Could be represented as:
+ *    type MyTable struct {
+ *       Id    int `lua:"@index"` -- 1001
+ *       Values []struct {
+ *          Id    int `lua:"@index"` -- 100, 101
+ *          Data []struct {
+ *             FieldA string
+ *             FieldB string
+ *          } `lua:"@sliceValue"` -- !!! Expand the values of 100/101 as elements of this struct.
+ *       }
+ *    }
+ */
+
 type luaDecoder struct {
 	L                *lua.State
 	reencoder        StringReencoder
