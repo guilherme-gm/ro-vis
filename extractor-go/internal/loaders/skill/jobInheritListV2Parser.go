@@ -99,5 +99,5 @@ func (p JobInehritListV2Parser) parseFile(filePath string) []SkillJobId {
 }
 
 func (p JobInehritListV2Parser) Parse(basePath string, change *domain.UpdateChange) []SkillJobId {
-	return p.parseFile(basePath + "/" + change.Patch + "/" + change.File)
+	return p.parseFile(basePath + "/" + change.GetFullPath())
 }

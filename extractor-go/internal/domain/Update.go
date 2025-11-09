@@ -16,6 +16,10 @@ func (u UpdateChange) String() string {
 	return fmt.Sprintf("'%s'/'%s'", u.Patch, u.File)
 }
 
+func (u UpdateChange) GetFullPath() string {
+	return fmt.Sprintf("%s/%s", u.Patch, u.File)
+}
+
 type Update struct {
 	Date    time.Time      `json:"date"`
 	Changes []UpdateChange `json:"changes"`

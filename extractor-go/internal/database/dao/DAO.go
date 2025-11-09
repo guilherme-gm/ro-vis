@@ -23,4 +23,7 @@ type IDAO interface {
 	// quests.sql.extra.go
 	BulkInsertQuestHistory(ctx context.Context, arg []BulkInsertQuestHistoryParams) (sql.Result, error)
 	BulkUpsertQuests(ctx context.Context, arg []BulkUpsertQuestParams) (sql.Result, error)
+
+	// skills.sql.extra.go
+	BulkInsertSkillJob(ctx context.Context, arg []BulkInsertSkillJobParams) (sql.Result, error)
 }

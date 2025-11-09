@@ -311,6 +311,74 @@ func (_c *MockIDAO_BulkInsertQuestHistory_Call) RunAndReturn(run func(ctx contex
 	return _c
 }
 
+// BulkInsertSkillJob provides a mock function for the type MockIDAO
+func (_mock *MockIDAO) BulkInsertSkillJob(ctx context.Context, arg []BulkInsertSkillJobParams) (sql.Result, error) {
+	ret := _mock.Called(ctx, arg)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BulkInsertSkillJob")
+	}
+
+	var r0 sql.Result
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertSkillJobParams) (sql.Result, error)); ok {
+		return returnFunc(ctx, arg)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertSkillJobParams) sql.Result); ok {
+		r0 = returnFunc(ctx, arg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(sql.Result)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []BulkInsertSkillJobParams) error); ok {
+		r1 = returnFunc(ctx, arg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockIDAO_BulkInsertSkillJob_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BulkInsertSkillJob'
+type MockIDAO_BulkInsertSkillJob_Call struct {
+	*mock.Call
+}
+
+// BulkInsertSkillJob is a helper method to define mock.On call
+//   - ctx context.Context
+//   - arg []BulkInsertSkillJobParams
+func (_e *MockIDAO_Expecter) BulkInsertSkillJob(ctx interface{}, arg interface{}) *MockIDAO_BulkInsertSkillJob_Call {
+	return &MockIDAO_BulkInsertSkillJob_Call{Call: _e.mock.On("BulkInsertSkillJob", ctx, arg)}
+}
+
+func (_c *MockIDAO_BulkInsertSkillJob_Call) Run(run func(ctx context.Context, arg []BulkInsertSkillJobParams)) *MockIDAO_BulkInsertSkillJob_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []BulkInsertSkillJobParams
+		if args[1] != nil {
+			arg1 = args[1].([]BulkInsertSkillJobParams)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockIDAO_BulkInsertSkillJob_Call) Return(result sql.Result, err error) *MockIDAO_BulkInsertSkillJob_Call {
+	_c.Call.Return(result, err)
+	return _c
+}
+
+func (_c *MockIDAO_BulkInsertSkillJob_Call) RunAndReturn(run func(ctx context.Context, arg []BulkInsertSkillJobParams) (sql.Result, error)) *MockIDAO_BulkInsertSkillJob_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // BulkUpsertI18ns provides a mock function for the type MockIDAO
 func (_mock *MockIDAO) BulkUpsertI18ns(ctx context.Context, arg []BulkUpsertI18nParams) (sql.Result, error) {
 	ret := _mock.Called(ctx, arg)
@@ -2545,6 +2613,68 @@ func (_c *MockIDAO_GetQuestsIdsInUpdate_Call) Return(getQuestsIdsInUpdateRows []
 }
 
 func (_c *MockIDAO_GetQuestsIdsInUpdate_Call) RunAndReturn(run func(ctx context.Context, update string) ([]GetQuestsIdsInUpdateRow, error)) *MockIDAO_GetQuestsIdsInUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetSkillJobs provides a mock function for the type MockIDAO
+func (_mock *MockIDAO) GetSkillJobs(ctx context.Context) ([]SkillsJob, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSkillJobs")
+	}
+
+	var r0 []SkillsJob
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]SkillsJob, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []SkillsJob); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]SkillsJob)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockIDAO_GetSkillJobs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSkillJobs'
+type MockIDAO_GetSkillJobs_Call struct {
+	*mock.Call
+}
+
+// GetSkillJobs is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockIDAO_Expecter) GetSkillJobs(ctx interface{}) *MockIDAO_GetSkillJobs_Call {
+	return &MockIDAO_GetSkillJobs_Call{Call: _e.mock.On("GetSkillJobs", ctx)}
+}
+
+func (_c *MockIDAO_GetSkillJobs_Call) Run(run func(ctx context.Context)) *MockIDAO_GetSkillJobs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockIDAO_GetSkillJobs_Call) Return(skillsJobs []SkillsJob, err error) *MockIDAO_GetSkillJobs_Call {
+	_c.Call.Return(skillsJobs, err)
+	return _c
+}
+
+func (_c *MockIDAO_GetSkillJobs_Call) RunAndReturn(run func(ctx context.Context) ([]SkillsJob, error)) *MockIDAO_GetSkillJobs_Call {
 	_c.Call.Return(run)
 	return _c
 }

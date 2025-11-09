@@ -215,6 +215,23 @@ type PreviousQuestHistoryVw struct {
 	RewardItemList    []byte
 }
 
+type PreviousSkillHistoryVw struct {
+	HistoryID         sql.NullInt32
+	PreviousHistoryID sql.NullInt32
+	SkillID           sql.NullInt32
+	FileVersion       sql.NullInt32
+	Update            sql.NullString
+	Constant          sql.NullString
+	Name              sql.NullString
+	Description       sql.NullString
+	MaxLevel          sql.NullInt32
+	SpAmount          []byte
+	SeparateLevel     sql.NullBool
+	AttackRange       []byte
+	NeedSkillList     []byte
+	CreatedAt         sql.NullTime
+}
+
 type Quest struct {
 	QuestID         int32
 	LatestHistoryID int32
@@ -240,4 +257,40 @@ type QuestHistory struct {
 	RewardJexp        sql.NullString
 	CoolTimeQuest     sql.NullInt32
 	RewardItemList    []byte
+}
+
+type Skill struct {
+	SkillID         int32
+	LatestHistoryID int32
+	Deleted         bool
+	UpdatedAt       sql.NullTime
+}
+
+type SkillsHistory struct {
+	HistoryID         int32
+	PreviousHistoryID sql.NullInt32
+	SkillID           int32
+	FileVersion       int32
+	Update            string
+	Constant          sql.NullString
+	Name              sql.NullString
+	Description       sql.NullString
+	MaxLevel          sql.NullInt32
+	SpAmount          []byte
+	SeparateLevel     sql.NullBool
+	AttackRange       []byte
+	NeedSkillList     []byte
+	CreatedAt         sql.NullTime
+}
+
+type SkillsJob struct {
+	Constant      string
+	JobID         int32
+	InheritedJob  sql.NullInt32
+	InheritedJob2 sql.NullInt32
+	FirstUpdate   string
+	LastUpdate    string
+	Deleted       bool
+	UpdatedAt     sql.NullTime
+	CreatedAt     sql.NullTime
 }

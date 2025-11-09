@@ -1,0 +1,34 @@
+-- Trimmed down version of data/luafiles514/lua files/skillinfoz/jobinheritlist.lub
+-- contains only a small set of data to be used in tests
+-- Based on V2 file
+
+JOBID = {
+	JT_NOVICE = 0,
+	JT_SWORDMAN = 1,
+	JT_KNIGHT_H = 4008,
+	JT_BARD_H = 4020,
+	JT_DANCER_H = 4021,
+	JT_RUNE_KNIGHT = 4054,
+	JT_WARLOCK = 4055,
+	JT_RUNE_KNIGHT_H = 4060,
+	JT_WARLOCK_H = 4061,
+}
+
+JOB_INHERIT_LIST = {
+	[JOBID.JT_SWORDMAN] = JOBID.JT_NOVICE,
+	[JOBID.JT_RUNE_KNIGHT_H] = JOBID.JT_KNIGHT_H,
+	[JOBID.JT_WARLOCK_H] = JOBID.JT_WIZARD_H,
+	__newindex = function()
+		error("unknown state")
+	end
+}
+setmetatable(JOB_INHERIT_LIST, JOB_INHERIT_LIST)
+
+JOB_INHERIT_LIST2 = {
+	[JOBID.JT_RUNE_KNIGHT_H] = JOBID.JT_RUNE_KNIGHT,
+	[JOBID.JT_WARLOCK_H] = JOBID.JT_WARLOCK,
+	__newindex = function()
+		error("unknown state")
+	end
+}
+setmetatable(JOB_INHERIT_LIST2, JOB_INHERIT_LIST2)
