@@ -27,6 +27,7 @@ type Querier interface {
 	GetCurrentItems(ctx context.Context) ([]GetCurrentItemsRow, error)
 	GetCurrentMaps(ctx context.Context) ([]GetCurrentMapsRow, error)
 	GetCurrentQuests(ctx context.Context) ([]GetCurrentQuestsRow, error)
+	GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, error)
 	GetI18nHistory(ctx context.Context, arg GetI18nHistoryParams) ([]GetI18nHistoryRow, error)
 	GetI18nList(ctx context.Context, arg GetI18nListParams) ([]GetI18nListRow, error)
 	GetI18nsIdsInUpdate(ctx context.Context, update string) ([]GetI18nsIdsInUpdateRow, error)

@@ -20,11 +20,11 @@ func NewSkillRepository(db *database.Database) *SkillRepository {
 	}
 }
 
-func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) (*[]domain.SkillJob, error) {
+func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) ([]domain.SkillJob, error) {
 	queries := r.DB.GetDAO(tx)
 	res, err := queries.GetSkillJobs(context.Background())
 	if err == sql.ErrNoRows {
-		return &[]domain.SkillJob{}, nil
+		return []domain.SkillJob{}, nil
 	}
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) (*[]domain.SkillJob, error) {
 		jobs[idx] = model.ToDomain()
 	}
 
-	return &jobs, nil
+	return jobs, nil
 }
 
 func (r *SkillRepository) insertSkillJob_sub(tx *sql.Tx, newJobs []*domain.SkillJob) error {
@@ -80,4 +80,23 @@ func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []*domain.SkillJob) e
 	}
 
 	return nil
+}
+
+func (r *SkillRepository) GetCurrentSkills(tx *sql.Tx) ([]domain.Skill, error) {
+	queries := r.DB.GetDAO(tx)
+	res, err := queries.GetCurrentSkills(context.Background())
+	if err == sql.ErrNoRows {
+		return []domain.Skill{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	skills := make([]domain.Skill, len(res))
+	for idx, qmodel := range res {
+		skills[idx] = qmodel.ToDomain()
+	}
+
+	return skills, nil
 }

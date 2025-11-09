@@ -60,6 +60,14 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 			panic(err)
 		}
 	}
+
+	existingSkills, err := l.repository.GetCurrentSkills(tx)
+	if err != nil {
+		panic(err)
+	}
+
+	skillUpdater := loaders.NewUpdater(existingSkills)
+	l.loadSkillIDs(basePath, update, skillUpdater)
 }
 
 func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
@@ -100,6 +108,40 @@ func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater
 			deletedJob := jobUpdater.GetForEdit(existingJob.Constant)
 			deletedJob.Deleted = true
 			deletedJob.LastUpdate = update.Name()
+		}
+	}
+}
+
+func (l *SkillLoader) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
+	change, err := update.GetChangeForFile(skillIdV2)
+	if err != nil {
+		panic(err)
+	}
+
+	skillParser := NewSkillIdV2Parser()
+	skillList := skillParser.Parse(basePath, &change)
+
+	fileSkillMap := make(map[int32]bool)
+	for fileConst, fileId := range skillList {
+		fileSkillMap[int32(fileId)] = true
+		existingSkill, exists := skillUpdater.GetForRead(int32(fileId))
+		shouldSave := false
+
+		if !exists || existingSkill.SkillID != int32(fileId) || existingSkill.Constant.String != fileConst {
+			shouldSave = true
+		}
+
+		if shouldSave {
+			newSkill := skillUpdater.GetForEdit(int32(fileId))
+			newSkill.Constant = domain.NewNullableString(fileConst)
+			newSkill.SkillID = int32(fileId)
+		}
+	}
+
+	for _, existingSkill := range skillUpdater.CurrentValues {
+		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
+			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+			deletedSkill.Deleted = true
 		}
 	}
 }

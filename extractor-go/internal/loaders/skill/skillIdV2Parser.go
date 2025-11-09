@@ -52,5 +52,5 @@ func (p SkillIdV2Parser) parseFile(filePath string) map[string]int {
 }
 
 func (p SkillIdV2Parser) Parse(basePath string, change *domain.UpdateChange) map[string]int {
-	return p.parseFile(basePath + "/" + change.Patch + "/" + change.File)
+	return p.parseFile(basePath + "/" + change.GetFullPath())
 }

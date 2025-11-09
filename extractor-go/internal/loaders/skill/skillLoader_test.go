@@ -67,3 +67,57 @@ func TestSkillLoader_loadJobs_InsertUpdateDelete(t *testing.T) {
 		assert.Equal(t, update.Name(), deleted.LastUpdate)
 	}
 }
+
+func TestSkillLoader_loadSkillIDs_InsertUpdateDelete(t *testing.T) {
+	update := domain.Update{
+		Date: time.Date(2012, time.January, 2, 0, 0, 0, 0, time.UTC),
+		Changes: []domain.UpdateChange{
+			{Patch: "testfiles", File: "data/luafiles514/lua files/skillinfoz/SkillID.lub"},
+		},
+	}
+
+	existing := []domain.Skill{
+		{SkillID: 1, Constant: domain.NewNullableString("WRONG_CONST"), Deleted: false},
+		{SkillID: 45, Constant: domain.NewNullableString("AC_CONCENTRATION"), Deleted: false},
+		{SkillID: 9999, Constant: domain.NewNullableString("TO_DELETE"), Deleted: false},
+	}
+	skillUpdater := loaders.NewUpdater(existing)
+
+	loader := &SkillLoader{}
+	loader.loadSkillIDs(testfiles.Root, update, skillUpdater)
+
+	// Verify unchanged
+	_, exists := skillUpdater.DirtyValues[45]
+	assert.False(t, exists, "expected AC_CONCENTRATION (45) to be unchanged")
+
+	// Verify insertion
+	insertHas := false
+	for _, it := range skillUpdater.ValuesToInsert {
+		if it.SkillID == 24 {
+			insertHas = true
+			assert.Equal(t, "AL_RUWACH", it.Constant.String)
+			assert.True(t, it.Constant.Valid)
+			assert.False(t, it.Deleted)
+			break
+		}
+	}
+	assert.True(t, insertHas, "expected AL_RUWACH (24) to be inserted")
+
+	// Verify update
+	updateHas := false
+	for _, it := range skillUpdater.ValuesToUpdate {
+		if it.SkillID == 1 {
+			updateHas = true
+			assert.Equal(t, "NV_BASIC", it.Constant.String)
+			assert.True(t, it.Constant.Valid)
+			assert.False(t, it.Deleted)
+			break
+		}
+	}
+	assert.True(t, updateHas, "expected NV_BASIC (1) to be updated")
+
+	// Verify deletion
+	if deleted, ok := skillUpdater.DirtyValues[9999]; assert.True(t, ok, "expected 9999 to be edited for deletion") {
+		assert.True(t, deleted.Deleted)
+	}
+}

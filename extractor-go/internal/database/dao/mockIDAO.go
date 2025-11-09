@@ -1675,6 +1675,68 @@ func (_c *MockIDAO_GetCurrentQuests_Call) RunAndReturn(run func(ctx context.Cont
 	return _c
 }
 
+// GetCurrentSkills provides a mock function for the type MockIDAO
+func (_mock *MockIDAO) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetCurrentSkills")
+	}
+
+	var r0 []GetCurrentSkillsRow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]GetCurrentSkillsRow, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []GetCurrentSkillsRow); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]GetCurrentSkillsRow)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockIDAO_GetCurrentSkills_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCurrentSkills'
+type MockIDAO_GetCurrentSkills_Call struct {
+	*mock.Call
+}
+
+// GetCurrentSkills is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockIDAO_Expecter) GetCurrentSkills(ctx interface{}) *MockIDAO_GetCurrentSkills_Call {
+	return &MockIDAO_GetCurrentSkills_Call{Call: _e.mock.On("GetCurrentSkills", ctx)}
+}
+
+func (_c *MockIDAO_GetCurrentSkills_Call) Run(run func(ctx context.Context)) *MockIDAO_GetCurrentSkills_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockIDAO_GetCurrentSkills_Call) Return(getCurrentSkillsRows []GetCurrentSkillsRow, err error) *MockIDAO_GetCurrentSkills_Call {
+	_c.Call.Return(getCurrentSkillsRows, err)
+	return _c
+}
+
+func (_c *MockIDAO_GetCurrentSkills_Call) RunAndReturn(run func(ctx context.Context) ([]GetCurrentSkillsRow, error)) *MockIDAO_GetCurrentSkills_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetI18nHistory provides a mock function for the type MockIDAO
 func (_mock *MockIDAO) GetI18nHistory(ctx context.Context, arg GetI18nHistoryParams) ([]GetI18nHistoryRow, error) {
 	ret := _mock.Called(ctx, arg)

@@ -38,6 +38,15 @@ type Skill struct {
 	SeparateLevel     NullableBool
 	AttackRange       []int32
 	NeedSkillList     []NeedSkillEntry
+	Deleted           bool
+}
+
+func (s Skill) GetId() int32 {
+	return s.SkillID
+}
+
+func (s *Skill) SetId(id int32) {
+	s.SkillID = id
 }
 
 func (s *Skill) Equals(otherSkill Skill) bool {

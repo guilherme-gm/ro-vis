@@ -7,7 +7,71 @@ package dao
 
 import (
 	"context"
+	"database/sql"
 )
+
+const getCurrentSkills = `-- name: GetCurrentSkills :many
+SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_amount, skills_history.separate_level, skills_history.attack_range, skills_history.need_skill_list, skills_history.created_at, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
+FROM ` + "`" + `skills` + "`" + `
+INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `
+`
+
+type GetCurrentSkillsRow struct {
+	HistoryID         int32
+	PreviousHistoryID sql.NullInt32
+	SkillID           int32
+	FileVersion       int32
+	Update            string
+	Constant          sql.NullString
+	Name              sql.NullString
+	Description       sql.NullString
+	MaxLevel          sql.NullInt32
+	SpAmount          []byte
+	SeparateLevel     sql.NullBool
+	AttackRange       []byte
+	NeedSkillList     []byte
+	CreatedAt         sql.NullTime
+	Deleted           bool
+}
+
+func (q *Queries) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCurrentSkills)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCurrentSkillsRow
+	for rows.Next() {
+		var i GetCurrentSkillsRow
+		if err := rows.Scan(
+			&i.HistoryID,
+			&i.PreviousHistoryID,
+			&i.SkillID,
+			&i.FileVersion,
+			&i.Update,
+			&i.Constant,
+			&i.Name,
+			&i.Description,
+			&i.MaxLevel,
+			&i.SpAmount,
+			&i.SeparateLevel,
+			&i.AttackRange,
+			&i.NeedSkillList,
+			&i.CreatedAt,
+			&i.Deleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getSkillJobs = `-- name: GetSkillJobs :many
 SELECT skills_jobs.constant, skills_jobs.job_id, skills_jobs.inherited_job, skills_jobs.inherited_job2, skills_jobs.first_update, skills_jobs.last_update, skills_jobs.deleted, skills_jobs.updated_at, skills_jobs.created_at FROM ` + "`" + `skills_jobs` + "`" + `
