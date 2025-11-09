@@ -12,6 +12,14 @@ type SkillJob struct {
 	Deleted       bool
 }
 
+func (s SkillJob) GetId() string {
+	return s.Constant
+}
+
+func (s *SkillJob) SetId(id string) {
+	s.Constant = id
+}
+
 type NeedSkillEntry struct {
 	SkillID int32
 	Level   int32

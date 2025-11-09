@@ -8,6 +8,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/repository"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 )
 
 type SkillLoader struct {
@@ -44,24 +45,24 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 		panic(err)
 	}
 
-	jobUpdater := newSkillJobUpdater(*existingJobs)
+	jobUpdater := loaders.NewUpdater(existingJobs)
 	l.loadJobs(basePath, update, jobUpdater)
 
-	if len(jobUpdater.jobsToInsert) > 0 {
-		fmt.Println("> Inserting new skill jobs... ", len(jobUpdater.jobsToInsert))
-		if err := l.repository.AddSkillJobs(tx, jobUpdater.jobsToInsert); err != nil {
+	if len(jobUpdater.ValuesToInsert) > 0 {
+		fmt.Println("> Inserting new skill jobs... ", len(jobUpdater.ValuesToInsert))
+		if err := l.repository.AddSkillJobs(tx, jobUpdater.ValuesToInsert); err != nil {
 			panic(err)
 		}
 	}
-	if len(jobUpdater.jobsToUpdate) > 0 {
-		fmt.Println("> Updating skill jobs... ", len(jobUpdater.jobsToUpdate))
-		if err := l.repository.AddSkillJobs(tx, jobUpdater.jobsToUpdate); err != nil {
+	if len(jobUpdater.ValuesToUpdate) > 0 {
+		fmt.Println("> Updating skill jobs... ", len(jobUpdater.ValuesToUpdate))
+		if err := l.repository.AddSkillJobs(tx, jobUpdater.ValuesToUpdate); err != nil {
 			panic(err)
 		}
 	}
 }
 
-func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *skillJobUpdater) {
+func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
 	change, err := update.GetChangeForFile(jobInehritListV2)
 	if err != nil {
 		panic(err)
@@ -73,7 +74,7 @@ func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater
 	fileJobMap := make(map[string]bool)
 	for _, fileJob := range jobList {
 		fileJobMap[fileJob.Constant] = true
-		existingJob, exists := jobUpdater.getForRead(fileJob.Constant)
+		existingJob, exists := jobUpdater.GetForRead(fileJob.Constant)
 		shouldSave := false
 
 		if !exists || existingJob.JobId != int32(fileJob.JobId) || existingJob.InheritedJob != fileJob.InheritedJob || existingJob.InheritedJob2 != fileJob.InheritedJob2 {
@@ -81,7 +82,7 @@ func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater
 		}
 
 		if shouldSave {
-			newJob := jobUpdater.getForEdit(fileJob.Constant)
+			newJob := jobUpdater.GetForEdit(fileJob.Constant)
 			newJob.Constant = fileJob.Constant
 			newJob.JobId = int32(fileJob.JobId)
 			newJob.InheritedJob = fileJob.InheritedJob
@@ -94,9 +95,9 @@ func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater
 		}
 	}
 
-	for _, existingJob := range jobUpdater.currentJobs {
+	for _, existingJob := range jobUpdater.CurrentValues {
 		if _, ok := fileJobMap[existingJob.Constant]; !ok {
-			deletedJob := jobUpdater.getForEdit(existingJob.Constant)
+			deletedJob := jobUpdater.GetForEdit(existingJob.Constant)
 			deletedJob.Deleted = true
 			deletedJob.LastUpdate = update.Name()
 		}
