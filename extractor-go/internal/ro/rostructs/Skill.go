@@ -1,5 +1,7 @@
 package rostructs
 
+import "github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+
 // V1 was used between 2009-10-07 and before 2010-04-14
 // It used the following files:
 // - data/lua files/skillinfo/jobinheritlist.lub
@@ -43,4 +45,47 @@ type SkillInfoV2 struct {
 	AttackRange       []int
 	RequiredSkills    []RequiredSkillV2    `lua:"_NeedSkillList"`
 	JobRequiredSkills []JobRequiredSkillV2 `lua:"NeedSkillList"`
+}
+
+func (s SkillInfoV2) ToSkill(base domain.Skill) domain.Skill {
+	base.Constant = domain.NewNullableString(s.Constant)
+	base.SkillID = int32(s.SkillId)
+	base.Name = domain.NewNullableString(s.SkillName)
+	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
+
+	spCost := make([]int32, len(s.SpCost))
+	for i, v := range s.SpCost {
+		spCost[i] = int32(v)
+	}
+	base.SpCost = spCost
+	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
+	base.AttackRange = make([]int32, len(s.AttackRange))
+	for i, v := range s.AttackRange {
+		base.AttackRange[i] = int32(v)
+	}
+
+	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
+	for i, v := range s.RequiredSkills {
+		base.RequiredSkills[i] = domain.NeedSkillEntry{
+			SkillID: int32(v.SkillId),
+			Level:   int32(v.Lv),
+		}
+	}
+
+	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
+	for i, v := range s.JobRequiredSkills {
+		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
+			JobId:  int32(v.Job),
+			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
+		}
+
+		for j, w := range v.RequiredSkills {
+			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
+				SkillID: int32(w.SkillId),
+				Level:   int32(w.Lv),
+			}
+		}
+	}
+
+	return base
 }

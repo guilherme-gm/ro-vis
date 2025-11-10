@@ -68,6 +68,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 
 	skillUpdater := loaders.NewUpdater(existingSkills)
 	l.loadSkillIDs(basePath, update, skillUpdater)
+	l.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
 }
 
 func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
@@ -135,6 +136,60 @@ func (l *SkillLoader) loadSkillIDs(basePath string, update domain.Update, skillU
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
+		}
+	}
+
+	for _, existingSkill := range skillUpdater.CurrentValues {
+		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
+			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+			deletedSkill.Deleted = true
+		}
+	}
+}
+
+type KV[T comparable] struct {
+	Key   T
+	Value int
+}
+
+func (l *SkillLoader) loadSkillInfos(
+	basePath string,
+	update domain.Update,
+	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
+	jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob],
+) {
+	change, err := update.GetChangeForFile(skillInfoListV2)
+	if err != nil {
+		panic(err)
+	}
+
+	jobMap := make(map[string]int)
+	jobUpdater.ForEach(func(key string, value domain.SkillJob) {
+		jobMap[value.Constant] = int(value.JobId)
+	})
+
+	skillIdMap := make(map[string]int)
+	skillUpdater.ForEach(func(key int32, value domain.Skill) {
+		skillIdMap[value.Constant.String] = int(value.SkillID)
+	})
+
+	skillParser := NewSkillInfoV2Parser()
+	skillList := skillParser.Parse(basePath, &change, jobMap, skillIdMap)
+
+	fileSkillMap := make(map[int32]bool)
+	for _, fileSkill := range skillList {
+		fileSkillMap[int32(fileSkill.SkillId)] = true
+		existingSkill, exists := skillUpdater.GetForRead(int32(fileSkill.SkillId))
+		shouldSave := false
+
+		fileSkillDomain := fileSkill.ToSkill(existingSkill)
+		if !exists || !existingSkill.Equals(fileSkillDomain) {
+			shouldSave = true
+		}
+
+		if shouldSave {
+			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
+			*newSkill = fileSkillDomain
 		}
 	}
 

@@ -45,9 +45,9 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		Constant:          domain.NullableString(q.Constant),
 		Name:              domain.NullableString(q.Name),
 		MaxLevel:          domain.NullableInt32(q.MaxLevel),
-		SpAmount:          spAmount,
-		SeparateLevel:     domain.NullableBool(q.SeparateLevel),
+		SpCost:            spAmount,
+		CanSelectLevel:    domain.NullableBool(q.SeparateLevel),
 		AttackRange:       attackRange,
-		NeedSkillList:     needSkillList,
+		RequiredSkills:    needSkillList,
 	}
 }

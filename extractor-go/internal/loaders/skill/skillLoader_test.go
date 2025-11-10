@@ -121,3 +121,48 @@ func TestSkillLoader_loadSkillIDs_InsertUpdateDelete(t *testing.T) {
 		assert.True(t, deleted.Deleted)
 	}
 }
+
+func TestSkillLoader_loadSkillInfos(t *testing.T) {
+	update := domain.Update{
+		Date: time.Date(2012, time.January, 2, 0, 0, 0, 0, time.UTC),
+		Changes: []domain.UpdateChange{
+			{Patch: "testfiles", File: "data/luafiles514/lua files/skillinfoz/JobInheritList.lub"},
+			{Patch: "testfiles", File: "data/luafiles514/lua files/skillinfoz/SkillID.lub"},
+			{Patch: "testfiles", File: "data/luafiles514/lua files/skillinfoz/SkillInfoList.lub"},
+		},
+	}
+
+	// Build job and skill tables first (mirrors LoadPatch order)
+	jobUpdater := loaders.NewUpdater([]domain.SkillJob{})
+	skillUpdater := loaders.NewUpdater([]domain.Skill{
+		{SkillID: 24, Constant: domain.NewNullableString("AL_RUWACH"), Description: domain.NewNullableString("Test"), Deleted: false},
+	})
+	loader := &SkillLoader{}
+
+	loader.loadJobs(testfiles.Root, update, jobUpdater)
+	loader.loadSkillIDs(testfiles.Root, update, skillUpdater)
+
+	// Precondition sanity: skill 45 exists from SkillID.lub and is not deleted yet
+	if s, ok := skillUpdater.GetForRead(45); assert.True(t, ok) {
+		assert.Equal(t, int32(45), s.SkillID)
+		assert.False(t, s.Deleted)
+	}
+
+	// Execute
+	loader.loadSkillInfos(testfiles.Root, update, skillUpdater, jobUpdater)
+
+	// Skills present in SKILL_INFO_LIST should not be marked deleted
+	ruwach, ok := skillUpdater.GetForRead(24)
+	assert.True(t, ok)
+	assert.False(t, ruwach.Deleted)
+	assert.Equal(t, "AL_RUWACH", ruwach.Constant.String)
+	assert.Equal(t, int32(24), ruwach.SkillID)
+	assert.Equal(t, "Ruach", ruwach.Name.String)
+	assert.Equal(t, "Test", ruwach.Description.String)
+	assert.Equal(t, int32(1), ruwach.MaxLevel.Int32)
+	assert.EqualValues(t, []int32{10}, ruwach.SpCost)
+	assert.Equal(t, domain.NewNullableBool(false), ruwach.CanSelectLevel)
+	assert.EqualValues(t, []int32{10}, ruwach.AttackRange)
+	assert.Equal(t, 0, len(ruwach.RequiredSkills))
+	assert.Equal(t, 0, len(ruwach.JobRequiredSkills))
+}

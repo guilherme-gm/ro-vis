@@ -61,3 +61,26 @@ func (u *Updater[K, T, P]) GetForEdit(key K) P {
 	u.DirtyValues[key] = newMap
 	return newMap
 }
+
+func (u *Updater[K, T, P]) ForEach(fn func(K, T)) {
+	readKeys := make(map[K]bool)
+
+	// Dirty contains modified/new values
+	for _, m := range u.DirtyValues {
+		if _, ok := readKeys[(*m).GetId()]; ok {
+			continue
+		}
+
+		readKeys[(*m).GetId()] = true
+		fn((*m).GetId(), *m)
+	}
+
+	// Current contains existing values, before any changes (may be duplicated with dirty)
+	for _, m := range u.CurrentValues {
+		if _, ok := readKeys[(*m).GetId()]; ok {
+			continue
+		}
+		readKeys[(*m).GetId()] = true
+		fn((*m).GetId(), *m)
+	}
+}

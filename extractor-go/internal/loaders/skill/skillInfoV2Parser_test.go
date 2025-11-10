@@ -35,6 +35,13 @@ func TestSkillInfoV2Parser(t *testing.T) {
 
 	windwalk := result[windwalkIdx]
 	assert.Equal(t, 383, windwalk.SkillId, "SN_WINDWALK has invalid SkillID")
+	assert.Equal(t, "Wind Walk", windwalk.SkillName)
+	assert.Equal(t, 10, windwalk.MaxLv)
+	assert.EqualValues(t, []int{46, 52, 58, 64, 70, 76, 82, 88, 94, 100}, windwalk.SpCost)
+	assert.Equal(t, true, windwalk.CanSelectLevel)
+	assert.EqualValues(t, []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, windwalk.AttackRange)
+	assert.Equal(t, 1, len(windwalk.RequiredSkills))
+	assert.Equal(t, 0, len(windwalk.JobRequiredSkills))
 
 	// Checking meltdown (contains RequiredSkills -- not job linked)
 	meltdownIdx := slices.IndexFunc(result, func(s rostructs.SkillInfoV2) bool { return s.Constant == "WS_MELTDOWN" })

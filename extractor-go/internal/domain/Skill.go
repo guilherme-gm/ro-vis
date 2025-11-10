@@ -25,6 +25,11 @@ type NeedSkillEntry struct {
 	Level   int32
 }
 
+type JobRequiredSkillEntry struct {
+	JobId  int32
+	Skills []NeedSkillEntry
+}
+
 type Skill struct {
 	PreviousHistoryID NullableInt32
 	HistoryID         NullableInt32
@@ -34,10 +39,11 @@ type Skill struct {
 	Name              NullableString
 	Description       NullableString
 	MaxLevel          NullableInt32
-	SpAmount          []int32
-	SeparateLevel     NullableBool
+	SpCost            []int32
+	CanSelectLevel    NullableBool
 	AttackRange       []int32
-	NeedSkillList     []NeedSkillEntry
+	RequiredSkills    []NeedSkillEntry
+	JobRequiredSkills []JobRequiredSkillEntry
 	Deleted           bool
 }
 
@@ -49,21 +55,72 @@ func (s *Skill) SetId(id int32) {
 	s.SkillID = id
 }
 
-func (s *Skill) Equals(otherSkill Skill) bool {
-	// FileVersion is not checked, if the file has changed but the skill is the same, we don't care.
-	if len(s.NeedSkillList) != len(otherSkill.NeedSkillList) {
+// Checks if JobRequiredSkills are equal
+// We consider equal if we have the same jobs and same requirements
+func (s *Skill) isJobRequiredSkillEqual(otherSkill Skill) bool {
+	if len(s.JobRequiredSkills) != len(otherSkill.JobRequiredSkills) {
 		return false
 	}
 
+	for _, v := range s.JobRequiredSkills {
+		var otherRequired JobRequiredSkillEntry
+		otherRequired.JobId = -1
+		// find matching job in otherSkill
+		for _, otherJob := range otherSkill.JobRequiredSkills {
+			if otherJob.JobId == v.JobId {
+				otherRequired = otherJob
+				break
+			}
+		}
+
+		if otherRequired.JobId == -1 {
+			return false
+		}
+
+		if len(v.Skills) != len(otherRequired.Skills) {
+			return false
+		}
+
+		for _, w := range v.Skills {
+			var otherSkill NeedSkillEntry
+			otherSkill.SkillID = -1
+			// find matching skill in otherRequired
+			for _, otherRequiredSkill := range otherRequired.Skills {
+				if otherRequiredSkill.SkillID == w.SkillID {
+					otherSkill = otherRequiredSkill
+					break
+				}
+			}
+
+			if otherSkill.SkillID == -1 {
+				return false
+			}
+
+			if w.SkillID != otherSkill.SkillID {
+				return false
+			}
+
+			if w.Level != otherSkill.Level {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func (s *Skill) Equals(otherSkill Skill) bool {
+	// FileVersion is not checked, if the file has changed but the skill is the same, we don't care.
 	return (s.SkillID == otherSkill.SkillID &&
 		s.Constant == otherSkill.Constant &&
 		s.Name == otherSkill.Name &&
 		s.Description == otherSkill.Description &&
 		s.MaxLevel == otherSkill.MaxLevel &&
-		slices.Equal(s.SpAmount, otherSkill.SpAmount) &&
-		s.SeparateLevel == otherSkill.SeparateLevel &&
+		slices.Equal(s.SpCost, otherSkill.SpCost) &&
+		s.CanSelectLevel == otherSkill.CanSelectLevel &&
 		slices.Equal(s.AttackRange, otherSkill.AttackRange) &&
-		slices.Equal(s.NeedSkillList, otherSkill.NeedSkillList))
+		slices.Equal(s.RequiredSkills, otherSkill.RequiredSkills) &&
+		s.isJobRequiredSkillEqual(otherSkill))
 }
 
 type MinSkill struct {
