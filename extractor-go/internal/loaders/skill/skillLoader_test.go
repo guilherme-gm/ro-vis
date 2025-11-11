@@ -166,3 +166,51 @@ func TestSkillLoader_loadSkillInfos(t *testing.T) {
 	assert.Equal(t, 0, len(ruwach.RequiredSkills))
 	assert.Equal(t, 0, len(ruwach.JobRequiredSkills))
 }
+
+func TestSkillLoader_loadSkillDesc(t *testing.T) {
+	update := domain.Update{
+		Date: time.Date(2012, time.January, 2, 0, 0, 0, 0, time.UTC),
+		Changes: []domain.UpdateChange{
+			{Patch: "testfiles", File: "data/luafiles514/lua files/skillinfoz/SkillDescript.lub"},
+		},
+	}
+
+	// Seed existing skills so the parser can resolve SKID constants
+	existing := []domain.Skill{
+		{SkillID: 1, Constant: domain.NewNullableString("NV_BASIC"), Description: domain.NewNullableString("Old"), Deleted: false},
+		{SkillID: 24, Constant: domain.NewNullableString("AL_RUWACH"), Description: domain.NewNullableString(""), Deleted: false},
+		{SkillID: 45, Constant: domain.NewNullableString("AC_CONCENTRATION"), Description: domain.NewNullableString("something"), Deleted: false},
+		{SkillID: 9999, Constant: domain.NewNullableString("TO_DELETE"), Description: domain.NewNullableString("Removed desc"), Deleted: false},
+	}
+	skillUpdater := loaders.NewUpdater(existing)
+
+	loader := &SkillLoader{}
+	loader.loadSkillDesc(testfiles.Root, update, skillUpdater)
+
+	// NV_BASIC description updated
+	if s, ok := skillUpdater.GetForRead(1); assert.True(t, ok, "NV_BASIC should exist") {
+		assert.False(t, s.Deleted)
+		assert.True(t, s.Description.Valid)
+		assert.Equal(t, "Basic Skill\nMAX Lv : 9", s.Description.String)
+	}
+
+	// AL_RUWACH description updated with 3 lines
+	if s, ok := skillUpdater.GetForRead(24); assert.True(t, ok, "AL_RUWACH should exist") {
+		assert.False(t, s.Deleted)
+		assert.True(t, s.Description.Valid)
+		assert.Equal(t, "Ruwach\nMAX Lv : 10\nType : ^000099Offensive^000000", s.Description.String)
+	}
+
+	// AC_CONCENTRATION empty description preserved as empty string (npc-like)
+	if s, ok := skillUpdater.GetForRead(45); assert.True(t, ok, "AC_CONCENTRATION should exist") {
+		assert.False(t, s.Deleted)
+		assert.True(t, s.Description.Valid)
+		assert.Equal(t, "", s.Description.String)
+	}
+
+	// Extra existing skill not present in file should be marked with null description
+	if s, ok := skillUpdater.GetForRead(9999); assert.True(t, ok, "9999 should exist") {
+		assert.False(t, s.Deleted)
+		assert.False(t, s.Description.Valid)
+	}
+}

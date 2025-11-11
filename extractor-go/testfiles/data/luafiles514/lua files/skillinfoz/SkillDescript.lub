@@ -1,0 +1,16 @@
+-- Trimmed down version of data/luafiles514/lua files/skillinfoz/SkillDescript.lub
+-- contains only a small set of data to be used in tests
+-- Based on V2 file
+
+SKILL_DESCRIPT = {
+	[SKID.NV_BASIC] = {
+		"Basic Skill",
+		"MAX Lv : 9"
+	},
+	[SKID.AL_RUWACH] = {
+		"Ruwach",
+		"MAX Lv : 10",
+		"Type : ^000099Offensive^000000"
+	},
+	[SKID.AC_CONCENTRATION] = {}, -- mimics NPC skill
+}

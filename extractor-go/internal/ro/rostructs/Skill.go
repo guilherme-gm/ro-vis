@@ -1,6 +1,10 @@
 package rostructs
 
-import "github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+import (
+	"strings"
+
+	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+)
 
 // V1 was used between 2009-10-07 and before 2010-04-14
 // It used the following files:
@@ -87,5 +91,15 @@ func (s SkillInfoV2) ToSkill(base domain.Skill) domain.Skill {
 		}
 	}
 
+	return base
+}
+
+type SkillDescript struct {
+	SkillId     int      `lua:"@index"`
+	Description []string `lua:"@sliceValue"`
+}
+
+func (s SkillDescript) ToSkill(base domain.Skill) domain.Skill {
+	base.Description = domain.NewNullableString(strings.Join(s.Description, "\n"))
 	return base
 }
