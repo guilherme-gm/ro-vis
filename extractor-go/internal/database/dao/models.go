@@ -225,10 +225,11 @@ type PreviousSkillHistoryVw struct {
 	Name              sql.NullString
 	Description       sql.NullString
 	MaxLevel          sql.NullInt32
-	SpAmount          []byte
-	SeparateLevel     sql.NullBool
+	SpCost            []byte
+	CanSelectLevel    sql.NullBool
 	AttackRange       []byte
-	NeedSkillList     []byte
+	RequiredSkills    []byte
+	JobRequiredSkills []byte
 	CreatedAt         sql.NullTime
 }
 
@@ -276,10 +277,11 @@ type SkillsHistory struct {
 	Name              sql.NullString
 	Description       sql.NullString
 	MaxLevel          sql.NullInt32
-	SpAmount          []byte
-	SeparateLevel     sql.NullBool
+	SpCost            []byte
+	CanSelectLevel    sql.NullBool
 	AttackRange       []byte
-	NeedSkillList     []byte
+	RequiredSkills    []byte
+	JobRequiredSkills []byte
 	CreatedAt         sql.NullTime
 }
 

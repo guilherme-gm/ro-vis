@@ -43,6 +43,7 @@ type Querier interface {
 	GetQuestList(ctx context.Context, arg GetQuestListParams) ([]GetQuestListRow, error)
 	GetQuestsIdsInUpdate(ctx context.Context, update string) ([]GetQuestsIdsInUpdateRow, error)
 	GetSkillJobs(ctx context.Context) ([]SkillsJob, error)
+	GetSkillsIdsInUpdate(ctx context.Context, update string) ([]GetSkillsIdsInUpdateRow, error)
 	GetStrings(ctx context.Context, ids []string) ([]GetStringsRow, error)
 	GetUpdatesCount(ctx context.Context) (int64, error)
 	InsertPatch(ctx context.Context, arg InsertPatchParams) error

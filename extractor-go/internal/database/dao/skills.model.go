@@ -19,10 +19,10 @@ func (q *SkillsJob) ToDomain() domain.SkillJob {
 }
 
 func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
-	var spAmount []int32
-	if q.SpAmount != nil {
+	var spCost []int32
+	if q.SpCost != nil {
 		// Parse the JSON string into RewardItem slice
-		json.Unmarshal(q.SpAmount, &spAmount)
+		json.Unmarshal(q.SpCost, &spCost)
 	}
 
 	var attackRange []int32
@@ -32,9 +32,15 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 	}
 
 	var needSkillList []domain.NeedSkillEntry
-	if q.NeedSkillList != nil {
+	if q.RequiredSkills != nil {
 		// Parse the JSON string into RewardItem slice
-		json.Unmarshal(q.NeedSkillList, &needSkillList)
+		json.Unmarshal(q.RequiredSkills, &needSkillList)
+	}
+
+	var jobRequiredSkills []domain.JobRequiredSkillEntry
+	if q.JobRequiredSkills != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.JobRequiredSkills, &jobRequiredSkills)
 	}
 
 	return domain.Skill{
@@ -45,9 +51,10 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		Constant:          domain.NullableString(q.Constant),
 		Name:              domain.NullableString(q.Name),
 		MaxLevel:          domain.NullableInt32(q.MaxLevel),
-		SpCost:            spAmount,
-		CanSelectLevel:    domain.NullableBool(q.SeparateLevel),
+		SpCost:            spCost,
+		CanSelectLevel:    domain.NullableBool(q.CanSelectLevel),
 		AttackRange:       attackRange,
 		RequiredSkills:    needSkillList,
+		JobRequiredSkills: jobRequiredSkills,
 	}
 }

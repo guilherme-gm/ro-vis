@@ -11,7 +11,7 @@ import (
 )
 
 const getCurrentSkills = `-- name: GetCurrentSkills :many
-SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_amount, skills_history.separate_level, skills_history.attack_range, skills_history.need_skill_list, skills_history.created_at, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.created_at, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `skills` + "`" + `
 INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -26,10 +26,11 @@ type GetCurrentSkillsRow struct {
 	Name              sql.NullString
 	Description       sql.NullString
 	MaxLevel          sql.NullInt32
-	SpAmount          []byte
-	SeparateLevel     sql.NullBool
+	SpCost            []byte
+	CanSelectLevel    sql.NullBool
 	AttackRange       []byte
-	NeedSkillList     []byte
+	RequiredSkills    []byte
+	JobRequiredSkills []byte
 	CreatedAt         sql.NullTime
 	Deleted           bool
 }
@@ -53,10 +54,11 @@ func (q *Queries) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, 
 			&i.Name,
 			&i.Description,
 			&i.MaxLevel,
-			&i.SpAmount,
-			&i.SeparateLevel,
+			&i.SpCost,
+			&i.CanSelectLevel,
 			&i.AttackRange,
-			&i.NeedSkillList,
+			&i.RequiredSkills,
+			&i.JobRequiredSkills,
 			&i.CreatedAt,
 			&i.Deleted,
 		); err != nil {
@@ -97,6 +99,40 @@ func (q *Queries) GetSkillJobs(ctx context.Context) ([]SkillsJob, error) {
 			&i.UpdatedAt,
 			&i.CreatedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSkillsIdsInUpdate = `-- name: GetSkillsIdsInUpdate :many
+SELECT ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `skill_id` + "`" + `
+FROM ` + "`" + `skills_history` + "`" + `
+WHERE ` + "`" + `skills_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
+`
+
+type GetSkillsIdsInUpdateRow struct {
+	HistoryID int32
+	SkillID   int32
+}
+
+func (q *Queries) GetSkillsIdsInUpdate(ctx context.Context, update string) ([]GetSkillsIdsInUpdateRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSkillsIdsInUpdate, update)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSkillsIdsInUpdateRow
+	for rows.Next() {
+		var i GetSkillsIdsInUpdateRow
+		if err := rows.Scan(&i.HistoryID, &i.SkillID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

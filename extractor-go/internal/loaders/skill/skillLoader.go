@@ -70,6 +70,26 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	l.loadSkillIDs(basePath, update, skillUpdater)
 	l.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
 	l.loadSkillDesc(basePath, update, skillUpdater)
+
+	if len(skillUpdater.ValuesToInsert) > 0 {
+		fmt.Println("> Inserting new skills... ", len(skillUpdater.ValuesToInsert))
+		res, err := l.repository.AddSkillsToHistory(tx, update.Name(), skillUpdater.ValuesToInsert)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("\tResult: ", res)
+	}
+
+	if len(skillUpdater.ValuesToUpdate) > 0 {
+		fmt.Println("> Updating skills... ", len(skillUpdater.ValuesToUpdate))
+		res, err := l.repository.AddSkillsToHistory(tx, update.Name(), skillUpdater.ValuesToUpdate)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("\tResult: ", res)
+	}
 }
 
 func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {

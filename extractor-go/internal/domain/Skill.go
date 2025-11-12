@@ -20,6 +20,18 @@ func (s *SkillJob) SetId(id string) {
 	s.Constant = id
 }
 
+func (s SkillJob) GetHistoryId() NullableInt32 {
+	return NewNullableNullInt32() // SkillJob doesn't have HistoryID
+}
+
+func (s *SkillJob) SetHistoryId(id NullableInt32) {
+	// SkillJob doesn't have HistoryID
+}
+
+func (s *SkillJob) SetPreviousHistoryId(id NullableInt32) {
+	// SkillJob doesn't have PreviousHistoryID
+}
+
 type NeedSkillEntry struct {
 	SkillID int32
 	Level   int32
@@ -53,6 +65,18 @@ func (s Skill) GetId() int32 {
 
 func (s *Skill) SetId(id int32) {
 	s.SkillID = id
+}
+
+func (s Skill) GetHistoryId() NullableInt32 {
+	return s.HistoryID
+}
+
+func (s *Skill) SetHistoryId(id NullableInt32) {
+	s.HistoryID = id
+}
+
+func (s *Skill) SetPreviousHistoryId(id NullableInt32) {
+	s.PreviousHistoryID = id
 }
 
 // Checks if JobRequiredSkills are equal

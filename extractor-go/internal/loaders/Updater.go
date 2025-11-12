@@ -1,8 +1,18 @@
 package loaders
 
-import (
-	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
-)
+import "github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+
+type UpdaterEntry[K comparable] interface {
+	GetId() K
+	GetHistoryId() domain.NullableInt32
+}
+
+type UpdaterEntryPointer[K comparable, T any] interface {
+	SetId(id K)
+	SetHistoryId(id domain.NullableInt32)
+	SetPreviousHistoryId(id domain.NullableInt32)
+	*T
+}
 
 /**
  * Generic updater to track changes to a given data type.
@@ -10,14 +20,14 @@ import (
  * It is used to generically track changes in loaders so they can later apply it to the database.
  */
 
-type Updater[K comparable, T domain.Identifiable[K], P domain.IdentifiablePointer[K, T]] struct {
+type Updater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]] struct {
 	CurrentValues  map[K]P
 	DirtyValues    map[K]P
 	ValuesToInsert []P
 	ValuesToUpdate []P
 }
 
-func NewUpdater[K comparable, T domain.Identifiable[K], P domain.IdentifiablePointer[K, T]](currentValues []T) *Updater[K, T, P] {
+func NewUpdater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]](currentValues []T) *Updater[K, T, P] {
 	currentValuesHash := make(map[K]P)
 	for _, m := range currentValues {
 		currentValuesHash[m.GetId()] = &m
@@ -49,14 +59,20 @@ func (u *Updater[K, T, P]) GetForEdit(key K) P {
 
 	if m, ok := u.CurrentValues[key]; ok {
 		newMap := *m
-		u.ValuesToUpdate = append(u.ValuesToUpdate, &newMap)
-		u.DirtyValues[key] = &newMap
-		return &newMap
+		newMapPtr := P(&newMap)
+		// This line is weird but makes sense. at this point newMap = *m, thus GetHistoryID
+		// contains the original HistoryID, and we want it to become PreviousHistoryID
+		newMapPtr.SetPreviousHistoryId(newMap.GetHistoryId())
+		newMapPtr.SetHistoryId(domain.NewNullableNullInt32())
+		u.ValuesToUpdate = append(u.ValuesToUpdate, newMapPtr)
+		u.DirtyValues[key] = newMapPtr
+		return newMapPtr
 	}
 
 	var newMapData T
 	newMap := P(&newMapData)
 	newMap.SetId(key)
+	newMap.SetHistoryId(domain.NewNullableNullInt32())
 	u.ValuesToInsert = append(u.ValuesToInsert, newMap)
 	u.DirtyValues[key] = newMap
 	return newMap
