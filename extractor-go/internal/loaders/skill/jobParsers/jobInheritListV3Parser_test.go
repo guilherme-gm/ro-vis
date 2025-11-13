@@ -1,4 +1,4 @@
-package skill
+package jobParsers
 
 import (
 	"slices"
@@ -9,9 +9,9 @@ import (
 )
 
 func TestJobInheritV2Parser(t *testing.T) {
-	parser := NewJobInehritListV2Parser()
+	parser := NewJobInehritListV3Parser()
 
-	result := parser.parseFile(testfiles.GetFilePath("rostructs/JobInheritListV2.lua"))
+	result := parser.ParseFile(testfiles.GetFilePath("rostructs/JobInheritListV2.lua"))
 
 	assert.GreaterOrEqual(t, len(result), 1, "Expected at least one result, got none")
 

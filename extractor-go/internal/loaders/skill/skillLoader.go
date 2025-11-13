@@ -9,6 +9,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
 )
 
 type SkillLoader struct {
@@ -19,7 +20,7 @@ type SkillLoader struct {
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
 func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		jobInehritListV2Regex,
+		jobParsers.JobInheritListV2Regex,
 		skillIdV2Regex,
 		skillInfoListV2Regex,
 	}
@@ -93,12 +94,12 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 }
 
 func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
-	change, err := update.GetChangeForFile(jobInehritListV2)
+	change, err := update.GetChangeForFile(jobParsers.JobInehritListV2)
 	if err != nil {
 		panic(err)
 	}
 
-	jobParser := NewJobInehritListV2Parser()
+	jobParser := jobParsers.NewJobInehritListV3Parser()
 	jobList := jobParser.Parse(basePath, &change)
 
 	fileJobMap := make(map[string]bool)

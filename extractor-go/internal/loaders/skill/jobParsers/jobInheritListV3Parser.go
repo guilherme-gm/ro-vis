@@ -1,4 +1,4 @@
-package skill
+package jobParsers
 
 import (
 	"regexp"
@@ -7,6 +7,9 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
+
+var JobInehritListV2 = "data/luafiles514/lua files/skillinfoz/jobinheritlist.lub"
+var JobInheritListV2Regex = regexp.MustCompile(`(?i)^` + JobInehritListV2 + `$`)
 
 type SkillJobId struct {
 	Constant      string
@@ -24,29 +27,33 @@ func newSkillJobId(constant string, jobId int) *SkillJobId {
 	}
 }
 
-type JobInehritListV2Parser struct {
+/**
+ * V3 starts on 2012-01-11 with the move to LuaFiles514.
+ * The structure itself remains the same as V2
+ */
+type JobInehritListV3Parser struct {
 }
 
-func NewJobInehritListV2Parser() *JobInehritListV2Parser {
-	return &JobInehritListV2Parser{}
+func NewJobInehritListV3Parser() *JobInehritListV3Parser {
+	return &JobInehritListV3Parser{}
 }
 
-func (p JobInehritListV2Parser) IsUpdateInRange(update *domain.Update) bool {
+func (p JobInehritListV3Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2010, time.April, 14, 0, 0, 0, 0, time.UTC)) &&
 		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC))
 }
 
-func (p JobInehritListV2Parser) GetRelevantFiles() []*regexp.Regexp {
+func (p JobInehritListV3Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		jobInehritListV2Regex,
+		JobInheritListV2Regex,
 	}
 }
 
-func (p JobInehritListV2Parser) HasFiles(update *domain.Update) bool {
+func (p JobInehritListV3Parser) HasFiles(update *domain.Update) bool {
 	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
-func (p JobInehritListV2Parser) parseFile(filePath string) []SkillJobId {
+func (p JobInehritListV3Parser) ParseFile(filePath string) []SkillJobId {
 	stringReencoder := decoders.ConvertEucKrToUtf8
 
 	var jobIds struct {
@@ -98,6 +105,6 @@ func (p JobInehritListV2Parser) parseFile(filePath string) []SkillJobId {
 	return result
 }
 
-func (p JobInehritListV2Parser) Parse(basePath string, change *domain.UpdateChange) []SkillJobId {
-	return p.parseFile(basePath + "/" + change.GetFullPath())
+func (p JobInehritListV3Parser) Parse(basePath string, change *domain.UpdateChange) []SkillJobId {
+	return p.ParseFile(basePath + "/" + change.GetFullPath())
 }

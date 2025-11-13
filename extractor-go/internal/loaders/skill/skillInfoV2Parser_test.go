@@ -4,6 +4,7 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 	"github.com/guilherme-gm/ro-vis/extractor/testfiles"
 	"github.com/stretchr/testify/assert"
@@ -11,8 +12,8 @@ import (
 
 func TestSkillInfoV2Parser(t *testing.T) {
 	// Get needed data from other parsers
-	jobInehritListV2Parser := NewJobInehritListV2Parser()
-	jobIdList := jobInehritListV2Parser.parseFile(testfiles.GetFilePath("rostructs/JobInheritListV2.lua"))
+	jobInehritListV3Parser := jobParsers.NewJobInehritListV3Parser()
+	jobIdList := jobInehritListV3Parser.ParseFile(testfiles.GetFilePath("rostructs/JobInheritListV2.lua"))
 
 	jobIdTable := make(map[string]int)
 	for _, v := range jobIdList {
