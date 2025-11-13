@@ -20,7 +20,7 @@ type SkillLoader struct {
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
 func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		jobParsers.JobInheritListV2Regex,
+		jobParsers.JobInheritListV3Regex,
 		skillIdV2Regex,
 		skillInfoListV2Regex,
 	}
@@ -94,7 +94,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 }
 
 func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
-	change, err := update.GetChangeForFile(jobParsers.JobInehritListV2)
+	change, err := update.GetChangeForFile(jobParsers.JobInehritListV3)
 	if err != nil {
 		panic(err)
 	}

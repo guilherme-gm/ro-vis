@@ -8,8 +8,8 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
-var JobInehritListV2 = "data/luafiles514/lua files/skillinfoz/jobinheritlist.lub"
-var JobInheritListV2Regex = regexp.MustCompile(`(?i)^` + JobInehritListV2 + `$`)
+var JobInehritListV3 = "data/luafiles514/lua files/skillinfoz/jobinheritlist.lub"
+var JobInheritListV3Regex = regexp.MustCompile(`(?i)^` + JobInehritListV3 + `$`)
 
 type SkillJobId struct {
 	Constant      string
@@ -29,7 +29,9 @@ func newSkillJobId(constant string, jobId int) *SkillJobId {
 
 /**
  * V3 starts on 2012-01-11 with the move to LuaFiles514.
- * The structure itself remains the same as V2
+ * The structure and content remains the same as V2
+ *
+ * It aligns with skill V5
  */
 type JobInehritListV3Parser struct {
 }
@@ -45,7 +47,7 @@ func (p JobInehritListV3Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p JobInehritListV3Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		JobInheritListV2Regex,
+		JobInheritListV3Regex,
 	}
 }
 
