@@ -8,6 +8,21 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
+/**
+ * Skill ID V1 parser
+ * Started at: 2010-04-14
+ *
+ * Files:
+ * - data/lua files/skillinfoz/skillid.lub
+ *
+ * Format:
+ * SKID = { SkillConst = SkillId }
+ *
+ * Notes:
+ * - This aligns with Skill V4
+ * - This update introduced auto-learning of pre-requirements, but I think this file itself
+ *   was only changed for simplification purposes (having proper Lua constants)
+ */
 type SkillInfoV1Parser struct {
 }
 

@@ -24,7 +24,7 @@ type SkillLoader struct {
 func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
 		jobParsers.JobInheritListV3Regex,
-		idParser.SkillIdV2Regex,
+		idParser.SkillIdV1Regex,
 		infoParser.SkillInfoListV2Regex,
 	}
 }

@@ -9,8 +9,17 @@ import (
 )
 
 /**
- * Skill V5 starts on 2012-01-11, and it is a simple directory change compared to V4.
- * Files where moved from data/lua files/skillinfoz/* to data/luafiles514/lua files/skillinfoz/*
+ * Skill V5 structure/parser
+ * Started at: 2012-01-11
+ * Simply moved files from data/lua files/skillinfoz/* to data/lua files514/lua files/skillinfoz/*
+ *
+ * Files:
+ * - data/luafiles514/lua files/skillinfoz/jobinheritlist.lub (Job Inherit V2, now uses consts)
+ * - data/luafiles514/lua files/skillinfoz/skillid.lub (Skill ID V2)
+ * - data/luafiles514/lua files/skillinfoz/skillinfolist.lub (Skill Info V3)
+ * - data/luafiles514/lua files/skillinfoz/skilldescript.lub (Skill Descript V4)
+ * - data/luafiles514/lua files/skillinfoz/skillinfo_f.lub (not parsed)
+ * - data/luafiles514/lua files/skillinfoz/skilltreeview.lub (not parsed)
  */
 type SkillV5Parser struct{}
 

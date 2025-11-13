@@ -1,6 +1,6 @@
 -- Trimmed down version of data/luafiles514/lua files/skillinfoz/SkillID.lub
 -- contains only a small set of data to be used in tests
--- Based on V2 file
+-- Based on V3 file
 
 SKID = {
 	NV_BASIC = 1,
