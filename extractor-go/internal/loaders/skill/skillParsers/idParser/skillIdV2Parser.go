@@ -1,4 +1,4 @@
-package skill
+package idParser
 
 import (
 	"regexp"
@@ -7,6 +7,9 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/decoders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
+
+var SkillIdV2 = "data/luafiles514/lua files/skillinfoz/skillid.lub"
+var SkillIdV2Regex = regexp.MustCompile(`(?i)^` + SkillIdV2 + `$`)
 
 type SkillIdV2Parser struct {
 }
@@ -22,7 +25,7 @@ func (p SkillIdV2Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p SkillIdV2Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		skillIdV2Regex,
+		SkillIdV2Regex,
 	}
 }
 
@@ -30,7 +33,7 @@ func (p SkillIdV2Parser) HasFiles(update *domain.Update) bool {
 	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
-func (p SkillIdV2Parser) parseFile(filePath string) map[string]int {
+func (p SkillIdV2Parser) ParseFile(filePath string) map[string]int {
 	stringReencoder := decoders.ConvertEucKrToUtf8
 
 	var skillIds struct {
@@ -52,5 +55,5 @@ func (p SkillIdV2Parser) parseFile(filePath string) map[string]int {
 }
 
 func (p SkillIdV2Parser) Parse(basePath string, change *domain.UpdateChange) map[string]int {
-	return p.parseFile(basePath + "/" + change.GetFullPath())
+	return p.ParseFile(basePath + "/" + change.GetFullPath())
 }

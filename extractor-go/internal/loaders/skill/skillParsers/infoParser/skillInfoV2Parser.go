@@ -1,4 +1,4 @@
-package skill
+package infoParser
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func (p SkillInfoV2Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p SkillInfoV2Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		skillInfoListV2Regex,
+		SkillInfoListV2Regex,
 	}
 }
 
@@ -32,7 +32,7 @@ func (p SkillInfoV2Parser) HasFiles(update *domain.Update) bool {
 	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
-func (p SkillInfoV2Parser) parseFile(filePath string, jobIdTable map[string]int, skillIdTable map[string]int) []rostructs.SkillInfoV2 {
+func (p SkillInfoV2Parser) ParseFile(filePath string, jobIdTable map[string]int, skillIdTable map[string]int) []rostructs.SkillInfoV2 {
 	stringReencoder := decoders.ConvertEucKrToUtf8
 
 	var skills []rostructs.SkillInfoV2
@@ -50,5 +50,5 @@ func (p SkillInfoV2Parser) parseFile(filePath string, jobIdTable map[string]int,
 }
 
 func (p SkillInfoV2Parser) Parse(basePath string, change *domain.UpdateChange, jobIdTable map[string]int, skillIdTable map[string]int) []rostructs.SkillInfoV2 {
-	return p.parseFile(basePath+"/"+change.Patch+"/"+change.File, jobIdTable, skillIdTable)
+	return p.ParseFile(basePath+"/"+change.Patch+"/"+change.File, jobIdTable, skillIdTable)
 }

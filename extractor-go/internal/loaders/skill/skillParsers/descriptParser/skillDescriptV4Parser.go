@@ -1,4 +1,4 @@
-package skill
+package descriptParser
 
 import (
 	"fmt"
@@ -10,29 +10,32 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 )
 
-type SkillDescriptV2Parser struct {
+var SkillDescriptV4 = "data/luafiles514/lua files/skillinfoz/skilldescript.lub"
+var SkillDescriptV4Regex = regexp.MustCompile(`(?i)^` + SkillDescriptV4 + `$`)
+
+type SkillDescriptV4Parser struct {
 }
 
-func NewSkillDescriptV2Parser() SkillDescriptParser {
-	return &SkillDescriptV2Parser{}
+func NewSkillDescriptV4Parser() SkillDescriptParser {
+	return &SkillDescriptV4Parser{}
 }
 
-func (p SkillDescriptV2Parser) IsUpdateInRange(update *domain.Update) bool {
+func (p SkillDescriptV4Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2010, time.April, 14, 0, 0, 0, 0, time.UTC)) &&
 		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC))
 }
 
-func (p SkillDescriptV2Parser) GetRelevantFiles() []*regexp.Regexp {
+func (p SkillDescriptV4Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		skillDescriptV2Regex,
+		SkillDescriptV4Regex,
 	}
 }
 
-func (p SkillDescriptV2Parser) HasFiles(update *domain.Update) bool {
+func (p SkillDescriptV4Parser) HasFiles(update *domain.Update) bool {
 	return update.HasChangedAnyFiles(p.GetRelevantFiles())
 }
 
-func (p SkillDescriptV2Parser) parseFile(filePath string, skillIdTable map[string]int) []rostructs.SkillDescript {
+func (p SkillDescriptV4Parser) ParseFile(filePath string, skillIdTable map[string]int) []rostructs.SkillDescript {
 	stringReencoder := decoders.ConvertEucKrToUtf8
 
 	var skills []rostructs.SkillDescript
@@ -48,6 +51,6 @@ func (p SkillDescriptV2Parser) parseFile(filePath string, skillIdTable map[strin
 	return skills
 }
 
-func (p SkillDescriptV2Parser) Parse(basePath string, change *domain.UpdateChange, skillIdTable map[string]int) []rostructs.SkillDescript {
-	return p.parseFile(basePath+"/"+change.GetFullPath(), skillIdTable)
+func (p SkillDescriptV4Parser) Parse(basePath string, change *domain.UpdateChange, skillIdTable map[string]int) []rostructs.SkillDescript {
+	return p.ParseFile(basePath+"/"+change.GetFullPath(), skillIdTable)
 }

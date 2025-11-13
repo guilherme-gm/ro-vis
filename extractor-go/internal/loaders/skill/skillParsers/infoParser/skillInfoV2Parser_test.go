@@ -1,10 +1,11 @@
-package skill
+package infoParser
 
 import (
 	"slices"
 	"testing"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/idParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/rostructs"
 	"github.com/guilherme-gm/ro-vis/extractor/testfiles"
 	"github.com/stretchr/testify/assert"
@@ -20,13 +21,13 @@ func TestSkillInfoV2Parser(t *testing.T) {
 		jobIdTable[v.Constant] = v.JobId
 	}
 
-	skillIdParser := NewSkillIdV2Parser()
-	skillIdTable := skillIdParser.parseFile(testfiles.GetFilePath("rostructs/SkillIDV2.lua"))
+	skillIdParser := idParser.NewSkillIdV2Parser()
+	skillIdTable := skillIdParser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV2.lua"))
 
 	// Actual test
 	parser := NewSkillInfoV2Parser().(*SkillInfoV2Parser)
 
-	result := parser.parseFile(testfiles.GetFilePath("rostructs/SkillInfoV2.lua"), jobIdTable, skillIdTable)
+	result := parser.ParseFile(testfiles.GetFilePath("rostructs/SkillInfoV2.lua"), jobIdTable, skillIdTable)
 
 	assert.GreaterOrEqual(t, len(result), 1, "Expected at least one result, got none")
 

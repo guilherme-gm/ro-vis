@@ -10,6 +10,9 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain/server"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/idParser"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/infoParser"
 )
 
 type SkillLoader struct {
@@ -21,8 +24,8 @@ type SkillLoader struct {
 func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
 		jobParsers.JobInheritListV3Regex,
-		skillIdV2Regex,
-		skillInfoListV2Regex,
+		idParser.SkillIdV2Regex,
+		infoParser.SkillInfoListV2Regex,
 	}
 }
 
@@ -68,9 +71,8 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	}
 
 	skillUpdater := loaders.NewUpdater(existingSkills)
-	l.loadSkillIDs(basePath, update, skillUpdater)
-	l.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
-	l.loadSkillDesc(basePath, update, skillUpdater)
+	skillParser := skillParsers.NewSkillV5Parser()
+	skillParser.Parse(basePath, update, skillUpdater, jobUpdater)
 
 	if len(skillUpdater.ValuesToInsert) > 0 {
 		fmt.Println("> Inserting new skills... ", len(skillUpdater.ValuesToInsert))
@@ -131,139 +133,6 @@ func (l *SkillLoader) loadJobs(basePath string, update domain.Update, jobUpdater
 			deletedJob := jobUpdater.GetForEdit(existingJob.Constant)
 			deletedJob.Deleted = true
 			deletedJob.LastUpdate = update.Name()
-		}
-	}
-}
-
-func (l *SkillLoader) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
-	change, err := update.GetChangeForFile(skillIdV2)
-	if err != nil {
-		panic(err)
-	}
-
-	skillParser := NewSkillIdV2Parser()
-	skillList := skillParser.Parse(basePath, &change)
-
-	fileSkillMap := make(map[int32]bool)
-	for fileConst, fileId := range skillList {
-		fileSkillMap[int32(fileId)] = true
-		existingSkill, exists := skillUpdater.GetForRead(int32(fileId))
-		shouldSave := false
-
-		if !exists || existingSkill.SkillID != int32(fileId) || existingSkill.Constant.String != fileConst {
-			shouldSave = true
-		}
-
-		if shouldSave {
-			newSkill := skillUpdater.GetForEdit(int32(fileId))
-			newSkill.Constant = domain.NewNullableString(fileConst)
-			newSkill.SkillID = int32(fileId)
-		}
-	}
-
-	for _, existingSkill := range skillUpdater.CurrentValues {
-		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
-			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.Deleted = true
-		}
-	}
-}
-
-type KV[T comparable] struct {
-	Key   T
-	Value int
-}
-
-func (l *SkillLoader) loadSkillInfos(
-	basePath string,
-	update domain.Update,
-	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
-	jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob],
-) {
-	change, err := update.GetChangeForFile(skillInfoListV2)
-	if err != nil {
-		panic(err)
-	}
-
-	jobMap := make(map[string]int)
-	jobUpdater.ForEach(func(key string, value domain.SkillJob) {
-		jobMap[value.Constant] = int(value.JobId)
-	})
-
-	skillIdMap := make(map[string]int)
-	skillUpdater.ForEach(func(key int32, value domain.Skill) {
-		skillIdMap[value.Constant.String] = int(value.SkillID)
-	})
-
-	skillParser := NewSkillInfoV2Parser()
-	skillList := skillParser.Parse(basePath, &change, jobMap, skillIdMap)
-
-	fileSkillMap := make(map[int32]bool)
-	for _, fileSkill := range skillList {
-		fileSkillMap[int32(fileSkill.SkillId)] = true
-		existingSkill, exists := skillUpdater.GetForRead(int32(fileSkill.SkillId))
-		shouldSave := false
-
-		fileSkillDomain := fileSkill.ToSkill(existingSkill)
-		if !exists || !existingSkill.Equals(fileSkillDomain) {
-			shouldSave = true
-		}
-
-		if shouldSave {
-			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			*newSkill = fileSkillDomain
-		}
-	}
-
-	for _, existingSkill := range skillUpdater.CurrentValues {
-		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
-			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.Deleted = true
-		}
-	}
-}
-
-func (l *SkillLoader) loadSkillDesc(
-	basePath string,
-	update domain.Update,
-	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
-) {
-	change, err := update.GetChangeForFile(skillDescriptV2)
-	if err != nil {
-		panic(err)
-	}
-
-	skillIdMap := make(map[string]int)
-	skillUpdater.ForEach(func(key int32, value domain.Skill) {
-		skillIdMap[value.Constant.String] = int(value.SkillID)
-	})
-
-	skillParser := NewSkillDescriptV2Parser()
-	skillList := skillParser.Parse(basePath, &change, skillIdMap)
-
-	fileSkillMap := make(map[int32]bool)
-	for _, fileSkill := range skillList {
-		fileSkillMap[int32(fileSkill.SkillId)] = true
-		existingSkill, exists := skillUpdater.GetForRead(int32(fileSkill.SkillId))
-		shouldSave := false
-
-		fileSkillDomain := fileSkill.ToSkill(existingSkill)
-		if !exists || !existingSkill.Equals(fileSkillDomain) {
-			shouldSave = true
-		}
-
-		if shouldSave {
-			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			*newSkill = fileSkillDomain
-		}
-	}
-
-	for _, existingSkill := range skillUpdater.CurrentValues {
-		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
-			if existingSkill.Description.Valid {
-				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.Description = domain.NewNullableNullString()
-			}
 		}
 	}
 }

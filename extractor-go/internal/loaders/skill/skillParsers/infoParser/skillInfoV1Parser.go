@@ -1,4 +1,4 @@
-package skill
+package infoParser
 
 import (
 	"regexp"
@@ -22,7 +22,7 @@ func (p SkillInfoV1Parser) IsUpdateInRange(update *domain.Update) bool {
 
 func (p SkillInfoV1Parser) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
-		skillInfoV1Regex,
+		SkillInfoV1Regex,
 	}
 }
 
