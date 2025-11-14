@@ -1,6 +1,9 @@
 package skillParsers
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/descriptParser"
@@ -27,6 +30,18 @@ func NewSkillV5Parser() *SkillV5Parser {
 	return &SkillV5Parser{}
 }
 
+func shouldSkipConst(constant string) bool {
+	// These were present in a few 2015 updates of SkillID,
+	// but they were not used and they conflict with other real skills
+	// They were later removed in 2015-12.
+	// They cause a lot of issues since we base on the numeric ID as the lead, and
+	// no reason to fret over those 4, so they are skipped.
+	return constant == "SR_FLASHCOMBO_ATK_STEP1" ||
+		constant == "SR_FLASHCOMBO_ATK_STEP2" ||
+		constant == "SR_FLASHCOMBO_ATK_STEP3" ||
+		constant == "SR_FLASHCOMBO_ATK_STEP4"
+}
+
 func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
 	change, err := update.GetChangeForFile(idParser.SkillIdV2)
 	if err != nil {
@@ -37,6 +52,11 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 	fileSkillMap := make(map[int32]bool)
 	for fileConst, fileId := range skillList {
+		if shouldSkipConst(fileConst) {
+			fmt.Printf("Skipping SKID %s\n", fileConst)
+			continue
+		}
+
 		fileSkillMap[int32(fileId)] = true
 		existingSkill, exists := skillUpdater.GetForRead(int32(fileId))
 		shouldSave := false
@@ -47,6 +67,7 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
+			newSkill.FileVersion = 5
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
 		}
@@ -55,6 +76,7 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 	for _, existingSkill := range skillUpdater.CurrentValues {
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+			deletedSkill.FileVersion = 5
 			deletedSkill.Deleted = true
 		}
 	}
@@ -102,14 +124,8 @@ func (l *SkillV5Parser) loadSkillInfos(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
+			newSkill.FileVersion = 5
 			*newSkill = fileSkillDomain
-		}
-	}
-
-	for _, existingSkill := range skillUpdater.CurrentValues {
-		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
-			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.Deleted = true
 		}
 	}
 }
@@ -145,6 +161,7 @@ func (l *SkillV5Parser) loadSkillDesc(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
+			newSkill.FileVersion = 5
 			*newSkill = fileSkillDomain
 		}
 	}
@@ -153,6 +170,7 @@ func (l *SkillV5Parser) loadSkillDesc(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+				deletedSkill.FileVersion = 5
 				deletedSkill.Description = domain.NewNullableNullString()
 			}
 		}
@@ -160,7 +178,13 @@ func (l *SkillV5Parser) loadSkillDesc(
 }
 
 func (p *SkillV5Parser) Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
-	p.loadSkillIDs(basePath, update, skillUpdater)
-	p.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
-	p.loadSkillDesc(basePath, update, skillUpdater)
+	if update.HasChangedAnyFiles([]*regexp.Regexp{idParser.SkillIdV2Regex}) {
+		p.loadSkillIDs(basePath, update, skillUpdater)
+	}
+	if update.HasChangedAnyFiles([]*regexp.Regexp{infoParser.SkillInfoListV2Regex}) {
+		p.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
+	}
+	if update.HasChangedAnyFiles([]*regexp.Regexp{descriptParser.SkillDescriptV4Regex}) {
+		p.loadSkillDesc(basePath, update, skillUpdater)
+	}
 }

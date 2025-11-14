@@ -11,6 +11,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/descriptParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/idParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/infoParser"
 )
@@ -24,7 +25,8 @@ type SkillLoader struct {
 func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 	return []*regexp.Regexp{
 		jobParsers.JobInheritListV3Regex,
-		idParser.SkillIdV1Regex,
+		descriptParser.SkillDescriptV4Regex,
+		idParser.SkillIdV2Regex,
 		infoParser.SkillInfoListV2Regex,
 	}
 }
@@ -50,7 +52,9 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	}
 
 	jobUpdater := loaders.NewUpdater(existingJobs)
-	l.loadJobs(basePath, update, jobUpdater)
+	if update.HasChangedAnyFiles(jobParsers.NewJobInehritListV3Parser().GetRelevantFiles()) {
+		l.loadJobs(basePath, update, jobUpdater)
+	}
 
 	if len(jobUpdater.ValuesToInsert) > 0 {
 		fmt.Println("> Inserting new skill jobs... ", len(jobUpdater.ValuesToInsert))
