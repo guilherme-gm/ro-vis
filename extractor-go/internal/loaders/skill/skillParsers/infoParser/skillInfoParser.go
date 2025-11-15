@@ -24,3 +24,6 @@ var SkillInfoListV3Regex = regexp.MustCompile(`(?i)^` + SkillInfoListV3 + `$`)
 
 var SkillInfoListV4 = "data/luafiles514/lua files/skillinfoz/skillinfolist.lub"
 var SkillInfoListV4Regex = regexp.MustCompile(`(?i)^` + SkillInfoListV4 + `$`)
+
+var SkillInfoListV5 = "data/luafiles514/lua files/skillinfoz/skillinfolist.lub"
+var SkillInfoListV5Regex = regexp.MustCompile(`(?i)^` + SkillInfoListV5 + `$`)

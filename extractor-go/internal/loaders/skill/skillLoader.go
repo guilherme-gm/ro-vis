@@ -11,6 +11,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/jobParsers"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/delayParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/descriptParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/idParser"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill/skillParsers/infoParser"
@@ -31,6 +32,8 @@ func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 		infoParser.SkillInfoListV2Regex,
 		// infoParser.SkillInfoListV3Regex, // same as v2
 		// infoParser.SkillInfoListV4Regex, // same as v2/v3
+		// infoParser.SkillInfoListV5Regex, // same as v2/v3/v4
+		delayParser.SkillDelayListV1Regex,
 	}
 }
 
@@ -42,6 +45,7 @@ func NewSkillLoader(server *server.Server) *SkillLoader {
 			skillParsers.NewSkillV5Parser(),
 			skillParsers.NewSkillV6Parser(),
 			skillParsers.NewSkillV7Parser(),
+			skillParsers.NewSkillV8Parser(),
 		},
 	}
 }

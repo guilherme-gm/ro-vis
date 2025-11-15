@@ -79,18 +79,24 @@ INSERT INTO ` + "`" + `skills_history` + "`" + ` (
 	` + "`" + `name` + "`" + `, -- 6
 	` + "`" + `description` + "`" + `, -- 7
 	` + "`" + `max_level` + "`" + `, -- 8
-	` + "`" + `sp_cost` + "`" + `, -- 9
-	` + "`" + `ap_cost` + "`" + `, -- 10
-	` + "`" + `can_select_level` + "`" + `, -- 11
-	` + "`" + `attack_range` + "`" + `, -- 12
-	` + "`" + `required_skills` + "`" + `, -- 13
-	` + "`" + `job_required_skills` + "`" + `, -- 14
-	` + "`" + `skill_scale` + "`" + ` -- 15
+	` + "`" + `is_passive` + "`" + `, -- 9
+	` + "`" + `sp_cost` + "`" + `, -- 10
+	` + "`" + `ap_cost` + "`" + `, -- 11
+	` + "`" + `can_select_level` + "`" + `, -- 12
+	` + "`" + `attack_range` + "`" + `, -- 13
+	` + "`" + `required_skills` + "`" + `, -- 14
+	` + "`" + `job_required_skills` + "`" + `, -- 15
+	` + "`" + `skill_scale` + "`" + `, -- 16
+	` + "`" + `cast_flags` + "`" + `, -- 17
+	` + "`" + `cast_fixed_delay` + "`" + `, -- 18
+	` + "`" + `cast_stat_delay` + "`" + `, -- 19
+	` + "`" + `single_post_delay` + "`" + `, -- 20
+	` + "`" + `global_post_delay` + "`" + ` -- 21
 )
 VALUES
 `
 
-const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 
 type BulkInsertSkillHistoryParams struct {
 	PreviousHistoryID sql.NullInt32
@@ -101,6 +107,7 @@ type BulkInsertSkillHistoryParams struct {
 	Name              sql.NullString
 	Description       sql.NullString
 	MaxLevel          sql.NullInt32
+	IsPassive         sql.NullBool
 	SpCost            sql.NullString
 	ApCost            sql.NullString
 	CanSelectLevel    sql.NullBool
@@ -108,6 +115,11 @@ type BulkInsertSkillHistoryParams struct {
 	RequiredSkills    sql.NullString
 	JobRequiredSkills sql.NullString
 	SkillScale        sql.NullString
+	CastFlags         sql.NullString
+	CastFixedDelay    sql.NullString
+	CastStatDelay     sql.NullString
+	SinglePostDelay   sql.NullString
+	GlobalPostDelay   sql.NullString
 }
 
 func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSkillHistoryParams) (sql.Result, error) {
@@ -128,13 +140,19 @@ func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSk
 			data.Name,
 			data.Description,
 			data.MaxLevel,
+			data.IsPassive,
 			data.SpCost,
 			data.ApCost,
 			data.CanSelectLevel,
 			data.AttackRange,
 			data.RequiredSkills,
 			data.JobRequiredSkills,
-			data.SkillScale)
+			data.SkillScale,
+			data.CastFlags,
+			data.CastFixedDelay,
+			data.CastStatDelay,
+			data.SinglePostDelay,
+			data.GlobalPostDelay)
 	}
 	query = strings.TrimRight(query, ",")
 	return q.db.ExecContext(ctx, query, params...)

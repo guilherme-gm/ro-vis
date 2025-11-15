@@ -55,6 +55,36 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		json.Unmarshal(q.SkillScale, &skillScale)
 	}
 
+	var castFlags []int32
+	if q.CastFlags != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.CastFlags, &castFlags)
+	}
+
+	var castFixedDelay []int32
+	if q.CastFixedDelay != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.CastFixedDelay, &castFixedDelay)
+	}
+
+	var castStatDelay []int32
+	if q.CastStatDelay != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.CastStatDelay, &castStatDelay)
+	}
+
+	var singlePostDelay []int32
+	if q.SinglePostDelay != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.SinglePostDelay, &singlePostDelay)
+	}
+
+	var globalPostDelay []int32
+	if q.GlobalPostDelay != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.GlobalPostDelay, &globalPostDelay)
+	}
+
 	return domain.Skill{
 		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
 		HistoryID:         ToNullableInt32(q.HistoryID),
@@ -64,6 +94,7 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		Name:              domain.NullableString(q.Name),
 		Description:       domain.NullableString(q.Description),
 		MaxLevel:          domain.NullableInt32(q.MaxLevel),
+		IsPassive:         domain.NullableBool(q.IsPassive),
 		SpCost:            spCost,
 		ApCost:            apCost,
 		CanSelectLevel:    domain.NullableBool(q.CanSelectLevel),
@@ -71,5 +102,10 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		RequiredSkills:    needSkillList,
 		JobRequiredSkills: jobRequiredSkills,
 		SkillScale:        skillScale,
+		CastFlags:         castFlags,
+		CastFixedDelay:    castFixedDelay,
+		CastStatDelay:     castStatDelay,
+		SinglePostDelay:   singlePostDelay,
+		GlobalPostDelay:   globalPostDelay,
 	}
 }

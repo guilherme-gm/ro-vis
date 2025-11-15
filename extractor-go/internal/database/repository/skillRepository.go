@@ -155,6 +155,36 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			skillScaleJson = domain.NewNullableString(string(jsonBytes))
 		}
 
+		castFlagsJson := domain.NewNullableNullString()
+		if len(it.CastFlags) > 0 {
+			jsonBytes, _ := json.Marshal(it.CastFlags)
+			castFlagsJson = domain.NewNullableString(string(jsonBytes))
+		}
+
+		castFixedDelayJson := domain.NewNullableNullString()
+		if len(it.CastFixedDelay) > 0 {
+			jsonBytes, _ := json.Marshal(it.CastFixedDelay)
+			castFixedDelayJson = domain.NewNullableString(string(jsonBytes))
+		}
+
+		castStatDelayJson := domain.NewNullableNullString()
+		if len(it.CastStatDelay) > 0 {
+			jsonBytes, _ := json.Marshal(it.CastStatDelay)
+			castStatDelayJson = domain.NewNullableString(string(jsonBytes))
+		}
+
+		singlePostDelayJson := domain.NewNullableNullString()
+		if len(it.SinglePostDelay) > 0 {
+			jsonBytes, _ := json.Marshal(it.SinglePostDelay)
+			singlePostDelayJson = domain.NewNullableString(string(jsonBytes))
+		}
+
+		globalPostDelayJson := domain.NewNullableNullString()
+		if len(it.GlobalPostDelay) > 0 {
+			jsonBytes, _ := json.Marshal(it.GlobalPostDelay)
+			globalPostDelayJson = domain.NewNullableString(string(jsonBytes))
+		}
+
 		insertParams := dao.BulkInsertSkillHistoryParams{
 			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
 			SkillId:           it.SkillID,
@@ -167,6 +197,7 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			insertParams.Name = sql.NullString(it.Name)
 			insertParams.Description = sql.NullString(it.Description)
 			insertParams.MaxLevel = sql.NullInt32(it.MaxLevel)
+			insertParams.IsPassive = sql.NullBool(it.IsPassive)
 			insertParams.SpCost = sql.NullString(spCostJson)
 			insertParams.ApCost = sql.NullString(apCostJson)
 			insertParams.CanSelectLevel = sql.NullBool(it.CanSelectLevel)
@@ -174,6 +205,11 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			insertParams.RequiredSkills = sql.NullString(needSkillListJson)
 			insertParams.JobRequiredSkills = sql.NullString(jobRequiredSkillsJson)
 			insertParams.SkillScale = sql.NullString(skillScaleJson)
+			insertParams.CastFlags = sql.NullString(castFlagsJson)
+			insertParams.CastFixedDelay = sql.NullString(castFixedDelayJson)
+			insertParams.CastStatDelay = sql.NullString(castStatDelayJson)
+			insertParams.SinglePostDelay = sql.NullString(singlePostDelayJson)
+			insertParams.GlobalPostDelay = sql.NullString(globalPostDelayJson)
 		}
 
 		bulkParams = append(bulkParams, insertParams)

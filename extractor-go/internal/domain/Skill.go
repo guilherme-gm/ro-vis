@@ -57,6 +57,7 @@ type Skill struct {
 	Name              NullableString
 	Description       NullableString
 	MaxLevel          NullableInt32
+	IsPassive         NullableBool
 	SpCost            []int32
 	ApCost            []int32
 	CanSelectLevel    NullableBool
@@ -64,6 +65,11 @@ type Skill struct {
 	RequiredSkills    []NeedSkillEntry
 	JobRequiredSkills []JobRequiredSkillEntry
 	SkillScale        []SkillScaleEntry
+	CastFlags         []int32
+	CastFixedDelay    []int32
+	CastStatDelay     []int32
+	SinglePostDelay   []int32
+	GlobalPostDelay   []int32
 	Deleted           bool
 }
 

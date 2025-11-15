@@ -11,7 +11,7 @@ import (
 )
 
 const getCurrentSkills = `-- name: GetCurrentSkills :many
-SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.skill_scale, skills_history.created_at, skills_history.ap_cost, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.skill_scale, skills_history.created_at, skills_history.ap_cost, skills_history.is_passive, skills_history.cast_flags, skills_history.cast_fixed_delay, skills_history.cast_stat_delay, skills_history.single_post_delay, skills_history.global_post_delay, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `skills` + "`" + `
 INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -34,6 +34,12 @@ type GetCurrentSkillsRow struct {
 	SkillScale        []byte
 	CreatedAt         sql.NullTime
 	ApCost            []byte
+	IsPassive         sql.NullBool
+	CastFlags         []byte
+	CastFixedDelay    []byte
+	CastStatDelay     []byte
+	SinglePostDelay   []byte
+	GlobalPostDelay   []byte
 	Deleted           bool
 }
 
@@ -64,6 +70,12 @@ func (q *Queries) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, 
 			&i.SkillScale,
 			&i.CreatedAt,
 			&i.ApCost,
+			&i.IsPassive,
+			&i.CastFlags,
+			&i.CastFixedDelay,
+			&i.CastStatDelay,
+			&i.SinglePostDelay,
+			&i.GlobalPostDelay,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
