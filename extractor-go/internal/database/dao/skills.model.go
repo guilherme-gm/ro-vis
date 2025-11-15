@@ -62,6 +62,7 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		FileVersion:       q.FileVersion,
 		Constant:          domain.NullableString(q.Constant),
 		Name:              domain.NullableString(q.Name),
+		Description:       domain.NullableString(q.Description),
 		MaxLevel:          domain.NullableInt32(q.MaxLevel),
 		SpCost:            spCost,
 		ApCost:            apCost,
