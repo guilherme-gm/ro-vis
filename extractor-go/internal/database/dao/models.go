@@ -285,6 +285,7 @@ type SkillsHistory struct {
 	JobRequiredSkills []byte
 	SkillScale        []byte
 	CreatedAt         sql.NullTime
+	ApCost            []byte
 }
 
 type SkillsJob struct {

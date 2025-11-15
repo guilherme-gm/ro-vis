@@ -11,7 +11,7 @@ import (
 )
 
 const getCurrentSkills = `-- name: GetCurrentSkills :many
-SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.skill_scale, skills_history.created_at, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
+SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.skill_scale, skills_history.created_at, skills_history.ap_cost, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `skills` + "`" + `
 INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `
 `
@@ -33,6 +33,7 @@ type GetCurrentSkillsRow struct {
 	JobRequiredSkills []byte
 	SkillScale        []byte
 	CreatedAt         sql.NullTime
+	ApCost            []byte
 	Deleted           bool
 }
 
@@ -62,6 +63,7 @@ func (q *Queries) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, 
 			&i.JobRequiredSkills,
 			&i.SkillScale,
 			&i.CreatedAt,
+			&i.ApCost,
 			&i.Deleted,
 		); err != nil {
 			return nil, err

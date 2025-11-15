@@ -80,16 +80,17 @@ INSERT INTO ` + "`" + `skills_history` + "`" + ` (
 	` + "`" + `description` + "`" + `, -- 7
 	` + "`" + `max_level` + "`" + `, -- 8
 	` + "`" + `sp_cost` + "`" + `, -- 9
-	` + "`" + `can_select_level` + "`" + `, -- 10
-	` + "`" + `attack_range` + "`" + `, -- 11
-	` + "`" + `required_skills` + "`" + `, -- 12
-	` + "`" + `job_required_skills` + "`" + `, -- 13
-	` + "`" + `skill_scale` + "`" + ` -- 14
+	` + "`" + `ap_cost` + "`" + `, -- 10
+	` + "`" + `can_select_level` + "`" + `, -- 11
+	` + "`" + `attack_range` + "`" + `, -- 12
+	` + "`" + `required_skills` + "`" + `, -- 13
+	` + "`" + `job_required_skills` + "`" + `, -- 14
+	` + "`" + `skill_scale` + "`" + ` -- 15
 )
 VALUES
 `
 
-const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 
 type BulkInsertSkillHistoryParams struct {
 	PreviousHistoryID sql.NullInt32
@@ -101,6 +102,7 @@ type BulkInsertSkillHistoryParams struct {
 	Description       sql.NullString
 	MaxLevel          sql.NullInt32
 	SpCost            sql.NullString
+	ApCost            sql.NullString
 	CanSelectLevel    sql.NullBool
 	AttackRange       sql.NullString
 	RequiredSkills    sql.NullString
@@ -127,6 +129,7 @@ func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSk
 			data.Description,
 			data.MaxLevel,
 			data.SpCost,
+			data.ApCost,
 			data.CanSelectLevel,
 			data.AttackRange,
 			data.RequiredSkills,

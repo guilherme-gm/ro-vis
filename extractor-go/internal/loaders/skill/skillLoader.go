@@ -30,6 +30,7 @@ func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 		idParser.SkillIdV2Regex,
 		infoParser.SkillInfoListV2Regex,
 		// infoParser.SkillInfoListV3Regex, // same as v2
+		// infoParser.SkillInfoListV4Regex, // same as v2/v3
 	}
 }
 
@@ -40,6 +41,7 @@ func NewSkillLoader(server *server.Server) *SkillLoader {
 		skillParsers: []skillParsers.SkillParser{
 			skillParsers.NewSkillV5Parser(),
 			skillParsers.NewSkillV6Parser(),
+			skillParsers.NewSkillV7Parser(),
 		},
 	}
 }

@@ -171,6 +171,82 @@ func (s SkillInfoV3) ToSkill(base domain.Skill) domain.Skill {
 	return base
 }
 
+type SkillInfoV4 struct {
+	SkillId           int    `lua:"@index"`
+	Constant          string `lua:"$$numeric:1"`
+	SkillName         string
+	MaxLv             int
+	Type              string
+	SpCost            []int `lua:"SpAmount"`
+	CanSelectLevel    bool  `lua:"bSeperateLv"`
+	AttackRange       []int
+	RequiredSkills    []RequiredSkillV2    `lua:"_NeedSkillList"`
+	JobRequiredSkills []JobRequiredSkillV2 `lua:"NeedSkillList"`
+	SkillScale        []SkillInfoScale     `lua:"SkillScale"`
+	// New in V4
+	ApCost []int `lua:"ApAmount"`
+}
+
+func (s SkillInfoV4) ToSkill(base domain.Skill) domain.Skill {
+	// Don't trust this value as constant, I've found 1 case it is wrong and breaks everything
+	// SillID always comes first anyway, we better trust it.
+	// base.Constant = domain.NewNullableString(s.Constant)
+	base.SkillID = int32(s.SkillId)
+	base.Name = domain.NewNullableString(s.SkillName)
+	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
+
+	spCost := make([]int32, len(s.SpCost))
+	for i, v := range s.SpCost {
+		spCost[i] = int32(v)
+	}
+	base.SpCost = spCost
+	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
+	base.AttackRange = make([]int32, len(s.AttackRange))
+	for i, v := range s.AttackRange {
+		base.AttackRange[i] = int32(v)
+	}
+
+	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
+	for i, v := range s.RequiredSkills {
+		base.RequiredSkills[i] = domain.NeedSkillEntry{
+			SkillID: int32(v.SkillId),
+			Level:   int32(v.Lv),
+		}
+	}
+
+	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
+	for i, v := range s.JobRequiredSkills {
+		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
+			JobId:  int32(v.Job),
+			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
+		}
+
+		for j, w := range v.RequiredSkills {
+			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
+				SkillID: int32(w.SkillId),
+				Level:   int32(w.Lv),
+			}
+		}
+	}
+
+	base.SkillScale = make([]domain.SkillScaleEntry, len(s.SkillScale))
+	for i, v := range s.SkillScale {
+		base.SkillScale[i] = domain.SkillScaleEntry{
+			Level: int32(v.Level),
+			X:     int32(v.X),
+			Y:     int32(v.Y),
+		}
+	}
+
+	apCost := make([]int32, len(s.ApCost))
+	for i, v := range s.ApCost {
+		apCost[i] = int32(v)
+	}
+	base.ApCost = apCost
+
+	return base
+}
+
 type SkillDescript struct {
 	SkillId     int      `lua:"@index"`
 	Description []string `lua:"@sliceValue"`

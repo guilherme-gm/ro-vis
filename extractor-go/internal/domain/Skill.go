@@ -58,6 +58,7 @@ type Skill struct {
 	Description       NullableString
 	MaxLevel          NullableInt32
 	SpCost            []int32
+	ApCost            []int32
 	CanSelectLevel    NullableBool
 	AttackRange       []int32
 	RequiredSkills    []NeedSkillEntry
@@ -148,10 +149,12 @@ func (s *Skill) Equals(otherSkill Skill) bool {
 		s.Description == otherSkill.Description &&
 		s.MaxLevel == otherSkill.MaxLevel &&
 		slices.Equal(s.SpCost, otherSkill.SpCost) &&
+		slices.Equal(s.ApCost, otherSkill.ApCost) &&
 		s.CanSelectLevel == otherSkill.CanSelectLevel &&
 		slices.Equal(s.AttackRange, otherSkill.AttackRange) &&
 		slices.Equal(s.RequiredSkills, otherSkill.RequiredSkills) &&
-		s.isJobRequiredSkillEqual(otherSkill))
+		s.isJobRequiredSkillEqual(otherSkill) &&
+		slices.Equal(s.SkillScale, otherSkill.SkillScale))
 }
 
 type MinSkill struct {

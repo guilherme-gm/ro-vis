@@ -25,6 +25,12 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		json.Unmarshal(q.SpCost, &spCost)
 	}
 
+	var apCost []int32
+	if q.ApCost != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.ApCost, &apCost)
+	}
+
 	var attackRange []int32
 	if q.AttackRange != nil {
 		// Parse the JSON string into RewardItem slice
@@ -58,6 +64,7 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		Name:              domain.NullableString(q.Name),
 		MaxLevel:          domain.NullableInt32(q.MaxLevel),
 		SpCost:            spCost,
+		ApCost:            apCost,
 		CanSelectLevel:    domain.NullableBool(q.CanSelectLevel),
 		AttackRange:       attackRange,
 		RequiredSkills:    needSkillList,

@@ -13,31 +13,31 @@ import (
 )
 
 /**
- * Skill V6 structure/parser
- * Started at: 2015-12-16
+ * Skill V7 structure/parser
+ * Started at: 2020-09-15
  *
- * SkillScale added to SkillInfo.lub (SkillInfo V3)
+ * ApAmount added to SkillInfo.lub (SkillInfo V4)
  *
  * Files:
  * - data/luafiles514/lua files/skillinfoz/jobinheritlist.lub (Job Inherit V2, now uses consts)
  * - data/luafiles514/lua files/skillinfoz/skillid.lub (Skill ID V2)
- * - data/luafiles514/lua files/skillinfoz/skillinfolist.lub (Skill Info V3)
+ * - data/luafiles514/lua files/skillinfoz/skillinfolist.lub (Skill Info V4)
  * - data/luafiles514/lua files/skillinfoz/skilldescript.lub (Skill Descript V4)
  * - data/luafiles514/lua files/skillinfoz/skillinfo_f.lub (not parsed)
  * - data/luafiles514/lua files/skillinfoz/skilltreeview.lub (not parsed)
  */
-type SkillV6Parser struct{}
+type SkillV7Parser struct{}
 
-func NewSkillV6Parser() *SkillV6Parser {
-	return &SkillV6Parser{}
+func NewSkillV7Parser() *SkillV7Parser {
+	return &SkillV7Parser{}
 }
 
-func (l *SkillV6Parser) IsUpdateInRange(update *domain.Update) bool {
-	return update.Date.After(time.Date(2015, time.December, 15, 0, 0, 0, 0, time.UTC)) &&
-		update.Date.Before(time.Date(2020, time.September, 15, 0, 0, 0, 0, time.UTC))
+func (l *SkillV7Parser) IsUpdateInRange(update *domain.Update) bool {
+	return update.Date.After(time.Date(2020, time.September, 14, 0, 0, 0, 0, time.UTC)) &&
+		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC))
 }
 
-func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
+func (l *SkillV7Parser) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
 	change, err := update.GetChangeForFile(idParser.SkillIdV2)
 	if err != nil {
 		panic(err)
@@ -66,7 +66,7 @@ func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
-			newSkill.FileVersion = 6
+			newSkill.FileVersion = 7
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
 		}
@@ -75,13 +75,13 @@ func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skil
 	for _, existingSkill := range skillUpdater.CurrentValues {
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.FileVersion = 6
+			deletedSkill.FileVersion = 7
 			deletedSkill.Deleted = true
 		}
 	}
 }
 
-func (l *SkillV6Parser) loadSkillInfos(
+func (l *SkillV7Parser) loadSkillInfos(
 	basePath string,
 	update domain.Update,
 	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
@@ -102,7 +102,7 @@ func (l *SkillV6Parser) loadSkillInfos(
 		skillIdMap[value.Constant.String] = int(value.SkillID)
 	})
 
-	skillParser := infoParser.NewSkillInfoV3Parser() // change
+	skillParser := infoParser.NewSkillInfoV4Parser() // change
 	skillList := skillParser.Parse(basePath, &change, jobMap, skillIdMap)
 
 	fileSkillMap := make(map[int32]bool)
@@ -118,13 +118,13 @@ func (l *SkillV6Parser) loadSkillInfos(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 6
+			newSkill.FileVersion = 7
 			*newSkill = fileSkillDomain
 		}
 	}
 }
 
-func (l *SkillV6Parser) loadSkillDesc(
+func (l *SkillV7Parser) loadSkillDesc(
 	basePath string,
 	update domain.Update,
 	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
@@ -155,7 +155,7 @@ func (l *SkillV6Parser) loadSkillDesc(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 6
+			newSkill.FileVersion = 7
 			*newSkill = fileSkillDomain
 		}
 	}
@@ -164,14 +164,14 @@ func (l *SkillV6Parser) loadSkillDesc(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 6
+				deletedSkill.FileVersion = 7
 				deletedSkill.Description = domain.NewNullableNullString()
 			}
 		}
 	}
 }
 
-func (p *SkillV6Parser) Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
+func (p *SkillV7Parser) Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
 	if update.HasChangedAnyFiles([]*regexp.Regexp{idParser.SkillIdV2Regex}) {
 		p.loadSkillIDs(basePath, update, skillUpdater)
 	}

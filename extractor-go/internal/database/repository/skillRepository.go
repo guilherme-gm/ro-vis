@@ -125,6 +125,12 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			spCostJson = domain.NewNullableString(string(jsonBytes))
 		}
 
+		apCostJson := domain.NewNullableNullString()
+		if len(it.ApCost) > 0 {
+			jsonBytes, _ := json.Marshal(it.ApCost)
+			apCostJson = domain.NewNullableString(string(jsonBytes))
+		}
+
 		attackRangeJson := domain.NewNullableNullString()
 		if len(it.AttackRange) > 0 {
 			jsonBytes, _ := json.Marshal(it.AttackRange)
@@ -162,6 +168,7 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			insertParams.Description = sql.NullString(it.Description)
 			insertParams.MaxLevel = sql.NullInt32(it.MaxLevel)
 			insertParams.SpCost = sql.NullString(spCostJson)
+			insertParams.ApCost = sql.NullString(apCostJson)
 			insertParams.CanSelectLevel = sql.NullBool(it.CanSelectLevel)
 			insertParams.AttackRange = sql.NullString(attackRangeJson)
 			insertParams.RequiredSkills = sql.NullString(needSkillListJson)
