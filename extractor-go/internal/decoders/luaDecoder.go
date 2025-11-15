@@ -337,6 +337,13 @@ func (decoder *luaDecoder) CreateIntTable(tableName string, values map[string]in
 	decoder.L.SetGlobal(tableName) // Pops the table from stack and set it to a variable
 }
 
+// creates a variable with int value
+// this allows you to add custom variables that the parser will use when decoding a file
+func (decoder *luaDecoder) CreateIntVar(varName string, value int) {
+	decoder.L.PushInteger(int64(value)) // pushes the new table into stack
+	decoder.L.SetGlobal(varName)        // Pops the table from stack and set it to a variable
+}
+
 func (decoder *luaDecoder) DecodeLuaTable(filePath string, tableName string, dst any) LuaDecoderResult {
 	defer decoder.L.Close()
 

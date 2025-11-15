@@ -50,6 +50,12 @@ type myTableWithConsts struct {
 	Value int
 }
 
+type myTableWithExtVar struct {
+	Id    int `lua:"@index"`
+	Name  string
+	Value int
+}
+
 // Tests decoding a simple table into a struct
 func TestLuaInstanceDecodeTableArray(t *testing.T) {
 	var dst []myTable
@@ -214,4 +220,17 @@ func TestLuaInstanceDecodeTableWithMetaindex(t *testing.T) {
 	assert.Equal(t, 1, dstTable.Values[0].Value)
 	assert.Equal(t, "Key2", dstTable.Values[1].Id)
 	assert.Equal(t, 2, dstTable.Values[1].Value)
+}
+
+func TestLuaInstanceDecodeTableWithExternalVars(t *testing.T) {
+	var dst []myTableWithExtVar
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.CreateIntVar("MY_VAR", 100)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_table_with_external_vars.lua"), "MY_TABLE_WITH_VARS", &dst)
+
+	assert.Equal(t, 1, len(dst))
+	assert.Equal(t, 1000, dst[0].Id)
+	assert.Equal(t, "Test", dst[0].Name)
+	assert.Equal(t, 100, dst[0].Value)
 }
