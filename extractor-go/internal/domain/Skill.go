@@ -42,6 +42,12 @@ type JobRequiredSkillEntry struct {
 	Skills []NeedSkillEntry
 }
 
+type SkillScaleEntry struct {
+	Level int32
+	X     int32
+	Y     int32
+}
+
 type Skill struct {
 	PreviousHistoryID NullableInt32
 	HistoryID         NullableInt32
@@ -56,6 +62,7 @@ type Skill struct {
 	AttackRange       []int32
 	RequiredSkills    []NeedSkillEntry
 	JobRequiredSkills []JobRequiredSkillEntry
+	SkillScale        []SkillScaleEntry
 	Deleted           bool
 }
 

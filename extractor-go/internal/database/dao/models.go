@@ -230,6 +230,7 @@ type PreviousSkillHistoryVw struct {
 	AttackRange       []byte
 	RequiredSkills    []byte
 	JobRequiredSkills []byte
+	SkillScale        []byte
 	CreatedAt         sql.NullTime
 }
 
@@ -282,6 +283,7 @@ type SkillsHistory struct {
 	AttackRange       []byte
 	RequiredSkills    []byte
 	JobRequiredSkills []byte
+	SkillScale        []byte
 	CreatedAt         sql.NullTime
 }
 

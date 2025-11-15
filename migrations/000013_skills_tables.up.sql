@@ -28,6 +28,7 @@ CREATE TABLE `skills_history` (
 	`attack_range` json,
 	`required_skills` json,
 	`job_required_skills` json,
+	`skill_scale` json,
 	`created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
 	KEY `idx_skill_history_skill_id` (`skill_id`),
 	KEY `idx_skill_history_update` (`update`)

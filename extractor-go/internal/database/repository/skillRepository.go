@@ -143,6 +143,12 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			jobRequiredSkillsJson = domain.NewNullableString(string(jsonBytes))
 		}
 
+		skillScaleJson := domain.NewNullableNullString()
+		if len(it.SkillScale) > 0 {
+			jsonBytes, _ := json.Marshal(it.SkillScale)
+			skillScaleJson = domain.NewNullableString(string(jsonBytes))
+		}
+
 		insertParams := dao.BulkInsertSkillHistoryParams{
 			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
 			SkillId:           it.SkillID,
@@ -160,6 +166,7 @@ func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills [
 			insertParams.AttackRange = sql.NullString(attackRangeJson)
 			insertParams.RequiredSkills = sql.NullString(needSkillListJson)
 			insertParams.JobRequiredSkills = sql.NullString(jobRequiredSkillsJson)
+			insertParams.SkillScale = sql.NullString(skillScaleJson)
 		}
 
 		bulkParams = append(bulkParams, insertParams)

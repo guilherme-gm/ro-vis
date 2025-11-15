@@ -83,12 +83,13 @@ INSERT INTO ` + "`" + `skills_history` + "`" + ` (
 	` + "`" + `can_select_level` + "`" + `, -- 10
 	` + "`" + `attack_range` + "`" + `, -- 11
 	` + "`" + `required_skills` + "`" + `, -- 12
-	` + "`" + `job_required_skills` + "`" + ` -- 13
+	` + "`" + `job_required_skills` + "`" + `, -- 13
+	` + "`" + `skill_scale` + "`" + ` -- 14
 )
 VALUES
 `
 
-const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+const bulkInsertSkillHistoryValueBlock = `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 
 type BulkInsertSkillHistoryParams struct {
 	PreviousHistoryID sql.NullInt32
@@ -104,6 +105,7 @@ type BulkInsertSkillHistoryParams struct {
 	AttackRange       sql.NullString
 	RequiredSkills    sql.NullString
 	JobRequiredSkills sql.NullString
+	SkillScale        sql.NullString
 }
 
 func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSkillHistoryParams) (sql.Result, error) {
@@ -128,7 +130,8 @@ func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSk
 			data.CanSelectLevel,
 			data.AttackRange,
 			data.RequiredSkills,
-			data.JobRequiredSkills)
+			data.JobRequiredSkills,
+			data.SkillScale)
 	}
 	query = strings.TrimRight(query, ",")
 	return q.db.ExecContext(ctx, query, params...)

@@ -43,6 +43,12 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		json.Unmarshal(q.JobRequiredSkills, &jobRequiredSkills)
 	}
 
+	var skillScale []domain.SkillScaleEntry
+	if q.SkillScale != nil {
+		// Parse the JSON string into RewardItem slice
+		json.Unmarshal(q.SkillScale, &skillScale)
+	}
+
 	return domain.Skill{
 		PreviousHistoryID: domain.NullableInt32(q.PreviousHistoryID),
 		HistoryID:         ToNullableInt32(q.HistoryID),
@@ -56,5 +62,6 @@ func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
 		AttackRange:       attackRange,
 		RequiredSkills:    needSkillList,
 		JobRequiredSkills: jobRequiredSkills,
+		SkillScale:        skillScale,
 	}
 }

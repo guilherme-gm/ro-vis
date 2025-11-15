@@ -17,8 +17,9 @@ import (
 )
 
 type SkillLoader struct {
-	repository *repository.SkillRepository
-	server     *server.Server
+	repository   *repository.SkillRepository
+	server       *server.Server
+	skillParsers []skillParsers.SkillParser
 }
 
 // GetRelevantFiles returns a list of all files that are relevant to this loader's parsers.
@@ -28,6 +29,7 @@ func (l *SkillLoader) GetRelevantFiles() []*regexp.Regexp {
 		descriptParser.SkillDescriptV4Regex,
 		idParser.SkillIdV2Regex,
 		infoParser.SkillInfoListV2Regex,
+		// infoParser.SkillInfoListV3Regex, // same as v2
 	}
 }
 
@@ -35,6 +37,10 @@ func NewSkillLoader(server *server.Server) *SkillLoader {
 	return &SkillLoader{
 		repository: server.Repositories.SkillRepository,
 		server:     server,
+		skillParsers: []skillParsers.SkillParser{
+			skillParsers.NewSkillV5Parser(),
+			skillParsers.NewSkillV6Parser(),
+		},
 	}
 }
 
@@ -75,8 +81,18 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	}
 
 	skillUpdater := loaders.NewUpdater(existingSkills)
-	skillParser := skillParsers.NewSkillV5Parser()
-	skillParser.Parse(basePath, update, skillUpdater, jobUpdater)
+	var targetParser skillParsers.SkillParser
+	for _, skillParser := range l.skillParsers {
+		if skillParser.IsUpdateInRange(&update) {
+			targetParser = skillParser
+		}
+	}
+
+	if targetParser == nil {
+		panic("No parser found for update " + update.Name())
+	}
+
+	targetParser.Parse(basePath, update, skillUpdater, jobUpdater)
 
 	if len(skillUpdater.ValuesToInsert) > 0 {
 		fmt.Println("> Inserting new skills... ", len(skillUpdater.ValuesToInsert))

@@ -13,33 +13,31 @@ import (
 )
 
 /**
- * Skill V5 structure/parser
- * Started at: 2012-01-11
- * Simply moved files from data/lua files/skillinfoz/* to data/lua files514/lua files/skillinfoz/*
- * For simplicity, ro-vis uses 2012-01-11 data as the dummy start (2012-01-01)
+ * Skill V6 structure/parser
+ * Started at: 2015-12-16
+ *
+ * SkillScale added to SkillInfo.lub (SkillInfo V3)
  *
  * Files:
  * - data/luafiles514/lua files/skillinfoz/jobinheritlist.lub (Job Inherit V2, now uses consts)
  * - data/luafiles514/lua files/skillinfoz/skillid.lub (Skill ID V2)
- * - data/luafiles514/lua files/skillinfoz/skillinfolist.lub (Skill Info V2)
+ * - data/luafiles514/lua files/skillinfoz/skillinfolist.lub (Skill Info V3)
  * - data/luafiles514/lua files/skillinfoz/skilldescript.lub (Skill Descript V4)
  * - data/luafiles514/lua files/skillinfoz/skillinfo_f.lub (not parsed)
  * - data/luafiles514/lua files/skillinfoz/skilltreeview.lub (not parsed)
  */
-type SkillV5Parser struct{}
+type SkillV6Parser struct{}
 
-func NewSkillV5Parser() *SkillV5Parser {
-	return &SkillV5Parser{}
+func NewSkillV6Parser() *SkillV6Parser {
+	return &SkillV6Parser{}
 }
 
-func (l *SkillV5Parser) IsUpdateInRange(update *domain.Update) bool {
-	// Actually starts on 2012-01-11 , but we have replicated it to 2012-01-01
-	// to simplify the initial load.
-	return update.Date.After(time.Date(2011, time.December, 31, 0, 0, 0, 0, time.UTC)) &&
-		update.Date.Before(time.Date(2015, time.December, 16, 0, 0, 0, 0, time.UTC))
+func (l *SkillV6Parser) IsUpdateInRange(update *domain.Update) bool {
+	return update.Date.After(time.Date(2015, time.December, 15, 0, 0, 0, 0, time.UTC)) &&
+		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC))
 }
 
-func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
+func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill]) {
 	change, err := update.GetChangeForFile(idParser.SkillIdV2)
 	if err != nil {
 		panic(err)
@@ -54,6 +52,10 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 			continue
 		}
 
+		if _, ok := fileSkillMap[int32(fileId)]; ok {
+			panic(fmt.Sprintf("Duplicated SKID %d. 2nd constant found: %s", fileId, fileConst))
+		}
+
 		fileSkillMap[int32(fileId)] = true
 		existingSkill, exists := skillUpdater.GetForRead(int32(fileId))
 		shouldSave := false
@@ -64,7 +66,7 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
-			newSkill.FileVersion = 5
+			newSkill.FileVersion = 6
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
 		}
@@ -73,13 +75,13 @@ func (l *SkillV5Parser) loadSkillIDs(basePath string, update domain.Update, skil
 	for _, existingSkill := range skillUpdater.CurrentValues {
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.FileVersion = 5
+			deletedSkill.FileVersion = 6
 			deletedSkill.Deleted = true
 		}
 	}
 }
 
-func (l *SkillV5Parser) loadSkillInfos(
+func (l *SkillV6Parser) loadSkillInfos(
 	basePath string,
 	update domain.Update,
 	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
@@ -100,7 +102,7 @@ func (l *SkillV5Parser) loadSkillInfos(
 		skillIdMap[value.Constant.String] = int(value.SkillID)
 	})
 
-	skillParser := infoParser.NewSkillInfoV2Parser()
+	skillParser := infoParser.NewSkillInfoV3Parser() // change
 	skillList := skillParser.Parse(basePath, &change, jobMap, skillIdMap)
 
 	fileSkillMap := make(map[int32]bool)
@@ -116,13 +118,13 @@ func (l *SkillV5Parser) loadSkillInfos(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 5
+			newSkill.FileVersion = 6
 			*newSkill = fileSkillDomain
 		}
 	}
 }
 
-func (l *SkillV5Parser) loadSkillDesc(
+func (l *SkillV6Parser) loadSkillDesc(
 	basePath string,
 	update domain.Update,
 	skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill],
@@ -153,7 +155,7 @@ func (l *SkillV5Parser) loadSkillDesc(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 5
+			newSkill.FileVersion = 6
 			*newSkill = fileSkillDomain
 		}
 	}
@@ -162,18 +164,18 @@ func (l *SkillV5Parser) loadSkillDesc(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 5
+				deletedSkill.FileVersion = 6
 				deletedSkill.Description = domain.NewNullableNullString()
 			}
 		}
 	}
 }
 
-func (p *SkillV5Parser) Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
+func (p *SkillV6Parser) Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob]) {
 	if update.HasChangedAnyFiles([]*regexp.Regexp{idParser.SkillIdV2Regex}) {
 		p.loadSkillIDs(basePath, update, skillUpdater)
 	}
-	if update.HasChangedAnyFiles([]*regexp.Regexp{infoParser.SkillInfoListV2Regex}) {
+	if update.HasChangedAnyFiles([]*regexp.Regexp{infoParser.SkillInfoListV3Regex}) {
 		p.loadSkillInfos(basePath, update, skillUpdater, jobUpdater)
 	}
 	if update.HasChangedAnyFiles([]*regexp.Regexp{descriptParser.SkillDescriptV4Regex}) {
