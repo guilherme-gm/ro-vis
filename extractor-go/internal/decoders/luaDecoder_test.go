@@ -1,6 +1,7 @@
 package decoders
 
 import (
+	"slices"
 	"testing"
 
 	testfiles "github.com/guilherme-gm/ro-vis/extractor/testfiles"
@@ -16,6 +17,11 @@ type myTableWithIds struct {
 	Id    int `lua:"@index"`
 	Name  string
 	Value int
+}
+
+type myTableIntArray struct {
+	Id     int `lua:"@index"`
+	Values []int
 }
 
 type myTableWithSliceValue struct {
@@ -74,6 +80,34 @@ func TestLuaInstanceDecodeTableWithIds(t *testing.T) {
 	assert.Equal(t, 1006, dst[1].Id)
 	assert.Equal(t, "Test2", dst[1].Name)
 	assert.Equal(t, 2, dst[1].Value)
+}
+
+// Tests decoding a table entry where values are simply indexed as an "array"
+func TestLuaInstanceDecodeTableIntArray(t *testing.T) {
+	var dst []myTableIntArray
+
+	decoder := NewLuaDecoder(ConvertNoop)
+	decoder.DecodeLuaTable(testfiles.GetFilePath("lua_tables.lua"), "MY_TABLE_INT_ARRAY", &dst)
+
+	assert.Equal(t, 3, len(dst))
+
+	index := slices.IndexFunc(dst, func(item myTableIntArray) bool {
+		return item.Id == 1005
+	})
+	assert.Equal(t, 1005, dst[index].Id)
+	assert.Equal(t, []int{1, 2, 3}, dst[index].Values)
+
+	index = slices.IndexFunc(dst, func(item myTableIntArray) bool {
+		return item.Id == 1006
+	})
+	assert.Equal(t, 1006, dst[index].Id)
+	assert.Equal(t, []int{}, dst[index].Values)
+
+	index = slices.IndexFunc(dst, func(item myTableIntArray) bool {
+		return item.Id == 1007
+	})
+	assert.Equal(t, 1007, dst[index].Id)
+	assert.Nil(t, dst[index].Values)
 }
 
 // Tests decoding a table entry where values are simply indexed as an "array", using $$numeric

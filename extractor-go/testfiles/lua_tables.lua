@@ -20,6 +20,18 @@ MY_TABLE_WITH_IDS = {
 	}
 }
 
+MY_TABLE_INT_ARRAY = {
+	[1005] = {
+		Values = { 1, 2, 3 }
+	},
+	[1006] = {
+		Values = { }
+	},
+	[1007] = {
+		-- Values = { } -- not present
+	},
+}
+
 MY_TABLE_SLICES = {
 	[1005] = {
 		Name = "Test",
