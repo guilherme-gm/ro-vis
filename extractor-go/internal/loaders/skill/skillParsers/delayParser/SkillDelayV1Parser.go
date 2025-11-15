@@ -37,10 +37,15 @@ func (p SkillDelayV1Parser) ParseFile(filePath string, skillIdTable map[string]i
 
 	var skills []rostructs.SkillDelayV1
 	decoder := decoders.NewLuaDecoder(stringReencoder)
-	// @TODO: Add some detection for possible new values
-	// Note: these values are not official, it is just a mapping so we can get them loaded
-	decoder.CreateIntVar("SKFLAG_NOREDUCT", 1)
-	decoder.CreateIntVar("SKFLAG_DISABLE_FIXEDCASTING_REDUCTION", 2)
+
+	if err := validateFileConstats(filePath, SkFlags); err != nil {
+		panic(err)
+	}
+
+	for flag, value := range SkFlags {
+		decoder.CreateIntVar(flag, value)
+	}
+
 	decoder.CreateIntTable("SKID", skillIdTable)
 
 	result := decoder.DecodeLuaTable(filePath, "SKILL_DELAY_LIST", &skills)
