@@ -26,4 +26,9 @@ export enum RouteName {
 	MapList = "mapList",
 	MapHistory = "mapHistory",
 	MapPatch = "mapPatch",
+
+	// Skills
+	SkillList = "skillList",
+	SkillHistory = "skillHistory",
+	SkillPatch = "skillPatch",
 }

@@ -10,6 +10,20 @@ import (
 	"database/sql"
 )
 
+const countSkills = `-- name: CountSkills :one
+SELECT COUNT(*)
+FROM ` + "`" + `skills` + "`" + `
+INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `
+WHERE ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+`
+
+func (q *Queries) CountSkills(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countSkills)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getCurrentSkills = `-- name: GetCurrentSkills :many
 SELECT skills_history.history_id, skills_history.previous_history_id, skills_history.skill_id, skills_history.file_version, skills_history.` + "`" + `update` + "`" + `, skills_history.constant, skills_history.name, skills_history.description, skills_history.max_level, skills_history.sp_cost, skills_history.can_select_level, skills_history.attack_range, skills_history.required_skills, skills_history.job_required_skills, skills_history.skill_scale, skills_history.created_at, skills_history.ap_cost, skills_history.is_passive, skills_history.cast_flags, skills_history.cast_fixed_delay, skills_history.cast_stat_delay, skills_history.single_post_delay, skills_history.global_post_delay, ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + `
 FROM ` + "`" + `skills` + "`" + `
@@ -114,6 +128,55 @@ func (q *Queries) GetSkillJobs(ctx context.Context) ([]SkillsJob, error) {
 			&i.Deleted,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSkillList = `-- name: GetSkillList :many
+SELECT ` + "`" + `skills_history` + "`" + `.` + "`" + `skill_id` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `name` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `constant` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `update` + "`" + ` lastUpdate
+FROM ` + "`" + `skills` + "`" + `
+INNER JOIN ` + "`" + `skills_history` + "`" + ` ON ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `skills` + "`" + `.` + "`" + `latest_history_id` + "`" + `
+WHERE ` + "`" + `skills` + "`" + `.` + "`" + `deleted` + "`" + ` = FALSE
+ORDER BY ` + "`" + `skills_history` + "`" + `.` + "`" + `skill_id` + "`" + ` ASC
+LIMIT ?, ?
+`
+
+type GetSkillListParams struct {
+	Offset int32
+	Limit  int32
+}
+
+type GetSkillListRow struct {
+	SkillID    int32
+	Name       sql.NullString
+	Constant   sql.NullString
+	Lastupdate string
+}
+
+func (q *Queries) GetSkillList(ctx context.Context, arg GetSkillListParams) ([]GetSkillListRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSkillList, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSkillListRow
+	for rows.Next() {
+		var i GetSkillListRow
+		if err := rows.Scan(
+			&i.SkillID,
+			&i.Name,
+			&i.Constant,
+			&i.Lastupdate,
 		); err != nil {
 			return nil, err
 		}

@@ -1291,6 +1291,66 @@ func (_c *MockIDAO_CountQuests_Call) RunAndReturn(run func(ctx context.Context) 
 	return _c
 }
 
+// CountSkills provides a mock function for the type MockIDAO
+func (_mock *MockIDAO) CountSkills(ctx context.Context) (int64, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountSkills")
+	}
+
+	var r0 int64
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (int64, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) int64); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockIDAO_CountSkills_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountSkills'
+type MockIDAO_CountSkills_Call struct {
+	*mock.Call
+}
+
+// CountSkills is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockIDAO_Expecter) CountSkills(ctx interface{}) *MockIDAO_CountSkills_Call {
+	return &MockIDAO_CountSkills_Call{Call: _e.mock.On("CountSkills", ctx)}
+}
+
+func (_c *MockIDAO_CountSkills_Call) Run(run func(ctx context.Context)) *MockIDAO_CountSkills_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockIDAO_CountSkills_Call) Return(n int64, err error) *MockIDAO_CountSkills_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockIDAO_CountSkills_Call) RunAndReturn(run func(ctx context.Context) (int64, error)) *MockIDAO_CountSkills_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetChangedI18ns provides a mock function for the type MockIDAO
 func (_mock *MockIDAO) GetChangedI18ns(ctx context.Context, arg GetChangedI18nsParams) ([]GetChangedI18nsRow, error) {
 	ret := _mock.Called(ctx, arg)
@@ -2873,6 +2933,74 @@ func (_c *MockIDAO_GetSkillJobs_Call) Return(skillsJobs []SkillsJob, err error) 
 }
 
 func (_c *MockIDAO_GetSkillJobs_Call) RunAndReturn(run func(ctx context.Context) ([]SkillsJob, error)) *MockIDAO_GetSkillJobs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetSkillList provides a mock function for the type MockIDAO
+func (_mock *MockIDAO) GetSkillList(ctx context.Context, arg GetSkillListParams) ([]GetSkillListRow, error) {
+	ret := _mock.Called(ctx, arg)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSkillList")
+	}
+
+	var r0 []GetSkillListRow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, GetSkillListParams) ([]GetSkillListRow, error)); ok {
+		return returnFunc(ctx, arg)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, GetSkillListParams) []GetSkillListRow); ok {
+		r0 = returnFunc(ctx, arg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]GetSkillListRow)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, GetSkillListParams) error); ok {
+		r1 = returnFunc(ctx, arg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockIDAO_GetSkillList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSkillList'
+type MockIDAO_GetSkillList_Call struct {
+	*mock.Call
+}
+
+// GetSkillList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - arg GetSkillListParams
+func (_e *MockIDAO_Expecter) GetSkillList(ctx interface{}, arg interface{}) *MockIDAO_GetSkillList_Call {
+	return &MockIDAO_GetSkillList_Call{Call: _e.mock.On("GetSkillList", ctx, arg)}
+}
+
+func (_c *MockIDAO_GetSkillList_Call) Run(run func(ctx context.Context, arg GetSkillListParams)) *MockIDAO_GetSkillList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 GetSkillListParams
+		if args[1] != nil {
+			arg1 = args[1].(GetSkillListParams)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockIDAO_GetSkillList_Call) Return(getSkillListRows []GetSkillListRow, err error) *MockIDAO_GetSkillList_Call {
+	_c.Call.Return(getSkillListRows, err)
+	return _c
+}
+
+func (_c *MockIDAO_GetSkillList_Call) RunAndReturn(run func(ctx context.Context, arg GetSkillListParams) ([]GetSkillListRow, error)) *MockIDAO_GetSkillList_Call {
 	_c.Call.Return(run)
 	return _c
 }

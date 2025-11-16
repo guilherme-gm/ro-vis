@@ -282,3 +282,43 @@ func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkill
 
 	return finalResult, nil
 }
+
+func (r *SkillRepository) CountSkills(tx *sql.Tx) (int32, error) {
+	queries := r.DB.GetDAO(tx)
+
+	res, err := queries.CountSkills(context.Background())
+	if err == sql.ErrNoRows {
+		return int32(res), nil
+	}
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(res), nil
+}
+
+func (r *SkillRepository) GetSkills(tx *sql.Tx, pagination Pagination) ([]domain.MinSkill, error) {
+	queries := r.DB.GetDAO(tx)
+	res, err := queries.GetSkillList(context.Background(), dao.GetSkillListParams{
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []domain.MinSkill{}, nil
+	}
+	if err != nil {
+		return []domain.MinSkill{}, nil
+	}
+
+	skills := make([]domain.MinSkill, len(res))
+	for idx, val := range res {
+		skills[idx] = domain.MinSkill{
+			SkillID:    val.SkillID,
+			LastUpdate: val.Lastupdate,
+			Constant:   domain.NullableString(val.Constant),
+			Name:       domain.NullableString(val.Name),
+		}
+	}
+	return skills, nil
+}

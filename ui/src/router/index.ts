@@ -105,6 +105,23 @@ const router = createRouter({
 			name: RouteName.MapHistory,
 			component: () => import("../views/Map/MapHistoryView.vue"),
 		},
+
+		// Skills
+		{
+			path: '/:server(latam|kro)/skills',
+			name: RouteName.SkillList,
+			component: () => import("../views/Skill/SkillListView.vue"),
+		},
+		{
+			path: '/:server(latam|kro)/skills/patch/:patch',
+			name: RouteName.SkillPatch,
+			component: () => import("../views/Skill/SkillPatchView.vue"),
+		},
+		{
+			path: '/:server(latam|kro)/skills/:skillId',
+			name: RouteName.SkillHistory,
+			component: () => import("../views/Skill/SkillHistoryView.vue"),
+		},
 	]
 })
 

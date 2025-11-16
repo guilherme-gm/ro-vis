@@ -166,5 +166,6 @@ func (s *Skill) Equals(otherSkill Skill) bool {
 type MinSkill struct {
 	SkillID    int32
 	LastUpdate string
+	Constant   NullableString
 	Name       NullableString
 }

@@ -38,6 +38,7 @@ func main() {
 	updatesController := controllers.UpdatesController{}
 	i18nController := controllers.I18nController{}
 	mapsController := controllers.MapsController{}
+	skillsController := controllers.SkillController{}
 
 	router.Group("api/items/").
 		GET("/", controllers.GlobalHandler(itemsController.List)).
@@ -60,6 +61,11 @@ func main() {
 		GET("/", controllers.GlobalHandler(mapsController.List)).
 		GET("/update/:update", controllers.GlobalHandler(mapsController.ListForUpdate)).
 		GET("/:mapId", controllers.GlobalHandler(mapsController.ListForItem))
+
+	router.Group("api/skills/").
+		GET("/", controllers.GlobalHandler(skillsController.List))
+		// GET("/update/:update", controllers.GlobalHandler(skillsController.ListForUpdate)).
+		// GET("/:skillId", controllers.GlobalHandler(skillsController.ListForSkill))
 
 	router.Run(fmt.Sprintf(":%d", conf.ApiConfig.Port))
 }
