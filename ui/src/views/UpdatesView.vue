@@ -54,6 +54,11 @@ const mapTrackInfo: TrackInfo = {
 	label: 'Map',
 };
 
+const skillTrackInfo: TrackInfo = {
+	route: RouteName.SkillPatch,
+	label: 'Skill',
+};
+
 const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 	// ======= Item
 	["data/bookitemnametable.txt", itemTrackInfo],
@@ -92,6 +97,12 @@ const fileTrackInfo = new Map<string, { route: RouteName; label: string; }>([
 	["data/luafiles514/lua files/navigation/navi_mob_kr.lub", mapTrackInfo],
 	["data/luafiles514/lua files/navigation/navi_npc_br.lub", mapTrackInfo],
 	["data/luafiles514/lua files/navigation/navi_npc_kr.lub", mapTrackInfo],
+
+	// ====== Skill
+	["data/luafiles514/lua files/skillinfoz/skilldescript.lub", skillTrackInfo],
+	["data/luafiles514/lua files/skillinfoz/skillid.lub", skillTrackInfo],
+	["data/luafiles514/lua files/skillinfoz/skillinfolist.lub", skillTrackInfo],
+	["data/luafiles514/lua files/skillinfoz/skilldelaylist.lub", skillTrackInfo],
 ]);
 
 function isTrackedFile(fileName: string): boolean {

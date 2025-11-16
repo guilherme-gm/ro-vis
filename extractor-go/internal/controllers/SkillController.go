@@ -59,3 +59,36 @@ func (ctlr *SkillController) ListForItem(c *gin.Context, params ListForSkillPara
 
 	c.JSON(http.StatusOK, gin.H{"total": len(updates), "list": updates})
 }
+
+type ListSkillForUpdateParams struct {
+	Params struct {
+		Update string `uri:"update" binding:"updateStr"`
+	}
+	Query PaginateQuery
+}
+
+func (ctlr *SkillController) ListForUpdate(c *gin.Context, params ListSkillForUpdateParams) {
+	// @TODO: Probably better make it a go routine
+	itemRepo := c.MustGet("x-server").(*server.Server).Repositories.SkillRepository
+	count, err := itemRepo.CountChangesInUpdate(nil, params.Params.Update)
+	if err != nil {
+		c.Error(NewInternalServerError("failed to fetch count", err))
+		return
+	}
+
+	if count < int(params.Query.Start) {
+		c.Error(NewBadRequestError("offset is out of range", nil))
+		return
+	}
+
+	updates, err := itemRepo.GetChangesInUpdate(nil, params.Params.Update, repository.Pagination{
+		Offset: params.Query.Start,
+		Limit:  100,
+	})
+	if err != nil {
+		c.Error(NewInternalServerError("failed to fetch Skill", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total": count, "list": updates})
+}

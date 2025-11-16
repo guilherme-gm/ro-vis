@@ -10,6 +10,19 @@ import (
 	"database/sql"
 )
 
+const countChangedSkillsInUpdate = `-- name: CountChangedSkillsInUpdate :one
+SELECT COUNT(*)
+FROM ` + "`" + `skills_history` + "`" + `
+WHERE ` + "`" + `update` + "`" + ` = ?
+`
+
+func (q *Queries) CountChangedSkillsInUpdate(ctx context.Context, update string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countChangedSkillsInUpdate, update)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countSkills = `-- name: CountSkills :one
 SELECT COUNT(*)
 FROM ` + "`" + `skills` + "`" + `
@@ -22,6 +35,100 @@ func (q *Queries) CountSkills(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const getChangedSkills = `-- name: GetChangedSkills :many
+SELECT current.history_id, current.previous_history_id, current.skill_id, current.file_version, current.` + "`" + `update` + "`" + `, current.constant, current.name, current.description, current.max_level, current.sp_cost, current.can_select_level, current.attack_range, current.required_skills, current.job_required_skills, current.skill_scale, current.created_at, current.ap_cost, current.is_passive, current.cast_flags, current.cast_fixed_delay, current.cast_stat_delay, current.single_post_delay, current.global_post_delay, previous.history_id, previous.previous_history_id, previous.skill_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.constant, previous.name, previous.description, previous.max_level, previous.sp_cost, previous.can_select_level, previous.attack_range, previous.required_skills, previous.job_required_skills, previous.skill_scale, previous.created_at, previous.ap_cost, previous.is_passive, previous.cast_flags, previous.cast_fixed_delay, previous.cast_stat_delay, previous.single_post_delay, previous.global_post_delay, latest.update lastUpdate
+FROM ` + "`" + `skills_history` + "`" + ` current
+LEFT JOIN ` + "`" + `previous_skill_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+LEFT JOIN ` + "`" + `skills` + "`" + ` latest_id ON ` + "`" + `latest_id` + "`" + `.` + "`" + `skill_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `skill_id` + "`" + `
+LEFT JOIN ` + "`" + `skills_history` + "`" + ` latest ON ` + "`" + `latest_id` + "`" + `.` + "`" + `latest_history_id` + "`" + ` = ` + "`" + `latest` + "`" + `.` + "`" + `history_id` + "`" + `
+WHERE ` + "`" + `current` + "`" + `.` + "`" + `update` + "`" + ` = ?
+ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + `
+LIMIT ?, ?
+`
+
+type GetChangedSkillsParams struct {
+	Update string
+	Offset int32
+	Limit  int32
+}
+
+type GetChangedSkillsRow struct {
+	SkillsHistory          SkillsHistory
+	PreviousSkillHistoryVw PreviousSkillHistoryVw
+	Lastupdate             sql.NullString
+}
+
+func (q *Queries) GetChangedSkills(ctx context.Context, arg GetChangedSkillsParams) ([]GetChangedSkillsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getChangedSkills, arg.Update, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetChangedSkillsRow
+	for rows.Next() {
+		var i GetChangedSkillsRow
+		if err := rows.Scan(
+			&i.SkillsHistory.HistoryID,
+			&i.SkillsHistory.PreviousHistoryID,
+			&i.SkillsHistory.SkillID,
+			&i.SkillsHistory.FileVersion,
+			&i.SkillsHistory.Update,
+			&i.SkillsHistory.Constant,
+			&i.SkillsHistory.Name,
+			&i.SkillsHistory.Description,
+			&i.SkillsHistory.MaxLevel,
+			&i.SkillsHistory.SpCost,
+			&i.SkillsHistory.CanSelectLevel,
+			&i.SkillsHistory.AttackRange,
+			&i.SkillsHistory.RequiredSkills,
+			&i.SkillsHistory.JobRequiredSkills,
+			&i.SkillsHistory.SkillScale,
+			&i.SkillsHistory.CreatedAt,
+			&i.SkillsHistory.ApCost,
+			&i.SkillsHistory.IsPassive,
+			&i.SkillsHistory.CastFlags,
+			&i.SkillsHistory.CastFixedDelay,
+			&i.SkillsHistory.CastStatDelay,
+			&i.SkillsHistory.SinglePostDelay,
+			&i.SkillsHistory.GlobalPostDelay,
+			&i.PreviousSkillHistoryVw.HistoryID,
+			&i.PreviousSkillHistoryVw.PreviousHistoryID,
+			&i.PreviousSkillHistoryVw.SkillID,
+			&i.PreviousSkillHistoryVw.FileVersion,
+			&i.PreviousSkillHistoryVw.Update,
+			&i.PreviousSkillHistoryVw.Constant,
+			&i.PreviousSkillHistoryVw.Name,
+			&i.PreviousSkillHistoryVw.Description,
+			&i.PreviousSkillHistoryVw.MaxLevel,
+			&i.PreviousSkillHistoryVw.SpCost,
+			&i.PreviousSkillHistoryVw.CanSelectLevel,
+			&i.PreviousSkillHistoryVw.AttackRange,
+			&i.PreviousSkillHistoryVw.RequiredSkills,
+			&i.PreviousSkillHistoryVw.JobRequiredSkills,
+			&i.PreviousSkillHistoryVw.SkillScale,
+			&i.PreviousSkillHistoryVw.CreatedAt,
+			&i.PreviousSkillHistoryVw.ApCost,
+			&i.PreviousSkillHistoryVw.IsPassive,
+			&i.PreviousSkillHistoryVw.CastFlags,
+			&i.PreviousSkillHistoryVw.CastFixedDelay,
+			&i.PreviousSkillHistoryVw.CastStatDelay,
+			&i.PreviousSkillHistoryVw.SinglePostDelay,
+			&i.PreviousSkillHistoryVw.GlobalPostDelay,
+			&i.Lastupdate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getCurrentSkills = `-- name: GetCurrentSkills :many

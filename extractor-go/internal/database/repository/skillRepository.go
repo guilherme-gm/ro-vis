@@ -370,3 +370,36 @@ func (r *SkillRepository) GetSkillHistory(tx *sql.Tx, skillId int32, pagination 
 
 	return records, nil
 }
+
+func (r *SkillRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	queries := r.DB.GetDAO(tx)
+	res, err := queries.CountChangedSkillsInUpdate(context.Background(), update)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
+}
+
+func (r *SkillRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Skill], error) {
+	queries := r.DB.GetDAO(tx)
+	res, err := queries.GetChangedSkills(context.Background(), dao.GetChangedSkillsParams{
+		Update: update,
+		Offset: pagination.Offset,
+		Limit:  pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Skill]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Skill], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousSkillHistoryVw, qmodel.SkillsHistory, qmodel.Lastupdate)
+	}
+
+	return records, nil
+}

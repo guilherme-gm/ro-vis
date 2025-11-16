@@ -32,3 +32,18 @@ LEFT JOIN `previous_skill_history_vw` previous ON `previous`.`history_id` = `cur
 WHERE `current`.`skill_id` = ?
 ORDER BY `current`.`history_id` ASC
 LIMIT ?, ?;
+
+-- name: CountChangedSkillsInUpdate :one
+SELECT COUNT(*)
+FROM `skills_history`
+WHERE `update` = ?;
+
+-- name: GetChangedSkills :many
+SELECT sqlc.embed(current), sqlc.embed(previous), latest.update lastUpdate
+FROM `skills_history` current
+LEFT JOIN `previous_skill_history_vw` previous ON `previous`.`history_id` = `current`.`previous_history_id`
+LEFT JOIN `skills` latest_id ON `latest_id`.`skill_id` = `current`.`skill_id`
+LEFT JOIN `skills_history` latest ON `latest_id`.`latest_history_id` = `latest`.`history_id`
+WHERE `current`.`update` = ?
+ORDER BY `current`.`history_id`
+LIMIT ?, ?;
