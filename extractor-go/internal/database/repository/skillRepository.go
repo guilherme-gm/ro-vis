@@ -322,3 +322,51 @@ func (r *SkillRepository) GetSkills(tx *sql.Tx, pagination Pagination) ([]domain
 	}
 	return skills, nil
 }
+
+func (r *SkillRepository) sqlRecordToDomain(dbFrom dao.PreviousSkillHistoryVw, dbTo dao.SkillsHistory, lastUpdate sql.NullString) FromToRecord[domain.Skill] {
+	var from *domain.Record[domain.Skill] = nil
+	var to *domain.Record[domain.Skill] = nil
+
+	if dbFrom.HistoryID.Valid {
+		from = &domain.Record[domain.Skill]{
+			Update: dbFrom.Update.String,
+			Data:   dbFrom.ToDomain(),
+		}
+	}
+
+	if dbTo.HistoryID != 0 {
+		to = &domain.Record[domain.Skill]{
+			Update: dbTo.Update,
+			Data:   dbTo.ToDomain(),
+		}
+	}
+
+	return FromToRecord[domain.Skill]{
+		LastUpdate: domain.NullableString(lastUpdate),
+		From:       from,
+		To:         to,
+	}
+}
+
+func (r *SkillRepository) GetSkillHistory(tx *sql.Tx, skillId int32, pagination Pagination) ([]FromToRecord[domain.Skill], error) {
+	queries := r.DB.GetDAO(tx)
+	res, err := queries.GetSkillHistory(context.Background(), dao.GetSkillHistoryParams{
+		SkillID: skillId,
+		Offset:  pagination.Offset,
+		Limit:   pagination.Limit,
+	})
+	if err == sql.ErrNoRows {
+		return []FromToRecord[domain.Skill]{}, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]FromToRecord[domain.Skill], len(res))
+	for idx, qmodel := range res {
+		records[idx] = r.sqlRecordToDomain(qmodel.PreviousSkillHistoryVw, qmodel.SkillsHistory, sql.NullString{})
+	}
+
+	return records, nil
+}

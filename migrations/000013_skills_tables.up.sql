@@ -41,9 +41,3 @@ CREATE TABLE `skills` (
 	`updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (`latest_history_id`) REFERENCES `skills_history`(`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- sqlc doesn't handle left joins very well, so we make it into a view so
--- it is forced to create a new type. Not ideal, but should not cause huge performance issues
-CREATE VIEW `previous_skill_history_vw` AS (
-	SELECT prev.* FROM `skills_history` AS curr LEFT JOIN `skills_history` AS prev ON prev.history_id = curr.previous_history_id
-);

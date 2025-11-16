@@ -24,3 +24,11 @@ SELECT COUNT(*)
 FROM `skills`
 INNER JOIN `skills_history` ON `skills`.`latest_history_id` = `skills_history`.`history_id`
 WHERE `skills`.`deleted` = FALSE;
+
+-- name: GetSkillHistory :many
+SELECT sqlc.embed(current), sqlc.embed(previous)
+FROM `skills_history` current
+LEFT JOIN `previous_skill_history_vw` previous ON `previous`.`history_id` = `current`.`previous_history_id`
+WHERE `current`.`skill_id` = ?
+ORDER BY `current`.`history_id` ASC
+LIMIT ?, ?;

@@ -232,6 +232,13 @@ type PreviousSkillHistoryVw struct {
 	JobRequiredSkills []byte
 	SkillScale        []byte
 	CreatedAt         sql.NullTime
+	ApCost            []byte
+	IsPassive         sql.NullBool
+	CastFlags         []byte
+	CastFixedDelay    []byte
+	CastStatDelay     []byte
+	SinglePostDelay   []byte
+	GlobalPostDelay   []byte
 }
 
 type Quest struct {

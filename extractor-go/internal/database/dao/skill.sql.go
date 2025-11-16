@@ -105,6 +105,96 @@ func (q *Queries) GetCurrentSkills(ctx context.Context) ([]GetCurrentSkillsRow, 
 	return items, nil
 }
 
+const getSkillHistory = `-- name: GetSkillHistory :many
+SELECT current.history_id, current.previous_history_id, current.skill_id, current.file_version, current.` + "`" + `update` + "`" + `, current.constant, current.name, current.description, current.max_level, current.sp_cost, current.can_select_level, current.attack_range, current.required_skills, current.job_required_skills, current.skill_scale, current.created_at, current.ap_cost, current.is_passive, current.cast_flags, current.cast_fixed_delay, current.cast_stat_delay, current.single_post_delay, current.global_post_delay, previous.history_id, previous.previous_history_id, previous.skill_id, previous.file_version, previous.` + "`" + `update` + "`" + `, previous.constant, previous.name, previous.description, previous.max_level, previous.sp_cost, previous.can_select_level, previous.attack_range, previous.required_skills, previous.job_required_skills, previous.skill_scale, previous.created_at, previous.ap_cost, previous.is_passive, previous.cast_flags, previous.cast_fixed_delay, previous.cast_stat_delay, previous.single_post_delay, previous.global_post_delay
+FROM ` + "`" + `skills_history` + "`" + ` current
+LEFT JOIN ` + "`" + `previous_skill_history_vw` + "`" + ` previous ON ` + "`" + `previous` + "`" + `.` + "`" + `history_id` + "`" + ` = ` + "`" + `current` + "`" + `.` + "`" + `previous_history_id` + "`" + `
+WHERE ` + "`" + `current` + "`" + `.` + "`" + `skill_id` + "`" + ` = ?
+ORDER BY ` + "`" + `current` + "`" + `.` + "`" + `history_id` + "`" + ` ASC
+LIMIT ?, ?
+`
+
+type GetSkillHistoryParams struct {
+	SkillID int32
+	Offset  int32
+	Limit   int32
+}
+
+type GetSkillHistoryRow struct {
+	SkillsHistory          SkillsHistory
+	PreviousSkillHistoryVw PreviousSkillHistoryVw
+}
+
+func (q *Queries) GetSkillHistory(ctx context.Context, arg GetSkillHistoryParams) ([]GetSkillHistoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSkillHistory, arg.SkillID, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSkillHistoryRow
+	for rows.Next() {
+		var i GetSkillHistoryRow
+		if err := rows.Scan(
+			&i.SkillsHistory.HistoryID,
+			&i.SkillsHistory.PreviousHistoryID,
+			&i.SkillsHistory.SkillID,
+			&i.SkillsHistory.FileVersion,
+			&i.SkillsHistory.Update,
+			&i.SkillsHistory.Constant,
+			&i.SkillsHistory.Name,
+			&i.SkillsHistory.Description,
+			&i.SkillsHistory.MaxLevel,
+			&i.SkillsHistory.SpCost,
+			&i.SkillsHistory.CanSelectLevel,
+			&i.SkillsHistory.AttackRange,
+			&i.SkillsHistory.RequiredSkills,
+			&i.SkillsHistory.JobRequiredSkills,
+			&i.SkillsHistory.SkillScale,
+			&i.SkillsHistory.CreatedAt,
+			&i.SkillsHistory.ApCost,
+			&i.SkillsHistory.IsPassive,
+			&i.SkillsHistory.CastFlags,
+			&i.SkillsHistory.CastFixedDelay,
+			&i.SkillsHistory.CastStatDelay,
+			&i.SkillsHistory.SinglePostDelay,
+			&i.SkillsHistory.GlobalPostDelay,
+			&i.PreviousSkillHistoryVw.HistoryID,
+			&i.PreviousSkillHistoryVw.PreviousHistoryID,
+			&i.PreviousSkillHistoryVw.SkillID,
+			&i.PreviousSkillHistoryVw.FileVersion,
+			&i.PreviousSkillHistoryVw.Update,
+			&i.PreviousSkillHistoryVw.Constant,
+			&i.PreviousSkillHistoryVw.Name,
+			&i.PreviousSkillHistoryVw.Description,
+			&i.PreviousSkillHistoryVw.MaxLevel,
+			&i.PreviousSkillHistoryVw.SpCost,
+			&i.PreviousSkillHistoryVw.CanSelectLevel,
+			&i.PreviousSkillHistoryVw.AttackRange,
+			&i.PreviousSkillHistoryVw.RequiredSkills,
+			&i.PreviousSkillHistoryVw.JobRequiredSkills,
+			&i.PreviousSkillHistoryVw.SkillScale,
+			&i.PreviousSkillHistoryVw.CreatedAt,
+			&i.PreviousSkillHistoryVw.ApCost,
+			&i.PreviousSkillHistoryVw.IsPassive,
+			&i.PreviousSkillHistoryVw.CastFlags,
+			&i.PreviousSkillHistoryVw.CastFixedDelay,
+			&i.PreviousSkillHistoryVw.CastStatDelay,
+			&i.PreviousSkillHistoryVw.SinglePostDelay,
+			&i.PreviousSkillHistoryVw.GlobalPostDelay,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSkillJobs = `-- name: GetSkillJobs :many
 SELECT skills_jobs.constant, skills_jobs.job_id, skills_jobs.inherited_job, skills_jobs.inherited_job2, skills_jobs.first_update, skills_jobs.last_update, skills_jobs.deleted, skills_jobs.updated_at, skills_jobs.created_at FROM ` + "`" + `skills_jobs` + "`" + `
 `
