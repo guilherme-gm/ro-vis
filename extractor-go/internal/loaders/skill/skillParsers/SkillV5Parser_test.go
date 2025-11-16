@@ -134,10 +134,10 @@ func TestSkillLoader_loadSkillDesc(t *testing.T) {
 
 	// Seed existing skills so the parser can resolve SKID constants
 	existing := []domain.Skill{
-		{SkillID: 1, Constant: domain.NewNullableString("NV_BASIC"), Description: domain.NewNullableString("Old"), Deleted: false},
-		{SkillID: 24, Constant: domain.NewNullableString("AL_RUWACH"), Description: domain.NewNullableString(""), Deleted: false},
-		{SkillID: 45, Constant: domain.NewNullableString("AC_CONCENTRATION"), Description: domain.NewNullableString("something"), Deleted: false},
-		{SkillID: 9999, Constant: domain.NewNullableString("TO_DELETE"), Description: domain.NewNullableString("Removed desc"), Deleted: false},
+		{SkillID: 1, HistoryID: domain.NewNullableInt32(1), Constant: domain.NewNullableString("NV_BASIC"), Description: domain.NewNullableString("Old"), Deleted: false},
+		{SkillID: 24, HistoryID: domain.NewNullableInt32(2), Constant: domain.NewNullableString("AL_RUWACH"), Description: domain.NewNullableString(""), Deleted: false},
+		{SkillID: 45, HistoryID: domain.NewNullableInt32(3), Constant: domain.NewNullableString("AC_CONCENTRATION"), Description: domain.NewNullableString("something"), Deleted: false},
+		{SkillID: 9999, HistoryID: domain.NewNullableInt32(4), Constant: domain.NewNullableString("TO_DELETE"), Description: domain.NewNullableString("Removed desc"), Deleted: false},
 	}
 	skillUpdater := loaders.NewUpdater(existing)
 
@@ -149,6 +149,8 @@ func TestSkillLoader_loadSkillDesc(t *testing.T) {
 		assert.False(t, s.Deleted)
 		assert.True(t, s.Description.Valid)
 		assert.Equal(t, "Basic Skill\nMAX Lv : 9", s.Description.String)
+		assert.Equal(t, domain.NewNullableNullInt32(), s.HistoryID)
+		assert.Equal(t, domain.NewNullableInt32(1), s.PreviousHistoryID)
 	}
 
 	// AL_RUWACH description updated with 3 lines

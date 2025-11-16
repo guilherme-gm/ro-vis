@@ -119,7 +119,25 @@ func (l *SkillV7Parser) loadSkillInfos(
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
 			newSkill.FileVersion = 7
-			*newSkill = fileSkillDomain
+			*newSkill = fileSkill.ToSkill(*newSkill)
+		}
+	}
+
+	for _, existingSkill := range skillUpdater.CurrentValues {
+		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
+			if existingSkill.Description.Valid {
+				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+				deletedSkill.FileVersion = 5
+				deletedSkill.MaxLevel = domain.NewNullableNullInt32()
+				deletedSkill.Name = domain.NewNullableNullString()
+				deletedSkill.SpCost = nil
+				deletedSkill.CanSelectLevel = domain.NewNullableNullBool()
+				deletedSkill.AttackRange = nil
+				deletedSkill.RequiredSkills = nil
+				deletedSkill.JobRequiredSkills = nil
+				deletedSkill.SkillScale = nil
+				deletedSkill.ApCost = nil
+			}
 		}
 	}
 }
@@ -156,7 +174,7 @@ func (l *SkillV7Parser) loadSkillDesc(
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
 			newSkill.FileVersion = 7
-			*newSkill = fileSkillDomain
+			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
 

@@ -154,13 +154,19 @@ func (s *Skill) Equals(otherSkill Skill) bool {
 		s.Name == otherSkill.Name &&
 		s.Description == otherSkill.Description &&
 		s.MaxLevel == otherSkill.MaxLevel &&
+		s.IsPassive == otherSkill.IsPassive &&
 		slices.Equal(s.SpCost, otherSkill.SpCost) &&
 		slices.Equal(s.ApCost, otherSkill.ApCost) &&
 		s.CanSelectLevel == otherSkill.CanSelectLevel &&
 		slices.Equal(s.AttackRange, otherSkill.AttackRange) &&
 		slices.Equal(s.RequiredSkills, otherSkill.RequiredSkills) &&
 		s.isJobRequiredSkillEqual(otherSkill) &&
-		slices.Equal(s.SkillScale, otherSkill.SkillScale))
+		slices.Equal(s.SkillScale, otherSkill.SkillScale)) &&
+		slices.Equal(s.CastFlags, otherSkill.CastFlags) &&
+		slices.Equal(s.CastFixedDelay, otherSkill.CastFixedDelay) &&
+		slices.Equal(s.CastStatDelay, otherSkill.CastStatDelay) &&
+		slices.Equal(s.SinglePostDelay, otherSkill.SinglePostDelay) &&
+		slices.Equal(s.GlobalPostDelay, otherSkill.GlobalPostDelay)
 }
 
 type MinSkill struct {

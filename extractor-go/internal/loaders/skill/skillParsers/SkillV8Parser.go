@@ -122,7 +122,26 @@ func (l *SkillV8Parser) loadSkillInfos(
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
 			newSkill.FileVersion = 8
-			*newSkill = fileSkillDomain
+			*newSkill = fileSkill.ToSkill(*newSkill)
+		}
+	}
+
+	for _, existingSkill := range skillUpdater.CurrentValues {
+		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
+			if existingSkill.Description.Valid {
+				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
+				deletedSkill.FileVersion = 5
+				deletedSkill.MaxLevel = domain.NewNullableNullInt32()
+				deletedSkill.Name = domain.NewNullableNullString()
+				deletedSkill.SpCost = nil
+				deletedSkill.CanSelectLevel = domain.NewNullableNullBool()
+				deletedSkill.AttackRange = nil
+				deletedSkill.RequiredSkills = nil
+				deletedSkill.JobRequiredSkills = nil
+				deletedSkill.SkillScale = nil
+				deletedSkill.ApCost = nil
+				deletedSkill.IsPassive = domain.NewNullableNullBool()
+			}
 		}
 	}
 }
@@ -159,7 +178,7 @@ func (l *SkillV8Parser) loadSkillDesc(
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
 			newSkill.FileVersion = 8
-			*newSkill = fileSkillDomain
+			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
 
@@ -206,7 +225,7 @@ func (l *SkillV8Parser) loadSkillDelay(
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
 			newSkill.FileVersion = 8
-			*newSkill = fileSkillDomain
+			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
 
@@ -215,7 +234,11 @@ func (l *SkillV8Parser) loadSkillDelay(
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
 				deletedSkill.FileVersion = 8
-				deletedSkill.Description = domain.NewNullableNullString()
+				deletedSkill.CastFlags = nil
+				deletedSkill.CastFixedDelay = nil
+				deletedSkill.CastStatDelay = nil
+				deletedSkill.SinglePostDelay = nil
+				deletedSkill.GlobalPostDelay = nil
 			}
 		}
 	}
