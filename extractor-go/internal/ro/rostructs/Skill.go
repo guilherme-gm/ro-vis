@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/utils"
 )
 
 // V1 was used between 2009-10-07 and before 2010-04-14
@@ -55,44 +56,9 @@ func (s SkillInfoV2) ToSkill(base domain.Skill) domain.Skill {
 	// Don't trust this value as constant, I've found 1 case it is wrong and breaks everything
 	// SillID always comes first anyway, we better trust it.
 	// base.Constant = domain.NewNullableString(s.Constant)
-	base.SkillID = int32(s.SkillId)
-	base.Name = domain.NewNullableString(s.SkillName)
-	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
-
-	spCost := make([]int32, len(s.SpCost))
-	for i, v := range s.SpCost {
-		spCost[i] = int32(v)
-	}
-	base.SpCost = spCost
-	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
-	base.AttackRange = make([]int32, len(s.AttackRange))
-	for i, v := range s.AttackRange {
-		base.AttackRange[i] = int32(v)
-	}
-
-	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
-	for i, v := range s.RequiredSkills {
-		base.RequiredSkills[i] = domain.NeedSkillEntry{
-			SkillID: int32(v.SkillId),
-			Level:   int32(v.Lv),
-		}
-	}
-
-	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
-	for i, v := range s.JobRequiredSkills {
-		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
-			JobId:  int32(v.Job),
-			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
-		}
-
-		for j, w := range v.RequiredSkills {
-			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
-				SkillID: int32(w.SkillId),
-				Level:   int32(w.Lv),
-			}
-		}
-	}
-
+	base = setBasicFields(base, s.SkillId, s.SkillName, s.MaxLv)
+	base = setSpAndRange(base, s.SpCost, s.CanSelectLevel, s.AttackRange)
+	base = setRequiredSkills(base, s.RequiredSkills, s.JobRequiredSkills)
 	return base
 }
 
@@ -121,53 +87,10 @@ func (s SkillInfoV3) ToSkill(base domain.Skill) domain.Skill {
 	// Don't trust this value as constant, I've found 1 case it is wrong and breaks everything
 	// SillID always comes first anyway, we better trust it.
 	// base.Constant = domain.NewNullableString(s.Constant)
-	base.SkillID = int32(s.SkillId)
-	base.Name = domain.NewNullableString(s.SkillName)
-	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
-
-	spCost := make([]int32, len(s.SpCost))
-	for i, v := range s.SpCost {
-		spCost[i] = int32(v)
-	}
-	base.SpCost = spCost
-	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
-	base.AttackRange = make([]int32, len(s.AttackRange))
-	for i, v := range s.AttackRange {
-		base.AttackRange[i] = int32(v)
-	}
-
-	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
-	for i, v := range s.RequiredSkills {
-		base.RequiredSkills[i] = domain.NeedSkillEntry{
-			SkillID: int32(v.SkillId),
-			Level:   int32(v.Lv),
-		}
-	}
-
-	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
-	for i, v := range s.JobRequiredSkills {
-		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
-			JobId:  int32(v.Job),
-			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
-		}
-
-		for j, w := range v.RequiredSkills {
-			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
-				SkillID: int32(w.SkillId),
-				Level:   int32(w.Lv),
-			}
-		}
-	}
-
-	base.SkillScale = make([]domain.SkillScaleEntry, len(s.SkillScale))
-	for i, v := range s.SkillScale {
-		base.SkillScale[i] = domain.SkillScaleEntry{
-			Level: int32(v.Level),
-			X:     int32(v.X),
-			Y:     int32(v.Y),
-		}
-	}
-
+	base = setBasicFields(base, s.SkillId, s.SkillName, s.MaxLv)
+	base = setSpAndRange(base, s.SpCost, s.CanSelectLevel, s.AttackRange)
+	base = setRequiredSkills(base, s.RequiredSkills, s.JobRequiredSkills)
+	base.SkillScale = convertSkillScale(s.SkillScale)
 	return base
 }
 
@@ -191,59 +114,11 @@ func (s SkillInfoV4) ToSkill(base domain.Skill) domain.Skill {
 	// Don't trust this value as constant, I've found 1 case it is wrong and breaks everything
 	// SillID always comes first anyway, we better trust it.
 	// base.Constant = domain.NewNullableString(s.Constant)
-	base.SkillID = int32(s.SkillId)
-	base.Name = domain.NewNullableString(s.SkillName)
-	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
-
-	spCost := make([]int32, len(s.SpCost))
-	for i, v := range s.SpCost {
-		spCost[i] = int32(v)
-	}
-	base.SpCost = spCost
-	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
-	base.AttackRange = make([]int32, len(s.AttackRange))
-	for i, v := range s.AttackRange {
-		base.AttackRange[i] = int32(v)
-	}
-
-	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
-	for i, v := range s.RequiredSkills {
-		base.RequiredSkills[i] = domain.NeedSkillEntry{
-			SkillID: int32(v.SkillId),
-			Level:   int32(v.Lv),
-		}
-	}
-
-	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
-	for i, v := range s.JobRequiredSkills {
-		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
-			JobId:  int32(v.Job),
-			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
-		}
-
-		for j, w := range v.RequiredSkills {
-			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
-				SkillID: int32(w.SkillId),
-				Level:   int32(w.Lv),
-			}
-		}
-	}
-
-	base.SkillScale = make([]domain.SkillScaleEntry, len(s.SkillScale))
-	for i, v := range s.SkillScale {
-		base.SkillScale[i] = domain.SkillScaleEntry{
-			Level: int32(v.Level),
-			X:     int32(v.X),
-			Y:     int32(v.Y),
-		}
-	}
-
-	apCost := make([]int32, len(s.ApCost))
-	for i, v := range s.ApCost {
-		apCost[i] = int32(v)
-	}
-	base.ApCost = apCost
-
+	base = setBasicFields(base, s.SkillId, s.SkillName, s.MaxLv)
+	base = setSpAndRange(base, s.SpCost, s.CanSelectLevel, s.AttackRange)
+	base = setRequiredSkills(base, s.RequiredSkills, s.JobRequiredSkills)
+	base.SkillScale = convertSkillScale(s.SkillScale)
+	base.ApCost = utils.ConvertIntSliceToInt32(s.ApCost)
 	return base
 }
 
@@ -268,61 +143,70 @@ func (s SkillInfoV5) ToSkill(base domain.Skill) domain.Skill {
 	// Don't trust this value as constant, I've found 1 case it is wrong and breaks everything
 	// SillID always comes first anyway, we better trust it.
 	// base.Constant = domain.NewNullableString(s.Constant)
-	base.SkillID = int32(s.SkillId)
-	base.Name = domain.NewNullableString(s.SkillName)
-	base.MaxLevel = domain.NewNullableInt32(int32(s.MaxLv))
+	base = setBasicFields(base, s.SkillId, s.SkillName, s.MaxLv)
 	base.IsPassive = domain.NewNullableBool(s.IsPassive)
+	base = setSpAndRange(base, s.SpCost, s.CanSelectLevel, s.AttackRange)
+	base = setRequiredSkills(base, s.RequiredSkills, s.JobRequiredSkills)
+	base.SkillScale = convertSkillScale(s.SkillScale)
+	base.ApCost = utils.ConvertIntSliceToInt32(s.ApCost)
+	return base
+}
 
-	spCost := make([]int32, len(s.SpCost))
-	for i, v := range s.SpCost {
-		spCost[i] = int32(v)
-	}
-	base.SpCost = spCost
-	base.CanSelectLevel = domain.NewNullableBool(s.CanSelectLevel)
-	base.AttackRange = make([]int32, len(s.AttackRange))
-	for i, v := range s.AttackRange {
-		base.AttackRange[i] = int32(v)
-	}
+func setBasicFields(base domain.Skill, skillId int, skillName string, maxLv int) domain.Skill {
+	base.SkillID = int32(skillId)
+	base.Name = domain.NewNullableString(skillName)
+	base.MaxLevel = domain.NewNullableInt32(int32(maxLv))
+	return base
+}
 
-	base.RequiredSkills = make([]domain.NeedSkillEntry, len(s.RequiredSkills))
-	for i, v := range s.RequiredSkills {
+func setSpAndRange(base domain.Skill, spCost []int, canSelect bool, attackRange []int) domain.Skill {
+	base.SpCost = utils.ConvertIntSliceToInt32(spCost)
+	base.CanSelectLevel = domain.NewNullableBool(canSelect)
+	base.AttackRange = utils.ConvertIntSliceToInt32(attackRange)
+	return base
+}
+
+func setRequiredSkills(base domain.Skill, req []RequiredSkillV2, jobReq []JobRequiredSkillV2) domain.Skill {
+	base.RequiredSkills = make([]domain.NeedSkillEntry, len(req))
+	for i, v := range req {
 		base.RequiredSkills[i] = domain.NeedSkillEntry{
 			SkillID: int32(v.SkillId),
 			Level:   int32(v.Lv),
 		}
 	}
 
-	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(s.JobRequiredSkills))
-	for i, v := range s.JobRequiredSkills {
-		base.JobRequiredSkills[i] = domain.JobRequiredSkillEntry{
+	base.JobRequiredSkills = make([]domain.JobRequiredSkillEntry, len(jobReq))
+	for i, v := range jobReq {
+		entry := domain.JobRequiredSkillEntry{
 			JobId:  int32(v.Job),
 			Skills: make([]domain.NeedSkillEntry, len(v.RequiredSkills)),
 		}
 
 		for j, w := range v.RequiredSkills {
-			base.JobRequiredSkills[i].Skills[j] = domain.NeedSkillEntry{
+			entry.Skills[j] = domain.NeedSkillEntry{
 				SkillID: int32(w.SkillId),
 				Level:   int32(w.Lv),
 			}
 		}
+
+		base.JobRequiredSkills[i] = entry
 	}
 
-	base.SkillScale = make([]domain.SkillScaleEntry, len(s.SkillScale))
-	for i, v := range s.SkillScale {
-		base.SkillScale[i] = domain.SkillScaleEntry{
+	return base
+}
+
+func convertSkillScale(src []SkillInfoScale) []domain.SkillScaleEntry {
+	out := make([]domain.SkillScaleEntry, len(src))
+
+	for i, v := range src {
+		out[i] = domain.SkillScaleEntry{
 			Level: int32(v.Level),
 			X:     int32(v.X),
 			Y:     int32(v.Y),
 		}
 	}
 
-	apCost := make([]int32, len(s.ApCost))
-	for i, v := range s.ApCost {
-		apCost[i] = int32(v)
-	}
-	base.ApCost = apCost
-
-	return base
+	return out
 }
 
 type SkillDelayV1 struct {
@@ -335,31 +219,11 @@ type SkillDelayV1 struct {
 }
 
 func (s SkillDelayV1) ToSkill(base domain.Skill) domain.Skill {
-	base.CastFlags = make([]int32, len(s.SkillFlag))
-	for i, v := range s.SkillFlag {
-		base.CastFlags[i] = int32(v)
-	}
-
-	base.CastFixedDelay = make([]int32, len(s.SkillCastFixedDelay))
-	for i, v := range s.SkillCastFixedDelay {
-		base.CastFixedDelay[i] = int32(v)
-	}
-
-	base.CastStatDelay = make([]int32, len(s.SkillCastStatDelay))
-	for i, v := range s.SkillCastStatDelay {
-		base.CastStatDelay[i] = int32(v)
-	}
-
-	base.SinglePostDelay = make([]int32, len(s.SkillSinglePostDelay))
-	for i, v := range s.SkillSinglePostDelay {
-		base.SinglePostDelay[i] = int32(v)
-	}
-
-	base.GlobalPostDelay = make([]int32, len(s.SkillGlobalPostDelay))
-	for i, v := range s.SkillGlobalPostDelay {
-		base.GlobalPostDelay[i] = int32(v)
-	}
-
+	base.CastFlags = utils.ConvertIntSliceToInt32(s.SkillFlag)
+	base.CastFixedDelay = utils.ConvertIntSliceToInt32(s.SkillCastFixedDelay)
+	base.CastStatDelay = utils.ConvertIntSliceToInt32(s.SkillCastStatDelay)
+	base.SinglePostDelay = utils.ConvertIntSliceToInt32(s.SkillSinglePostDelay)
+	base.GlobalPostDelay = utils.ConvertIntSliceToInt32(s.SkillGlobalPostDelay)
 	return base
 }
 
