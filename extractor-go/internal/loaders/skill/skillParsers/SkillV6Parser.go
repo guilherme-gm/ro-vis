@@ -32,6 +32,10 @@ func NewSkillV6Parser() *SkillV6Parser {
 	return &SkillV6Parser{}
 }
 
+func (l *SkillV6Parser) FileVersion() int32 {
+	return 6
+}
+
 func (l *SkillV6Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2015, time.December, 15, 0, 0, 0, 0, time.UTC)) &&
 		update.Date.Before(time.Date(2020, time.September, 15, 0, 0, 0, 0, time.UTC))
@@ -66,7 +70,6 @@ func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
-			newSkill.FileVersion = 6
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
 		}
@@ -75,7 +78,6 @@ func (l *SkillV6Parser) loadSkillIDs(basePath string, update domain.Update, skil
 	for _, existingSkill := range skillUpdater.CurrentValues {
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.FileVersion = 6
 			deletedSkill.Deleted = true
 		}
 	}
@@ -118,7 +120,6 @@ func (l *SkillV6Parser) loadSkillInfos(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 6
 			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
@@ -127,7 +128,6 @@ func (l *SkillV6Parser) loadSkillInfos(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 5
 				deletedSkill.MaxLevel = domain.NewNullableNullInt32()
 				deletedSkill.Name = domain.NewNullableNullString()
 				deletedSkill.SpCost = nil
@@ -172,7 +172,6 @@ func (l *SkillV6Parser) loadSkillDesc(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 6
 			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
@@ -181,7 +180,6 @@ func (l *SkillV6Parser) loadSkillDesc(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 6
 				deletedSkill.Description = domain.NewNullableNullString()
 			}
 		}

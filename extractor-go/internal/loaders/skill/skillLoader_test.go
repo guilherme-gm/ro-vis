@@ -26,7 +26,7 @@ func TestSkillLoader_loadJobs_InsertUpdateDelete(t *testing.T) {
 		{Constant: "JT_SWORDMAN", JobId: 999, FirstUpdate: "2012-01-01", LastUpdate: "2012-01-01", Deleted: false},
 		{Constant: "TO_DELETE", JobId: 12345, FirstUpdate: "2012-01-01", LastUpdate: "2012-01-01", Deleted: false},
 	}
-	updater := loaders.NewUpdater[string](existing)
+	updater := loaders.NewUpdater(existing, 0)
 
 	loader := &SkillLoader{}
 	loader.loadJobs(testfiles.Root, update, updater)

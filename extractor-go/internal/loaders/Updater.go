@@ -11,6 +11,7 @@ type UpdaterEntryPointer[K comparable, T any] interface {
 	SetId(id K)
 	SetHistoryId(id domain.NullableInt32)
 	SetPreviousHistoryId(id domain.NullableInt32)
+	SetFileVersion(version int32)
 	*T
 }
 
@@ -21,21 +22,23 @@ type UpdaterEntryPointer[K comparable, T any] interface {
  */
 
 type Updater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]] struct {
-	CurrentValues  map[K]P
-	DirtyValues    map[K]P
-	ValuesToInsert []P
-	ValuesToUpdate []P
+	CurrentValues     map[K]P
+	DirtyValues       map[K]P
+	ValuesToInsert    []P
+	ValuesToUpdate    []P
+	targetFileVersion int32
 }
 
-func NewUpdater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]](currentValues []T) *Updater[K, T, P] {
+func NewUpdater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]](currentValues []T, targetFileVersion int32) *Updater[K, T, P] {
 	currentValuesHash := make(map[K]P)
 	for _, m := range currentValues {
 		currentValuesHash[m.GetId()] = &m
 	}
 
 	return &Updater[K, T, P]{
-		DirtyValues:   make(map[K]P),
-		CurrentValues: currentValuesHash,
+		DirtyValues:       make(map[K]P),
+		CurrentValues:     currentValuesHash,
+		targetFileVersion: targetFileVersion,
 	}
 }
 
@@ -64,6 +67,7 @@ func (u *Updater[K, T, P]) GetForEdit(key K) P {
 		// contains the original HistoryID, and we want it to become PreviousHistoryID
 		newMapPtr.SetPreviousHistoryId(newMap.GetHistoryId())
 		newMapPtr.SetHistoryId(domain.NewNullableNullInt32())
+		newMapPtr.SetFileVersion(u.targetFileVersion)
 		u.ValuesToUpdate = append(u.ValuesToUpdate, newMapPtr)
 		u.DirtyValues[key] = newMapPtr
 		return newMapPtr
@@ -73,6 +77,7 @@ func (u *Updater[K, T, P]) GetForEdit(key K) P {
 	newMap := P(&newMapData)
 	newMap.SetId(key)
 	newMap.SetHistoryId(domain.NewNullableNullInt32())
+	newMap.SetFileVersion(u.targetFileVersion)
 	u.ValuesToInsert = append(u.ValuesToInsert, newMap)
 	u.DirtyValues[key] = newMap
 	return newMap

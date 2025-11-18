@@ -63,7 +63,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 		panic(err)
 	}
 
-	jobUpdater := loaders.NewUpdater(existingJobs)
+	jobUpdater := loaders.NewUpdater(existingJobs, 0)
 	if update.HasChangedAnyFiles(jobParsers.NewJobInehritListV3Parser().GetRelevantFiles()) {
 		l.loadJobs(basePath, update, jobUpdater)
 	}
@@ -86,13 +86,14 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 		panic(err)
 	}
 
-	skillUpdater := loaders.NewUpdater(existingSkills)
 	var targetParser skillParsers.SkillParser
 	for _, skillParser := range l.skillParsers {
 		if skillParser.IsUpdateInRange(&update) {
 			targetParser = skillParser
 		}
 	}
+
+	skillUpdater := loaders.NewUpdater(existingSkills, targetParser.FileVersion())
 
 	if targetParser == nil {
 		panic("No parser found for update " + update.Name())

@@ -23,7 +23,7 @@ func TestSkillV5Parser_loadSkillIDs_InsertUpdateDelete(t *testing.T) {
 		{SkillID: 45, Constant: domain.NewNullableString("AC_CONCENTRATION"), Deleted: false},
 		{SkillID: 9999, Constant: domain.NewNullableString("TO_DELETE"), Deleted: false},
 	}
-	skillUpdater := loaders.NewUpdater(existing)
+	skillUpdater := loaders.NewUpdater(existing, 5)
 
 	parser := &SkillV5Parser{}
 	parser.loadSkillIDs(testfiles.Root, update, skillUpdater)
@@ -65,7 +65,7 @@ func TestSkillV5Parser_loadSkillIDs_InsertUpdateDelete(t *testing.T) {
 }
 
 func getDummyJobUpdater() *loaders.Updater[string, domain.SkillJob, *domain.SkillJob] {
-	updater := loaders.NewUpdater([]domain.SkillJob{})
+	updater := loaders.NewUpdater([]domain.SkillJob{}, 5)
 	// Constant is auto-set by GetForEdit, and we don't care about the other fields for this test
 	updater.GetForEdit("JT_NOVICE").JobId = 0
 	updater.GetForEdit("JT_SWORDMAN").JobId = 1
@@ -93,7 +93,7 @@ func TestSkillV5Parser_loadSkillInfos(t *testing.T) {
 	jobUpdater := getDummyJobUpdater()
 	skillUpdater := loaders.NewUpdater([]domain.Skill{
 		{SkillID: 24, Constant: domain.NewNullableString("AL_RUWACH"), Description: domain.NewNullableString("Test"), Deleted: false},
-	})
+	}, 5)
 	parser := &SkillV5Parser{}
 
 	// jobParsers.loadJobs(testfiles.Root, update, jobUpdater)
@@ -139,7 +139,7 @@ func TestSkillLoader_loadSkillDesc(t *testing.T) {
 		{SkillID: 45, HistoryID: domain.NewNullableInt32(3), Constant: domain.NewNullableString("AC_CONCENTRATION"), Description: domain.NewNullableString("something"), Deleted: false},
 		{SkillID: 9999, HistoryID: domain.NewNullableInt32(4), Constant: domain.NewNullableString("TO_DELETE"), Description: domain.NewNullableString("Removed desc"), Deleted: false},
 	}
-	skillUpdater := loaders.NewUpdater(existing)
+	skillUpdater := loaders.NewUpdater(existing, 5)
 
 	parser := &SkillV5Parser{}
 	parser.loadSkillDesc(testfiles.Root, update, skillUpdater)
@@ -151,6 +151,7 @@ func TestSkillLoader_loadSkillDesc(t *testing.T) {
 		assert.Equal(t, "Basic Skill\nMAX Lv : 9", s.Description.String)
 		assert.Equal(t, domain.NewNullableNullInt32(), s.HistoryID)
 		assert.Equal(t, domain.NewNullableInt32(1), s.PreviousHistoryID)
+		assert.Equal(t, int32(5), s.FileVersion)
 	}
 
 	// AL_RUWACH description updated with 3 lines

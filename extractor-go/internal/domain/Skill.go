@@ -32,6 +32,10 @@ func (s *SkillJob) SetPreviousHistoryId(id NullableInt32) {
 	// SkillJob doesn't have PreviousHistoryID
 }
 
+func (s *SkillJob) SetFileVersion(version int32) {
+	// SkillJob doesn't have FileVersion
+}
+
 type NeedSkillEntry struct {
 	SkillID int32
 	Level   int32
@@ -91,6 +95,10 @@ func (s *Skill) SetHistoryId(id NullableInt32) {
 
 func (s *Skill) SetPreviousHistoryId(id NullableInt32) {
 	s.PreviousHistoryID = id
+}
+
+func (s *Skill) SetFileVersion(version int32) {
+	s.FileVersion = version
 }
 
 // Checks if JobRequiredSkills are equal

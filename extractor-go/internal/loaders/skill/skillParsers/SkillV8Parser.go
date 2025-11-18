@@ -35,6 +35,10 @@ func NewSkillV8Parser() *SkillV8Parser {
 	return &SkillV8Parser{}
 }
 
+func (l *SkillV8Parser) FileVersion() int32 {
+	return 8
+}
+
 func (l *SkillV8Parser) IsUpdateInRange(update *domain.Update) bool {
 	return update.Date.After(time.Date(2025, time.June, 17, 0, 0, 0, 0, time.UTC)) &&
 		update.Date.Before(time.Date(9999, time.December, 31, 0, 0, 0, 0, time.UTC))
@@ -69,7 +73,6 @@ func (l *SkillV8Parser) loadSkillIDs(basePath string, update domain.Update, skil
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileId))
-			newSkill.FileVersion = 8
 			newSkill.Constant = domain.NewNullableString(fileConst)
 			newSkill.SkillID = int32(fileId)
 		}
@@ -78,7 +81,6 @@ func (l *SkillV8Parser) loadSkillIDs(basePath string, update domain.Update, skil
 	for _, existingSkill := range skillUpdater.CurrentValues {
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-			deletedSkill.FileVersion = 8
 			deletedSkill.Deleted = true
 		}
 	}
@@ -121,7 +123,6 @@ func (l *SkillV8Parser) loadSkillInfos(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 8
 			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
@@ -177,7 +178,6 @@ func (l *SkillV8Parser) loadSkillDesc(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 8
 			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
@@ -186,7 +186,6 @@ func (l *SkillV8Parser) loadSkillDesc(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 8
 				deletedSkill.Description = domain.NewNullableNullString()
 			}
 		}
@@ -224,7 +223,6 @@ func (l *SkillV8Parser) loadSkillDelay(
 
 		if shouldSave {
 			newSkill := skillUpdater.GetForEdit(int32(fileSkill.SkillId))
-			newSkill.FileVersion = 8
 			*newSkill = fileSkill.ToSkill(*newSkill)
 		}
 	}
@@ -233,7 +231,6 @@ func (l *SkillV8Parser) loadSkillDelay(
 		if _, ok := fileSkillMap[existingSkill.SkillID]; !ok {
 			if existingSkill.Description.Valid {
 				deletedSkill := skillUpdater.GetForEdit(existingSkill.SkillID)
-				deletedSkill.FileVersion = 8
 				deletedSkill.CastFlags = nil
 				deletedSkill.CastFixedDelay = nil
 				deletedSkill.CastStatDelay = nil

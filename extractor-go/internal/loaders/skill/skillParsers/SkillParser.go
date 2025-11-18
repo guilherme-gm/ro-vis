@@ -8,6 +8,7 @@ import (
 type SkillParser interface {
 	IsUpdateInRange(update *domain.Update) bool
 	Parse(basePath string, update domain.Update, skillUpdater *loaders.Updater[int32, domain.Skill, *domain.Skill], jobUpdater *loaders.Updater[string, domain.SkillJob, *domain.SkillJob])
+	FileVersion() int32
 }
 
 type KV[T comparable] struct {
