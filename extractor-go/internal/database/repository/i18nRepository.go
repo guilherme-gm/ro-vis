@@ -10,18 +10,18 @@ import (
 )
 
 type I18nRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
 // NewI18nRepository creates a new I18nRepository instance
-func NewI18nRepository(db *database.Database) *I18nRepository {
+func NewI18nRepository(db database.IDatabase) *I18nRepository {
 	return &I18nRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *I18nRepository) GetCurrentI18ns(tx *sql.Tx) (*[]domain.I18n, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetCurrentI18ns(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.I18n{}, nil
@@ -93,20 +93,11 @@ func (r *I18nRepository) AddI18nsToHistory(tx *sql.Tx, update string, newHistori
 		return nil
 	}
 
-	pageSize := 500
-	steps := (len(*newHistories) / pageSize)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := (*newHistories)[i*pageSize : (i+1)*pageSize]
+	for _, seg := range chunkIndices(len(*newHistories), 500) {
+		slice := (*newHistories)[seg[0]:seg[1]]
 		if err := r.addI18nsToHistory_sub(tx, update, &slice); err != nil {
 			return err
 		}
-	}
-
-	slice := (*newHistories)[i*pageSize : len(*newHistories)]
-	if err := r.addI18nsToHistory_sub(tx, update, &slice); err != nil {
-		return err
 	}
 
 	return nil

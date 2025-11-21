@@ -12,18 +12,18 @@ import (
 )
 
 type PatchRepository struct {
-	DB database.IDatabase
+	BaseRepository
 }
 
 // NewPatchRepository creates a new PatchRepository instance
 func NewPatchRepository(db database.IDatabase) *PatchRepository {
 	return &PatchRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *PatchRepository) ListPatches(tx *sql.Tx, untilDate time.Time) ([]domain.Patch, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.ListPatches(context.Background(), untilDate)
 	if err == sql.ErrNoRows {
 		return []domain.Patch{}, nil

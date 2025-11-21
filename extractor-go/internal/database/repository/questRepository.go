@@ -11,18 +11,18 @@ import (
 )
 
 type QuestRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
 // NewQuestRepository creates a new QuestRepository instance
-func NewQuestRepository(db *database.Database) *QuestRepository {
+func NewQuestRepository(db database.IDatabase) *QuestRepository {
 	return &QuestRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetCurrentQuests(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Quest{}, nil
@@ -108,19 +108,11 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHisto
 		return nil
 	}
 
-	steps := (len(*newHistories) / 500)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := (*newHistories)[i*500 : (i+1)*500]
+	for _, seg := range chunkIndices(len(*newHistories), 500) {
+		slice := (*newHistories)[seg[0]:seg[1]]
 		if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
 			return err
 		}
-	}
-
-	slice := (*newHistories)[i*500 : len(*newHistories)]
-	if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
-		return err
 	}
 
 	return nil

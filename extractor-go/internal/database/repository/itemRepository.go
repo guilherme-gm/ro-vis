@@ -11,18 +11,18 @@ import (
 )
 
 type ItemRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
 // NewItemRepository creates a new ItemRepository instance
-func NewItemRepository(db *database.Database) *ItemRepository {
+func NewItemRepository(db database.IDatabase) *ItemRepository {
 	return &ItemRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *ItemRepository) GetCurrentItems(tx *sql.Tx) (*[]domain.Item, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetCurrentItems(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Item{}, nil
@@ -112,19 +112,11 @@ func (r *ItemRepository) AddItemsToHistory(tx *sql.Tx, patch string, newHistorie
 		return nil
 	}
 
-	steps := (len(*newHistories) / 500)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := (*newHistories)[i*500 : (i+1)*500]
+	for _, seg := range chunkIndices(len(*newHistories), 500) {
+		slice := (*newHistories)[seg[0]:seg[1]]
 		if err := r.addItemsToHistory_sub(tx, patch, &slice); err != nil {
 			return err
 		}
-	}
-
-	slice := (*newHistories)[i*500 : len(*newHistories)]
-	if err := r.addItemsToHistory_sub(tx, patch, &slice); err != nil {
-		return err
 	}
 
 	return nil

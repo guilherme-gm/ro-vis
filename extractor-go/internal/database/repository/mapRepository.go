@@ -11,18 +11,18 @@ import (
 )
 
 type MapRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
 // NewMapRepository creates a new MapRepository instance
-func NewMapRepository(db *database.Database) *MapRepository {
+func NewMapRepository(db database.IDatabase) *MapRepository {
 	return &MapRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *MapRepository) GetCurrentMaps(tx *sql.Tx) (*[]domain.Map, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetCurrentMaps(context.Background())
 	if err == sql.ErrNoRows {
 		return &[]domain.Map{}, nil
@@ -111,19 +111,11 @@ func (r *MapRepository) AddMapsToHistory(tx *sql.Tx, update string, newMaps []*d
 		return nil
 	}
 
-	steps := (len(newMaps) / 500)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := newMaps[i*500 : (i+1)*500]
+	for _, seg := range chunkIndices(len(newMaps), 500) {
+		slice := newMaps[seg[0]:seg[1]]
 		if err := r.addMapsToHistory_sub(tx, update, slice); err != nil {
 			return err
 		}
-	}
-
-	slice := newMaps[i*500:]
-	if err := r.addMapsToHistory_sub(tx, update, slice); err != nil {
-		return err
 	}
 
 	return nil

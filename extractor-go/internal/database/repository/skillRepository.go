@@ -21,17 +21,17 @@ func (r AddToHistoryResult) String() string {
 }
 
 type SkillRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
-func NewSkillRepository(db *database.Database) *SkillRepository {
+func NewSkillRepository(db database.IDatabase) *SkillRepository {
 	return &SkillRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) ([]domain.SkillJob, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetSkillJobs(context.Background())
 	if err == sql.ErrNoRows {
 		return []domain.SkillJob{}, nil
@@ -74,19 +74,11 @@ func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []*domain.SkillJob) e
 		return nil
 	}
 
-	steps := (len(newJobs) / 500)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := newJobs[i*500 : (i+1)*500]
+	for _, seg := range chunkIndices(len(newJobs), 500) {
+		slice := newJobs[seg[0]:seg[1]]
 		if err := r.insertSkillJob_sub(tx, slice); err != nil {
 			return err
 		}
-	}
-
-	slice := newJobs[i*500:]
-	if err := r.insertSkillJob_sub(tx, slice); err != nil {
-		return err
 	}
 
 	return nil
@@ -257,12 +249,8 @@ func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkill
 	}
 
 	finalResult := AddToHistoryResult{}
-	steps := (len(newSkills) / 500)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := newSkills[i*500 : (i+1)*500]
-
+	for _, seg := range chunkIndices(len(newSkills), 500) {
+		slice := newSkills[seg[0]:seg[1]]
 		res, err := r.insertSkill_sub(tx, update, slice)
 		if err != nil {
 			return AddToHistoryResult{}, err
@@ -270,15 +258,6 @@ func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkill
 		finalResult.UpsertCount += res.UpsertCount
 		finalResult.DeletedCount += res.DeletedCount
 	}
-
-	slice := newSkills[i*500:]
-
-	res, err := r.insertSkill_sub(tx, update, slice)
-	if err != nil {
-		return AddToHistoryResult{}, err
-	}
-	finalResult.UpsertCount += res.UpsertCount
-	finalResult.DeletedCount += res.DeletedCount
 
 	return finalResult, nil
 }

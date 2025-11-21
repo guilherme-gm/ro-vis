@@ -10,18 +10,18 @@ import (
 )
 
 type LoaderControllerRepository struct {
-	DB *database.Database
+	BaseRepository
 }
 
 // NewLoaderControllerRepository creates a new LoaderControllerRepository instance
-func NewLoaderControllerRepository(db *database.Database) *LoaderControllerRepository {
+func NewLoaderControllerRepository(db database.IDatabase) *LoaderControllerRepository {
 	return &LoaderControllerRepository{
-		DB: db,
+		BaseRepository: BaseRepository{DB: db},
 	}
 }
 
 func (r *LoaderControllerRepository) GetLatestUpdate(tx *sql.Tx, name string) (time.Time, error) {
-	queries := r.DB.GetDAO(tx)
+	queries := r.dao(tx)
 	res, err := queries.GetLatestUpdate(context.Background(), name)
 	if err == sql.ErrNoRows {
 		return time.Time{}, nil
