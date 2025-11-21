@@ -123,32 +123,25 @@ func (r *ItemRepository) AddItemsToHistory(tx *sql.Tx, patch string, newHistorie
 }
 
 func (r *ItemRepository) AddDeletedItem(tx *sql.Tx, patch string, Item *domain.Item) error {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
-		PreviousHistoryID: sql.NullInt32(Item.HistoryID),
-		ItemID:            Item.ItemID,
-		FileVersion:       Item.FileVersion,
-		Update:            patch,
-	}})
-
-	if err != nil {
-		return err
-	}
-
-	historyId, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	Item.HistoryID = dao.ToNullableInt32(int32(historyId))
-
-	_, err = queries.UpsertItem(context.Background(), dao.UpsertItemParams{
-		ItemID:          Item.ItemID,
-		LatestHistoryID: Item.HistoryID.Int32,
-		Deleted:         true,
-	})
-
-	return err
+	return r.insertDeletionAndUpsert(
+		tx,
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.BulkInsertItemHistory(context.Background(), []dao.BulkInsertItemHistoryParams{{
+				PreviousHistoryID: sql.NullInt32(Item.HistoryID),
+				ItemID:            Item.ItemID,
+				FileVersion:       Item.FileVersion,
+				Update:            patch,
+			}})
+		},
+		func(id int64) { Item.HistoryID = dao.ToNullableInt32(int32(id)) },
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.UpsertItem(context.Background(), dao.UpsertItemParams{
+				ItemID:          Item.ItemID,
+				LatestHistoryID: Item.HistoryID.Int32,
+				Deleted:         true,
+			})
+		},
+	)
 }
 
 func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {

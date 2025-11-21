@@ -40,6 +40,29 @@ func chunkIndices(total int, chunkSize int) [][2]int {
 	return segments
 }
 
+// insertDeletionAndUpsert orchestrates the common delete flow used by repositories:
+// 1) insert a history row, 2) capture LastInsertId and set the entity history ID,
+// 3) upsert the current table with Deleted=true.
+func (r BaseRepository) insertDeletionAndUpsert(
+	tx *sql.Tx,
+	insertHistory func(dao.IDAO) (sql.Result, error),
+	setHistoryID func(int64),
+	upsert func(dao.IDAO) (sql.Result, error),
+) error {
+	q := r.dao(tx)
+	res, err := insertHistory(q)
+	if err != nil {
+		return err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	setHistoryID(id)
+	_, err = upsert(q)
+	return err
+}
+
 type Repository struct {
 	ItemRepository             *ItemRepository
 	LoaderControllerRepository *LoaderControllerRepository

@@ -104,32 +104,25 @@ func (r *I18nRepository) AddI18nsToHistory(tx *sql.Tx, update string, newHistori
 }
 
 func (r *I18nRepository) AddDeletedI18n(tx *sql.Tx, update string, i18n *domain.I18n) error {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.BulkInsertI18nHistory(context.Background(), []dao.BulkInsertI18nHistoryParams{{
-		PreviousHistoryID: sql.NullInt64(i18n.HistoryID),
-		I18nID:            i18n.I18nId,
-		FileVersion:       i18n.FileVersion,
-		Update:            update,
-	}})
-
-	if err != nil {
-		return err
-	}
-
-	historyId, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	i18n.HistoryID = dao.ToNullableInt64(int64(historyId))
-
-	_, err = queries.UpsertI18n(context.Background(), dao.UpsertI18nParams{
-		I18nID:          i18n.I18nId,
-		LatestHistoryID: i18n.HistoryID.Int64,
-		Deleted:         true,
-	})
-
-	return err
+	return r.insertDeletionAndUpsert(
+		tx,
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.BulkInsertI18nHistory(context.Background(), []dao.BulkInsertI18nHistoryParams{{
+				PreviousHistoryID: sql.NullInt64(i18n.HistoryID),
+				I18nID:            i18n.I18nId,
+				FileVersion:       i18n.FileVersion,
+				Update:            update,
+			}})
+		},
+		func(id int64) { i18n.HistoryID = dao.ToNullableInt64(int64(id)) },
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.UpsertI18n(context.Background(), dao.UpsertI18nParams{
+				I18nID:          i18n.I18nId,
+				LatestHistoryID: i18n.HistoryID.Int64,
+				Deleted:         true,
+			})
+		},
+	)
 }
 
 // CountChangesInUpdate returns the number of i18n records changed in a specific update

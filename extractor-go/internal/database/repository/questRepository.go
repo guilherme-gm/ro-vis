@@ -119,32 +119,25 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHisto
 }
 
 func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, update string, quest *domain.Quest) error {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
-		PreviousHistoryID: sql.NullInt32(quest.HistoryID),
-		QuestID:           quest.QuestID,
-		FileVersion:       quest.FileVersion,
-		Update:            update,
-	}})
-
-	if err != nil {
-		return err
-	}
-
-	historyId, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	quest.HistoryID = dao.ToNullableInt32(int32(historyId))
-
-	_, err = queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
-		QuestID:         quest.QuestID,
-		LatestHistoryID: quest.HistoryID.Int32,
-		Deleted:         true,
-	})
-
-	return err
+	return r.insertDeletionAndUpsert(
+		tx,
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
+				PreviousHistoryID: sql.NullInt32(quest.HistoryID),
+				QuestID:           quest.QuestID,
+				FileVersion:       quest.FileVersion,
+				Update:            update,
+			}})
+		},
+		func(id int64) { quest.HistoryID = dao.ToNullableInt32(int32(id)) },
+		func(q dao.IDAO) (sql.Result, error) {
+			return q.UpsertQuest(context.Background(), dao.UpsertQuestParams{
+				QuestID:         quest.QuestID,
+				LatestHistoryID: quest.HistoryID.Int32,
+				Deleted:         true,
+			})
+		},
+	)
 }
 
 func (r *QuestRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
