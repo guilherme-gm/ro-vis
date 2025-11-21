@@ -77,22 +77,17 @@ func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, update string, newH
 		return err
 	}
 
-	res, err := queries.GetQuestsIdsInUpdate(context.Background(), update)
+	upsertParams, err := buildUpsertParams(queries,
+		func(q dao.IDAO) ([]dao.GetQuestsIdsInUpdateRow, error) {
+			return q.GetQuestsIdsInUpdate(context.Background(), update)
+		},
+		func(row dao.GetQuestsIdsInUpdateRow) bool { _, ok := updatedIdMap[row.QuestID]; return ok },
+		func(row dao.GetQuestsIdsInUpdateRow) dao.BulkUpsertQuestParams {
+			return dao.BulkUpsertQuestParams{QuestID: row.QuestID, HistoryID: row.HistoryID, Deleted: false}
+		},
+	)
 	if err != nil {
 		return err
-	}
-
-	upsertParams := []dao.BulkUpsertQuestParams{}
-	for _, id := range res {
-		if _, ok := updatedIdMap[id.QuestID]; !ok {
-			continue
-		}
-
-		upsertParams = append(upsertParams, dao.BulkUpsertQuestParams{
-			QuestID:   id.QuestID,
-			HistoryID: id.HistoryID,
-			Deleted:   false,
-		})
 	}
 
 	_, err = queries.BulkUpsertQuests(context.Background(), upsertParams)

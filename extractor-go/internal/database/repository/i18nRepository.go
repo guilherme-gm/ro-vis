@@ -62,22 +62,17 @@ func (r *I18nRepository) addI18nsToHistory_sub(tx *sql.Tx, update string, newHis
 		return err
 	}
 
-	res, err := queries.GetI18nsIdsInUpdate(context.Background(), update)
+	upsertParams, err := buildUpsertParams(queries,
+		func(q dao.IDAO) ([]dao.GetI18nsIdsInUpdateRow, error) {
+			return q.GetI18nsIdsInUpdate(context.Background(), update)
+		},
+		func(row dao.GetI18nsIdsInUpdateRow) bool { _, ok := updatedIdMap[row.I18nID]; return ok },
+		func(row dao.GetI18nsIdsInUpdateRow) dao.BulkUpsertI18nParams {
+			return dao.BulkUpsertI18nParams{I18nID: row.I18nID, HistoryID: row.HistoryID, Deleted: false}
+		},
+	)
 	if err != nil {
 		return err
-	}
-
-	upsertParams := []dao.BulkUpsertI18nParams{}
-	for _, id := range res {
-		if _, ok := updatedIdMap[id.I18nID]; !ok {
-			continue
-		}
-
-		upsertParams = append(upsertParams, dao.BulkUpsertI18nParams{
-			I18nID:    id.I18nID,
-			HistoryID: id.HistoryID,
-			Deleted:   false,
-		})
 	}
 
 	_, err = queries.BulkUpsertI18ns(context.Background(), upsertParams)

@@ -80,22 +80,17 @@ func (r *MapRepository) addMapsToHistory_sub(tx *sql.Tx, update string, newMaps 
 		return err
 	}
 
-	res, err := queries.GetMapsIdsInUpdate(context.Background(), update)
+	upsertParams, err := buildUpsertParams(queries,
+		func(q dao.IDAO) ([]dao.GetMapsIdsInUpdateRow, error) {
+			return q.GetMapsIdsInUpdate(context.Background(), update)
+		},
+		func(row dao.GetMapsIdsInUpdateRow) bool { _, ok := updatedIdMap[row.MapID]; return ok },
+		func(row dao.GetMapsIdsInUpdateRow) dao.BulkUpsertMapParams {
+			return dao.BulkUpsertMapParams{MapId: row.MapID, HistoryID: row.HistoryID, Deleted: false}
+		},
+	)
 	if err != nil {
 		return err
-	}
-
-	upsertParams := []dao.BulkUpsertMapParams{}
-	for _, id := range res {
-		if _, ok := updatedIdMap[id.MapID]; !ok {
-			continue
-		}
-
-		upsertParams = append(upsertParams, dao.BulkUpsertMapParams{
-			MapId:     id.MapID,
-			HistoryID: id.HistoryID,
-			Deleted:   false,
-		})
 	}
 
 	_, err = queries.BulkUpsertMaps(context.Background(), upsertParams)

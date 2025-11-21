@@ -81,22 +81,17 @@ func (r *ItemRepository) addItemsToHistory_sub(tx *sql.Tx, update string, newHis
 		return err
 	}
 
-	res, err := queries.GetItemIdsInUpdate(context.Background(), update)
+	upsertParams, err := buildUpsertParams(queries,
+		func(q dao.IDAO) ([]dao.GetItemIdsInUpdateRow, error) {
+			return q.GetItemIdsInUpdate(context.Background(), update)
+		},
+		func(row dao.GetItemIdsInUpdateRow) bool { _, ok := updatedIdMap[row.ItemID]; return ok },
+		func(row dao.GetItemIdsInUpdateRow) dao.BulkUpsertItemParams {
+			return dao.BulkUpsertItemParams{ItemID: row.ItemID, HistoryID: row.HistoryID, Deleted: false}
+		},
+	)
 	if err != nil {
 		return err
-	}
-
-	upsertParams := []dao.BulkUpsertItemParams{}
-	for _, id := range res {
-		if _, ok := updatedIdMap[id.ItemID]; !ok {
-			continue
-		}
-
-		upsertParams = append(upsertParams, dao.BulkUpsertItemParams{
-			ItemID:    id.ItemID,
-			HistoryID: id.HistoryID,
-			Deleted:   false,
-		})
 	}
 
 	_, err = queries.BulkUpsertItems(context.Background(), upsertParams)

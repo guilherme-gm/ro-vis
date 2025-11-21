@@ -14,8 +14,6 @@ type FromToRecord[T any] struct {
 	To         *domain.Record[T]
 }
 
-// BaseRepository provides shared DB plumbing for repositories
-// and a dao helper bound to an optional transaction.
 type BaseRepository struct {
 	DB database.IDatabase
 }
@@ -24,7 +22,6 @@ func (r BaseRepository) dao(tx *sql.Tx) dao.IDAO {
 	return r.DB.GetDAO(tx)
 }
 
-// chunkIndices returns [start,end) index pairs for splitting a list into batches of size chunkSize.
 func chunkIndices(total int, chunkSize int) [][2]int {
 	if chunkSize <= 0 || total <= 0 {
 		return nil
@@ -40,9 +37,6 @@ func chunkIndices(total int, chunkSize int) [][2]int {
 	return segments
 }
 
-// insertDeletionAndUpsert orchestrates the common delete flow used by repositories:
-// 1) insert a history row, 2) capture LastInsertId and set the entity history ID,
-// 3) upsert the current table with Deleted=true.
 func (r BaseRepository) insertDeletionAndUpsert(
 	tx *sql.Tx,
 	insertHistory func(dao.IDAO) (sql.Result, error),
@@ -61,6 +55,25 @@ func (r BaseRepository) insertDeletionAndUpsert(
 	setHistoryID(id)
 	_, err = upsert(q)
 	return err
+}
+
+func buildUpsertParams[R any, T any](
+	q dao.IDAO,
+	fetch func(dao.IDAO) ([]R, error),
+	include func(R) bool,
+	build func(R) T,
+) ([]T, error) {
+	rows, err := fetch(q)
+	if err != nil {
+		return nil, err
+	}
+	params := make([]T, 0, len(rows))
+	for _, r := range rows {
+		if include(r) {
+			params = append(params, build(r))
+		}
+	}
+	return params, nil
 }
 
 type Repository struct {
