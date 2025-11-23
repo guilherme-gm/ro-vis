@@ -11,13 +11,15 @@ import (
 )
 
 type QuestRepository struct {
-	DB *database.Database
+	DB       database.IDatabase
+	BulkSize int
 }
 
 // NewQuestRepository creates a new QuestRepository instance
-func NewQuestRepository(db *database.Database) *QuestRepository {
+func NewQuestRepository(db database.IDatabase) *QuestRepository {
 	return &QuestRepository{
-		DB: db,
+		DB:       db,
+		BulkSize: 500,
 	}
 }
 
@@ -108,17 +110,17 @@ func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHisto
 		return nil
 	}
 
-	steps := (len(*newHistories) / 500)
+	steps := (len(*newHistories) / r.BulkSize)
 
 	i := 0
 	for ; i < steps; i++ {
-		slice := (*newHistories)[i*500 : (i+1)*500]
+		slice := (*newHistories)[i*r.BulkSize : (i+1)*r.BulkSize]
 		if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
 			return err
 		}
 	}
 
-	slice := (*newHistories)[i*500 : len(*newHistories)]
+	slice := (*newHistories)[i*r.BulkSize : len(*newHistories)]
 	if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
 		return err
 	}
