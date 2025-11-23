@@ -21,12 +21,14 @@ func (r AddToHistoryResult) String() string {
 }
 
 type SkillRepository struct {
-	DB *database.Database
+	DB       database.IDatabase
+	BulkSize int
 }
 
-func NewSkillRepository(db *database.Database) *SkillRepository {
+func NewSkillRepository(db database.IDatabase) *SkillRepository {
 	return &SkillRepository{
-		DB: db,
+		DB:       db,
+		BulkSize: 500,
 	}
 }
 
@@ -74,17 +76,17 @@ func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []*domain.SkillJob) e
 		return nil
 	}
 
-	steps := (len(newJobs) / 500)
+	steps := (len(newJobs) / r.BulkSize)
 
 	i := 0
 	for ; i < steps; i++ {
-		slice := newJobs[i*500 : (i+1)*500]
+		slice := newJobs[i*r.BulkSize : (i+1)*r.BulkSize]
 		if err := r.insertSkillJob_sub(tx, slice); err != nil {
 			return err
 		}
 	}
 
-	slice := newJobs[i*500:]
+	slice := newJobs[i*r.BulkSize:]
 	if err := r.insertSkillJob_sub(tx, slice); err != nil {
 		return err
 	}
@@ -257,11 +259,11 @@ func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkill
 	}
 
 	finalResult := AddToHistoryResult{}
-	steps := (len(newSkills) / 500)
+	steps := (len(newSkills) / r.BulkSize)
 
 	i := 0
 	for ; i < steps; i++ {
-		slice := newSkills[i*500 : (i+1)*500]
+		slice := newSkills[i*r.BulkSize : (i+1)*r.BulkSize]
 
 		res, err := r.insertSkill_sub(tx, update, slice)
 		if err != nil {
@@ -271,7 +273,7 @@ func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkill
 		finalResult.DeletedCount += res.DeletedCount
 	}
 
-	slice := newSkills[i*500:]
+	slice := newSkills[i*r.BulkSize:]
 
 	res, err := r.insertSkill_sub(tx, update, slice)
 	if err != nil {
