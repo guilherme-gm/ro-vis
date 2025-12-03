@@ -7,7 +7,7 @@ FROM `skills`
 INNER JOIN `skills_history` ON `skills`.`latest_history_id` = `skills_history`.`history_id`;
 
 -- name: GetSkillsIdsInUpdate :many
-SELECT `skills_history`.`history_id`, `skills_history`.`skill_id`
+SELECT `skills_history`.`history_id`, `skills_history`.`skill_id` as ID
 FROM `skills_history`
 WHERE `skills_history`.`update` = ?;
 

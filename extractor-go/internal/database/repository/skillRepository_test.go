@@ -16,8 +16,8 @@ func TestAddSkillsToHistory_Empty_ReturnsZeroAndNoError(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewSkillRepository(mockDB)
 
-	var skills []*domain.Skill
-	res, err := repo.AddSkillsToHistory(nil, "u1", skills)
+	var skills []domain.Skill
+	res, err := repo.AddToHistory(nil, "u1", skills)
 
 	require.NoError(t, err)
 	assert.Equal(t, AddToHistoryResult{}, res)
@@ -30,7 +30,7 @@ func TestAddSkillsToHistory_Batching_And_Counts(t *testing.T) {
 	repo.BulkSize = 2
 
 	// Build 3 skills to force two batches (2 + 1)
-	skills := make([]*domain.Skill, 3)
+	skills := make([]domain.Skill, 3)
 	deletedCount := 0
 	for i := range 3 {
 		// alternate deleted flag
@@ -38,38 +38,38 @@ func TestAddSkillsToHistory_Batching_And_Counts(t *testing.T) {
 		if isDel {
 			deletedCount++
 		}
-		skills[i] = &domain.Skill{SkillID: int32(i + 1), FileVersion: 1, Deleted: isDel}
+		skills[i] = domain.Skill{SkillID: int32(i + 1), FileVersion: 1, Deleted: isDel}
 	}
 
 	// Expect two bulk inserts (slices of 2 and 1)
 	mockDB.Dao.
-		On("BulkInsertSkillHistory", mock.Anything, mock.MatchedBy(func(arg []dao.BulkInsertSkillHistoryParams) bool { return len(arg) == 2 })).
+		On("BulkInsertSkillHistory", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkInsertSkillHistoryParams) bool { return len(arg) == 2 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 	mockDB.Dao.
-		On("BulkInsertSkillHistory", mock.Anything, mock.MatchedBy(func(arg []dao.BulkInsertSkillHistoryParams) bool { return len(arg) == 1 })).
+		On("BulkInsertSkillHistory", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkInsertSkillHistoryParams) bool { return len(arg) == 1 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 
 	// IDs in update: generate one per skill
 	ids := make([]dao.GetSkillsIdsInUpdateRow, 0, 3)
 	for i := range 3 {
-		ids = append(ids, dao.GetSkillsIdsInUpdateRow{HistoryID: int32(1000 + i + 1), SkillID: int32(i + 1)})
+		ids = append(ids, dao.GetSkillsIdsInUpdateRow{HistoryID: int32(1000 + i + 1), ID: int32(i + 1)})
 	}
 	// Will be called once per batch
 	mockDB.Dao.On("GetSkillsIdsInUpdate", mock.Anything, "u2").Return(ids, nil).Twice()
 
 	// Expect upserts per batch
 	mockDB.Dao.
-		On("BulkUpsertSkills", mock.Anything, mock.MatchedBy(func(arg []dao.BulkUpsertSkillParams) bool { return len(arg) == 2 })).
+		On("BulkUpsertSkills", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkUpsertSkillParams) bool { return len(arg) == 2 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 	mockDB.Dao.
-		On("BulkUpsertSkills", mock.Anything, mock.MatchedBy(func(arg []dao.BulkUpsertSkillParams) bool { return len(arg) == 1 })).
+		On("BulkUpsertSkills", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkUpsertSkillParams) bool { return len(arg) == 1 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 
-	res, err := repo.AddSkillsToHistory(nil, "u2", skills)
+	res, err := repo.AddToHistory(nil, "u2", skills)
 	require.NoError(t, err)
 
 	// Verify counts

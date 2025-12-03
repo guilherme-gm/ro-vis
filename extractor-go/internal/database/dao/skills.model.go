@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"encoding/json"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
@@ -82,7 +83,7 @@ func (q *SkillsJob) ToDomain() domain.SkillJob {
 	}
 }
 
-func (q *GetCurrentSkillsRow) ToDomain() domain.Skill {
+func (q GetCurrentSkillsRow) ToDomain() domain.Skill {
 	parsed := parseSkillArrays(
 		q.SpCost,
 		q.ApCost,
@@ -199,4 +200,103 @@ func (q *SkillsHistory) ToDomain() domain.Skill {
 		SinglePostDelay:   parsed.SinglePostDelay,
 		GlobalPostDelay:   parsed.GlobalPostDelay,
 	}
+}
+
+func (s *BulkInsertSkillHistoryParams) FillFromDomain(skill *domain.Skill, update string) {
+	spCostJson := domain.NewNullableNullString()
+	if len(skill.SpCost) > 0 {
+		jsonBytes, _ := json.Marshal(skill.SpCost)
+		spCostJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	apCostJson := domain.NewNullableNullString()
+	if len(skill.ApCost) > 0 {
+		jsonBytes, _ := json.Marshal(skill.ApCost)
+		apCostJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	attackRangeJson := domain.NewNullableNullString()
+	if len(skill.AttackRange) > 0 {
+		jsonBytes, _ := json.Marshal(skill.AttackRange)
+		attackRangeJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	needSkillListJson := domain.NewNullableNullString()
+	if len(skill.RequiredSkills) > 0 {
+		jsonBytes, _ := json.Marshal(skill.RequiredSkills)
+		needSkillListJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	jobRequiredSkillsJson := domain.NewNullableNullString()
+	if len(skill.JobRequiredSkills) > 0 {
+		jsonBytes, _ := json.Marshal(skill.JobRequiredSkills)
+		jobRequiredSkillsJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	skillScaleJson := domain.NewNullableNullString()
+	if len(skill.SkillScale) > 0 {
+		jsonBytes, _ := json.Marshal(skill.SkillScale)
+		skillScaleJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	castFlagsJson := domain.NewNullableNullString()
+	if len(skill.CastFlags) > 0 {
+		jsonBytes, _ := json.Marshal(skill.CastFlags)
+		castFlagsJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	castFixedDelayJson := domain.NewNullableNullString()
+	if len(skill.CastFixedDelay) > 0 {
+		jsonBytes, _ := json.Marshal(skill.CastFixedDelay)
+		castFixedDelayJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	castStatDelayJson := domain.NewNullableNullString()
+	if len(skill.CastStatDelay) > 0 {
+		jsonBytes, _ := json.Marshal(skill.CastStatDelay)
+		castStatDelayJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	singlePostDelayJson := domain.NewNullableNullString()
+	if len(skill.SinglePostDelay) > 0 {
+		jsonBytes, _ := json.Marshal(skill.SinglePostDelay)
+		singlePostDelayJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	globalPostDelayJson := domain.NewNullableNullString()
+	if len(skill.GlobalPostDelay) > 0 {
+		jsonBytes, _ := json.Marshal(skill.GlobalPostDelay)
+		globalPostDelayJson = domain.NewNullableString(string(jsonBytes))
+	}
+
+	s.PreviousHistoryID = sql.NullInt32(skill.PreviousHistoryID)
+	s.SkillId = skill.SkillID
+	s.FileVersion = skill.FileVersion
+	s.Update = update
+
+	if !skill.Deleted {
+		s.Constant = sql.NullString(skill.Constant)
+		s.Name = sql.NullString(skill.Name)
+		s.Description = sql.NullString(skill.Description)
+		s.MaxLevel = sql.NullInt32(skill.MaxLevel)
+		s.IsPassive = sql.NullBool(skill.IsPassive)
+		s.SpCost = sql.NullString(spCostJson)
+		s.ApCost = sql.NullString(apCostJson)
+		s.CanSelectLevel = sql.NullBool(skill.CanSelectLevel)
+		s.AttackRange = sql.NullString(attackRangeJson)
+		s.RequiredSkills = sql.NullString(needSkillListJson)
+		s.JobRequiredSkills = sql.NullString(jobRequiredSkillsJson)
+		s.SkillScale = sql.NullString(skillScaleJson)
+		s.CastFlags = sql.NullString(castFlagsJson)
+		s.CastFixedDelay = sql.NullString(castFixedDelayJson)
+		s.CastStatDelay = sql.NullString(castStatDelayJson)
+		s.SinglePostDelay = sql.NullString(singlePostDelayJson)
+		s.GlobalPostDelay = sql.NullString(globalPostDelayJson)
+	}
+}
+
+func (s *BulkUpsertSkillParams) Fill(id int32, historyId int32, deleted bool) {
+	s.SkillId = id
+	s.HistoryID = historyId
+	s.Deleted = deleted
 }

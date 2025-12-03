@@ -101,6 +101,10 @@ func (s *Skill) SetFileVersion(version int32) {
 	s.FileVersion = version
 }
 
+func (s Skill) IsDeleted() bool {
+	return s.Deleted
+}
+
 // Checks if JobRequiredSkills are equal
 // We consider equal if we have the same jobs and same requirements
 func (s *Skill) isJobRequiredSkillEqual(otherSkill Skill) bool {

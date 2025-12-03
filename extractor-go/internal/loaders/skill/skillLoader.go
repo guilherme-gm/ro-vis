@@ -81,7 +81,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 		}
 	}
 
-	existingSkills, err := l.repository.GetCurrentSkills(tx)
+	existingSkills, err := l.repository.GetCurrent(tx)
 	if err != nil {
 		panic(err)
 	}
@@ -103,7 +103,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 
 	if len(skillUpdater.ValuesToInsert) > 0 {
 		fmt.Println("> Inserting new skills... ", len(skillUpdater.ValuesToInsert))
-		res, err := l.repository.AddSkillsToHistory(tx, update.Name(), skillUpdater.ValuesToInsert)
+		res, err := l.repository.AddToHistory(tx, update.Name(), skillUpdater.ValuesToInsert)
 		if err != nil {
 			panic(err)
 		}
@@ -113,7 +113,7 @@ func (l *SkillLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 
 	if len(skillUpdater.ValuesToUpdate) > 0 {
 		fmt.Println("> Updating skills... ", len(skillUpdater.ValuesToUpdate))
-		res, err := l.repository.AddSkillsToHistory(tx, update.Name(), skillUpdater.ValuesToUpdate)
+		res, err := l.repository.AddToHistory(tx, update.Name(), skillUpdater.ValuesToUpdate)
 		if err != nil {
 			panic(err)
 		}

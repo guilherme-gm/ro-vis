@@ -122,7 +122,7 @@ type BulkInsertSkillHistoryParams struct {
 	GlobalPostDelay   sql.NullString
 }
 
-func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSkillHistoryParams) (sql.Result, error) {
+func (q *Queries) BulkInsertSkillHistory(ctx context.Context, arg []*BulkInsertSkillHistoryParams) (sql.Result, error) {
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -178,7 +178,7 @@ type BulkUpsertSkillParams struct {
 	Deleted   bool
 }
 
-func (q *Queries) BulkUpsertSkills(ctx context.Context, arg []BulkUpsertSkillParams) (sql.Result, error) {
+func (q *Queries) BulkUpsertSkills(ctx context.Context, arg []*BulkUpsertSkillParams) (sql.Result, error) {
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}

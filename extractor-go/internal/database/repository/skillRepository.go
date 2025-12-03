@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
@@ -21,15 +20,33 @@ func (r AddToHistoryResult) String() string {
 }
 
 type SkillRepository struct {
-	DB       database.IDatabase
-	BulkSize int
+	HistoryBaseRepository[
+		domain.Skill,
+		dao.BulkInsertSkillHistoryParams,
+		*dao.BulkInsertSkillHistoryParams,
+		*dao.BulkUpsertSkillParams,
+	]
 }
 
 func NewSkillRepository(db database.IDatabase) *SkillRepository {
-	return &SkillRepository{
-		DB:       db,
-		BulkSize: 500,
+	repo := &SkillRepository{
+		HistoryBaseRepository: HistoryBaseRepository[
+			domain.Skill,
+			dao.BulkInsertSkillHistoryParams,
+			*dao.BulkInsertSkillHistoryParams,
+			*dao.BulkUpsertSkillParams,
+		]{
+			DB:       db,
+			BulkSize: 500,
+		},
 	}
+	repo.getCurrentData = repo.getCurrentDataFn
+	repo.bulkInsertHistory = repo.bulkInsertSkillHistoryFn
+	repo.bulkUpsertRecords = repo.bulkUpsertSkillFn
+	repo.getIdsInUpdate = repo.getIdsInUpdateFn
+	repo.newBulkParamEntry = func() *dao.BulkInsertSkillHistoryParams { return &dao.BulkInsertSkillHistoryParams{} }
+	repo.newRecordParam = func() *dao.BulkUpsertSkillParams { return &dao.BulkUpsertSkillParams{} }
+	return repo
 }
 
 func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) ([]domain.SkillJob, error) {
@@ -51,7 +68,7 @@ func (r *SkillRepository) GetSkillJobs(tx *sql.Tx) ([]domain.SkillJob, error) {
 	return jobs, nil
 }
 
-func (r *SkillRepository) insertSkillJob_sub(tx *sql.Tx, newJobs []*domain.SkillJob) error {
+func (r *SkillRepository) insertSkillJob_sub(tx *sql.Tx, newJobs []domain.SkillJob) error {
 	queries := r.DB.GetDAO(tx)
 	bulkParams := []dao.BulkInsertSkillJobParams{}
 	for _, it := range newJobs {
@@ -71,7 +88,7 @@ func (r *SkillRepository) insertSkillJob_sub(tx *sql.Tx, newJobs []*domain.Skill
 	return err
 }
 
-func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []*domain.SkillJob) error {
+func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []domain.SkillJob) error {
 	if len(newJobs) == 0 {
 		return nil
 	}
@@ -94,196 +111,96 @@ func (r *SkillRepository) AddSkillJobs(tx *sql.Tx, newJobs []*domain.SkillJob) e
 	return nil
 }
 
-func (r *SkillRepository) GetCurrentSkills(tx *sql.Tx) ([]domain.Skill, error) {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.GetCurrentSkills(context.Background())
-	if err == sql.ErrNoRows {
-		return []domain.Skill{}, nil
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	skills := make([]domain.Skill, len(res))
-	for idx, qmodel := range res {
-		skills[idx] = qmodel.ToDomain()
-	}
-
-	return skills, nil
+func (r *SkillRepository) getCurrentDataFn(dao dao.IDAO, ctx context.Context) ([]domain.Skill, error) {
+	return toDomainSlice(dao.GetCurrentSkills(ctx))
 }
 
-func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills []*domain.Skill) (AddToHistoryResult, error) {
-	queries := r.DB.GetDAO(tx)
-
-	// SkillID -> deleted (true | false)
-	isWasDeleted := make(map[int32]bool, len(newSkills))
-	bulkParams := []dao.BulkInsertSkillHistoryParams{}
-	for _, it := range newSkills {
-		isWasDeleted[it.SkillID] = it.Deleted
-		spCostJson := domain.NewNullableNullString()
-		if len(it.SpCost) > 0 {
-			jsonBytes, _ := json.Marshal(it.SpCost)
-			spCostJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		apCostJson := domain.NewNullableNullString()
-		if len(it.ApCost) > 0 {
-			jsonBytes, _ := json.Marshal(it.ApCost)
-			apCostJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		attackRangeJson := domain.NewNullableNullString()
-		if len(it.AttackRange) > 0 {
-			jsonBytes, _ := json.Marshal(it.AttackRange)
-			attackRangeJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		needSkillListJson := domain.NewNullableNullString()
-		if len(it.RequiredSkills) > 0 {
-			jsonBytes, _ := json.Marshal(it.RequiredSkills)
-			needSkillListJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		jobRequiredSkillsJson := domain.NewNullableNullString()
-		if len(it.JobRequiredSkills) > 0 {
-			jsonBytes, _ := json.Marshal(it.JobRequiredSkills)
-			jobRequiredSkillsJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		skillScaleJson := domain.NewNullableNullString()
-		if len(it.SkillScale) > 0 {
-			jsonBytes, _ := json.Marshal(it.SkillScale)
-			skillScaleJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		castFlagsJson := domain.NewNullableNullString()
-		if len(it.CastFlags) > 0 {
-			jsonBytes, _ := json.Marshal(it.CastFlags)
-			castFlagsJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		castFixedDelayJson := domain.NewNullableNullString()
-		if len(it.CastFixedDelay) > 0 {
-			jsonBytes, _ := json.Marshal(it.CastFixedDelay)
-			castFixedDelayJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		castStatDelayJson := domain.NewNullableNullString()
-		if len(it.CastStatDelay) > 0 {
-			jsonBytes, _ := json.Marshal(it.CastStatDelay)
-			castStatDelayJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		singlePostDelayJson := domain.NewNullableNullString()
-		if len(it.SinglePostDelay) > 0 {
-			jsonBytes, _ := json.Marshal(it.SinglePostDelay)
-			singlePostDelayJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		globalPostDelayJson := domain.NewNullableNullString()
-		if len(it.GlobalPostDelay) > 0 {
-			jsonBytes, _ := json.Marshal(it.GlobalPostDelay)
-			globalPostDelayJson = domain.NewNullableString(string(jsonBytes))
-		}
-
-		insertParams := dao.BulkInsertSkillHistoryParams{
-			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
-			SkillId:           it.SkillID,
-			FileVersion:       it.FileVersion,
-			Update:            update,
-		}
-
-		if !it.Deleted {
-			insertParams.Constant = sql.NullString(it.Constant)
-			insertParams.Name = sql.NullString(it.Name)
-			insertParams.Description = sql.NullString(it.Description)
-			insertParams.MaxLevel = sql.NullInt32(it.MaxLevel)
-			insertParams.IsPassive = sql.NullBool(it.IsPassive)
-			insertParams.SpCost = sql.NullString(spCostJson)
-			insertParams.ApCost = sql.NullString(apCostJson)
-			insertParams.CanSelectLevel = sql.NullBool(it.CanSelectLevel)
-			insertParams.AttackRange = sql.NullString(attackRangeJson)
-			insertParams.RequiredSkills = sql.NullString(needSkillListJson)
-			insertParams.JobRequiredSkills = sql.NullString(jobRequiredSkillsJson)
-			insertParams.SkillScale = sql.NullString(skillScaleJson)
-			insertParams.CastFlags = sql.NullString(castFlagsJson)
-			insertParams.CastFixedDelay = sql.NullString(castFixedDelayJson)
-			insertParams.CastStatDelay = sql.NullString(castStatDelayJson)
-			insertParams.SinglePostDelay = sql.NullString(singlePostDelayJson)
-			insertParams.GlobalPostDelay = sql.NullString(globalPostDelayJson)
-		}
-
-		bulkParams = append(bulkParams, insertParams)
-	}
-
-	addResult := AddToHistoryResult{}
-	_, err := queries.BulkInsertSkillHistory(context.Background(), bulkParams)
-	if err != nil {
-		return addResult, err
-	}
-
-	res, err := queries.GetSkillsIdsInUpdate(context.Background(), update)
-	if err != nil {
-		return addResult, err
-	}
-
-	upsertParams := []dao.BulkUpsertSkillParams{}
-	for _, id := range res {
-		if deleted, ok := isWasDeleted[id.SkillID]; ok {
-			if deleted {
-				addResult.DeletedCount++
-			} else {
-				addResult.UpsertCount++
-			}
-
-			upsertParams = append(upsertParams, dao.BulkUpsertSkillParams{
-				SkillId:   id.SkillID,
-				HistoryID: id.HistoryID,
-				Deleted:   deleted,
-			})
-		}
-	}
-
-	_, err = queries.BulkUpsertSkills(context.Background(), upsertParams)
-	if err != nil {
-		return addResult, err
-	}
-
-	return addResult, nil
+func (r *SkillRepository) bulkInsertSkillHistoryFn(dao dao.IDAO, arg []*dao.BulkInsertSkillHistoryParams) (sql.Result, error) {
+	return dao.BulkInsertSkillHistory(context.Background(), arg)
 }
 
-func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkills []*domain.Skill) (AddToHistoryResult, error) {
-	if len(newSkills) == 0 {
-		return AddToHistoryResult{}, nil
-	}
-
-	finalResult := AddToHistoryResult{}
-	steps := (len(newSkills) / r.BulkSize)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := newSkills[i*r.BulkSize : (i+1)*r.BulkSize]
-
-		res, err := r.insertSkill_sub(tx, update, slice)
-		if err != nil {
-			return AddToHistoryResult{}, err
-		}
-		finalResult.UpsertCount += res.UpsertCount
-		finalResult.DeletedCount += res.DeletedCount
-	}
-
-	slice := newSkills[i*r.BulkSize:]
-
-	res, err := r.insertSkill_sub(tx, update, slice)
-	if err != nil {
-		return AddToHistoryResult{}, err
-	}
-	finalResult.UpsertCount += res.UpsertCount
-	finalResult.DeletedCount += res.DeletedCount
-
-	return finalResult, nil
+func (r *SkillRepository) bulkUpsertSkillFn(dao dao.IDAO, arg []*dao.BulkUpsertSkillParams) (sql.Result, error) {
+	return dao.BulkUpsertSkills(context.Background(), arg)
 }
+
+func (r *SkillRepository) getIdsInUpdateFn(dao dao.IDAO, update string) ([]IdHistory, error) {
+	return toIdHistorySlice(dao.GetSkillsIdsInUpdate(context.Background(), update))
+}
+
+// func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills []*domain.Skill) (AddToHistoryResult, error) {
+// 	queries := r.DB.GetDAO(tx)
+
+// 	// SkillID -> deleted (true | false)
+// 	isWasDeleted := make(map[int32]bool, len(newSkills))
+// 	bulkParams := make([]dao.BulkInsertSkillHistoryParams, len(newSkills))
+// 	for idx, it := range newSkills {
+// 		isWasDeleted[it.SkillID] = it.Deleted
+// 		bulkParams[idx].FillFromDomain(it, update)
+// 	}
+
+// 	addResult := AddToHistoryResult{}
+// 	_, err := queries.BulkInsertSkillHistory(context.Background(), bulkParams)
+// 	if err != nil {
+// 		return addResult, err
+// 	}
+
+// 	res, err := queries.GetSkillsIdsInUpdate(context.Background(), update)
+// 	if err != nil {
+// 		return addResult, err
+// 	}
+
+// 	upsertParams := make([]dao.BulkUpsertSkillParams, len(res))
+// 	for idx, id := range res {
+// 		if deleted, ok := isWasDeleted[id.SkillID]; ok {
+// 			if deleted {
+// 				addResult.DeletedCount++
+// 			} else {
+// 				addResult.UpsertCount++
+// 			}
+
+// 			upsertParams[idx].Fill(id.SkillID, id.HistoryID, deleted)
+// 		}
+// 	}
+
+// 	_, err = queries.BulkUpsertSkills(context.Background(), upsertParams)
+// 	if err != nil {
+// 		return addResult, err
+// 	}
+
+// 	return addResult, nil
+// }
+
+// func (r *SkillRepository) AddSkillsToHistory(tx *sql.Tx, update string, newSkills []*domain.Skill) (AddToHistoryResult, error) {
+// 	if len(newSkills) == 0 {
+// 		return AddToHistoryResult{}, nil
+// 	}
+
+// 	finalResult := AddToHistoryResult{}
+// 	steps := (len(newSkills) / r.BulkSize)
+
+// 	i := 0
+// 	for ; i < steps; i++ {
+// 		slice := newSkills[i*r.BulkSize : (i+1)*r.BulkSize]
+
+// 		res, err := r.insertSkill_sub(tx, update, slice)
+// 		if err != nil {
+// 			return AddToHistoryResult{}, err
+// 		}
+// 		finalResult.UpsertCount += res.UpsertCount
+// 		finalResult.DeletedCount += res.DeletedCount
+// 	}
+
+// 	slice := newSkills[i*r.BulkSize:]
+
+// 	res, err := r.insertSkill_sub(tx, update, slice)
+// 	if err != nil {
+// 		return AddToHistoryResult{}, err
+// 	}
+// 	finalResult.UpsertCount += res.UpsertCount
+// 	finalResult.DeletedCount += res.DeletedCount
+
+// 	return finalResult, nil
+// }
 
 func (r *SkillRepository) CountSkills(tx *sql.Tx) (int32, error) {
 	queries := r.DB.GetDAO(tx)

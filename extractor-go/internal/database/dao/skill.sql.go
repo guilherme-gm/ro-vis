@@ -389,14 +389,14 @@ func (q *Queries) GetSkillList(ctx context.Context, arg GetSkillListParams) ([]G
 }
 
 const getSkillsIdsInUpdate = `-- name: GetSkillsIdsInUpdate :many
-SELECT ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `skill_id` + "`" + `
+SELECT ` + "`" + `skills_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `skills_history` + "`" + `.` + "`" + `skill_id` + "`" + ` as ID
 FROM ` + "`" + `skills_history` + "`" + `
 WHERE ` + "`" + `skills_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
 `
 
 type GetSkillsIdsInUpdateRow struct {
 	HistoryID int32
-	SkillID   int32
+	ID        int32
 }
 
 func (q *Queries) GetSkillsIdsInUpdate(ctx context.Context, update string) ([]GetSkillsIdsInUpdateRow, error) {
@@ -408,7 +408,7 @@ func (q *Queries) GetSkillsIdsInUpdate(ctx context.Context, update string) ([]Ge
 	var items []GetSkillsIdsInUpdateRow
 	for rows.Next() {
 		var i GetSkillsIdsInUpdateRow
-		if err := rows.Scan(&i.HistoryID, &i.SkillID); err != nil {
+		if err := rows.Scan(&i.HistoryID, &i.ID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

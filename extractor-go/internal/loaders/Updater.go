@@ -24,8 +24,8 @@ type UpdaterEntryPointer[K comparable, T any] interface {
 type Updater[K comparable, T UpdaterEntry[K], P UpdaterEntryPointer[K, T]] struct {
 	CurrentValues     map[K]P
 	DirtyValues       map[K]P
-	ValuesToInsert    []P
-	ValuesToUpdate    []P
+	ValuesToInsert    []T
+	ValuesToUpdate    []T
 	targetFileVersion int32
 }
 
@@ -62,23 +62,31 @@ func (u *Updater[K, T, P]) GetForEdit(key K) P {
 
 	if m, ok := u.CurrentValues[key]; ok {
 		newMap := *m
-		newMapPtr := P(&newMap)
+
+		// Append then build the pointer over the list item
+		// otherwise, we will get 2 different copies of the element.
+		u.ValuesToUpdate = append(u.ValuesToUpdate, newMap)
+		newMapPtr := P(&u.ValuesToUpdate[len(u.ValuesToUpdate)-1])
+
 		// This line is weird but makes sense. at this point newMap = *m, thus GetHistoryID
 		// contains the original HistoryID, and we want it to become PreviousHistoryID
 		newMapPtr.SetPreviousHistoryId(newMap.GetHistoryId())
 		newMapPtr.SetHistoryId(domain.NewNullableNullInt32())
 		newMapPtr.SetFileVersion(u.targetFileVersion)
-		u.ValuesToUpdate = append(u.ValuesToUpdate, newMapPtr)
 		u.DirtyValues[key] = newMapPtr
 		return newMapPtr
 	}
 
 	var newMapData T
-	newMap := P(&newMapData)
+
+	// Append then build the pointer over the list item
+	// otherwise, we will get 2 different copies of the element.
+	u.ValuesToInsert = append(u.ValuesToInsert, newMapData)
+	newMap := P(&u.ValuesToInsert[len(u.ValuesToInsert)-1])
+
 	newMap.SetId(key)
 	newMap.SetHistoryId(domain.NewNullableNullInt32())
 	newMap.SetFileVersion(u.targetFileVersion)
-	u.ValuesToInsert = append(u.ValuesToInsert, newMap)
 	u.DirtyValues[key] = newMap
 	return newMap
 }
