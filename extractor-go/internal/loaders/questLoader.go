@@ -68,57 +68,66 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	fileQuests := targetParser.Parse(basePath, &update)
 
 	fmt.Println("> Fetching current list...")
-	currentQuests, err := l.repository.GetCurrentQuests(tx)
+	currentQuests, err := l.repository.GetCurrent(tx)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("> Diffing...")
-	questMap := make(map[int32]*domain.Quest)
-	deletedIds := make(map[int32]bool)
-	for _, q := range *currentQuests {
-		questMap[q.QuestID] = &q
-
-		if !q.Deleted {
-			deletedIds[q.QuestID] = true
-		}
-	}
-
-	var newQuests []domain.Quest
-	var updatedQuests []domain.Quest
+	questUpdater := NewUpdater(currentQuests, targetParser.FileVersion())
+	idExists := make(map[int32]bool)
 
 	for _, fileQuest := range fileQuests {
-		delete(deletedIds, fileQuest.QuestID)
-		existingQuest := questMap[fileQuest.QuestID]
-		if existingQuest == nil {
-			newQuests = append(newQuests, fileQuest)
-			continue
+		idExists[fileQuest.QuestID] = true
+		existingQuest, exists := questUpdater.GetForRead(fileQuest.QuestID)
+		if !exists || existingQuest.Equals(fileQuest) {
+			updatedQuest := questUpdater.GetForEdit(fileQuest.QuestID)
+
+			// Patch new object
+			updatedQuest.Title = fileQuest.Title
+			updatedQuest.Description = fileQuest.Description
+			updatedQuest.Summary = fileQuest.Summary
+			updatedQuest.OldImage = fileQuest.OldImage
+			updatedQuest.IconName = fileQuest.IconName
+			updatedQuest.NpcSpr = fileQuest.NpcSpr
+			updatedQuest.NpcNavi = fileQuest.NpcNavi
+			updatedQuest.NpcPosX = fileQuest.NpcPosX
+			updatedQuest.NpcPosY = fileQuest.NpcPosY
+			updatedQuest.RewardEXP = fileQuest.RewardEXP
+			updatedQuest.RewardJEXP = fileQuest.RewardJEXP
+			updatedQuest.RewardItemList = fileQuest.RewardItemList
+			updatedQuest.CoolTimeQuest = fileQuest.CoolTimeQuest
 		}
+	}
 
-		if !existingQuest.Equals(fileQuest) {
-			fileQuest.PreviousHistoryID = existingQuest.HistoryID
-			updatedQuests = append(updatedQuests, fileQuest)
+	for _, quest := range questUpdater.CurrentValues {
+		if _, exists := idExists[quest.QuestID]; !exists {
+			// Mark for deletion
+			deletedQuest := questUpdater.GetForEdit(quest.QuestID)
+			temp := *deletedQuest
+			*deletedQuest = domain.NewQuest(temp.QuestID, temp.FileVersion)
+			deletedQuest.PreviousHistoryID = temp.PreviousHistoryID
+			deletedQuest.Deleted = true
 		}
 	}
 
-	fmt.Printf("> Saving new records... (%d records to save)\n", len(newQuests))
-	err = l.repository.AddQuestsToHistory(tx, update.Name(), &newQuests)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedQuests))
-	err = l.repository.AddQuestsToHistory(tx, update.Name(), &updatedQuests)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("> Deleting records... (%d records to delete)\n", len(deletedIds))
-	for deletedId := range deletedIds {
-		err := l.repository.AddDeletedQuest(tx, update.Name(), questMap[deletedId])
+	if len(questUpdater.ValuesToInsert) > 0 {
+		fmt.Printf("> Saving new records... (%d records to save)\n", len(questUpdater.ValuesToInsert))
+		res, err := l.repository.AddToHistory(tx, update.Name(), questUpdater.ValuesToInsert)
 		if err != nil {
 			panic(err)
 		}
+
+		fmt.Println("\tResult: ", res)
+	}
+
+	if len(questUpdater.ValuesToUpdate) > 0 {
+		fmt.Printf("> Updating records... (%d records to update)\n", len(questUpdater.ValuesToUpdate))
+		res, err := l.repository.AddToHistory(tx, update.Name(), questUpdater.ValuesToUpdate)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("\tResult: ", res)
 	}
 }
 

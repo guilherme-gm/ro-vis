@@ -52,7 +52,7 @@ type BulkInsertQuestHistoryParams struct {
 	CoolTimeQuest     sql.NullInt32
 }
 
-func (q *Queries) BulkInsertQuestHistory(ctx context.Context, arg []BulkInsertQuestHistoryParams) (sql.Result, error) {
+func (q *Queries) BulkInsertQuestHistory(ctx context.Context, arg []*BulkInsertQuestHistoryParams) (sql.Result, error) {
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -102,7 +102,7 @@ type BulkUpsertQuestParams struct {
 	Deleted   bool
 }
 
-func (q *Queries) BulkUpsertQuests(ctx context.Context, arg []BulkUpsertQuestParams) (sql.Result, error) {
+func (q *Queries) BulkUpsertQuests(ctx context.Context, arg []*BulkUpsertQuestParams) (sql.Result, error) {
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}

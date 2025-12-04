@@ -244,7 +244,7 @@ func (_c *MockIDAO_BulkInsertMapHistory_Call) RunAndReturn(run func(ctx context.
 }
 
 // BulkInsertQuestHistory provides a mock function for the type MockIDAO
-func (_mock *MockIDAO) BulkInsertQuestHistory(ctx context.Context, arg []BulkInsertQuestHistoryParams) (sql.Result, error) {
+func (_mock *MockIDAO) BulkInsertQuestHistory(ctx context.Context, arg []*BulkInsertQuestHistoryParams) (sql.Result, error) {
 	ret := _mock.Called(ctx, arg)
 
 	if len(ret) == 0 {
@@ -253,17 +253,17 @@ func (_mock *MockIDAO) BulkInsertQuestHistory(ctx context.Context, arg []BulkIns
 
 	var r0 sql.Result
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertQuestHistoryParams) (sql.Result, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkInsertQuestHistoryParams) (sql.Result, error)); ok {
 		return returnFunc(ctx, arg)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertQuestHistoryParams) sql.Result); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkInsertQuestHistoryParams) sql.Result); ok {
 		r0 = returnFunc(ctx, arg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(sql.Result)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []BulkInsertQuestHistoryParams) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []*BulkInsertQuestHistoryParams) error); ok {
 		r1 = returnFunc(ctx, arg)
 	} else {
 		r1 = ret.Error(1)
@@ -278,20 +278,20 @@ type MockIDAO_BulkInsertQuestHistory_Call struct {
 
 // BulkInsertQuestHistory is a helper method to define mock.On call
 //   - ctx context.Context
-//   - arg []BulkInsertQuestHistoryParams
+//   - arg []*BulkInsertQuestHistoryParams
 func (_e *MockIDAO_Expecter) BulkInsertQuestHistory(ctx interface{}, arg interface{}) *MockIDAO_BulkInsertQuestHistory_Call {
 	return &MockIDAO_BulkInsertQuestHistory_Call{Call: _e.mock.On("BulkInsertQuestHistory", ctx, arg)}
 }
 
-func (_c *MockIDAO_BulkInsertQuestHistory_Call) Run(run func(ctx context.Context, arg []BulkInsertQuestHistoryParams)) *MockIDAO_BulkInsertQuestHistory_Call {
+func (_c *MockIDAO_BulkInsertQuestHistory_Call) Run(run func(ctx context.Context, arg []*BulkInsertQuestHistoryParams)) *MockIDAO_BulkInsertQuestHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []BulkInsertQuestHistoryParams
+		var arg1 []*BulkInsertQuestHistoryParams
 		if args[1] != nil {
-			arg1 = args[1].([]BulkInsertQuestHistoryParams)
+			arg1 = args[1].([]*BulkInsertQuestHistoryParams)
 		}
 		run(
 			arg0,
@@ -306,13 +306,13 @@ func (_c *MockIDAO_BulkInsertQuestHistory_Call) Return(result sql.Result, err er
 	return _c
 }
 
-func (_c *MockIDAO_BulkInsertQuestHistory_Call) RunAndReturn(run func(ctx context.Context, arg []BulkInsertQuestHistoryParams) (sql.Result, error)) *MockIDAO_BulkInsertQuestHistory_Call {
+func (_c *MockIDAO_BulkInsertQuestHistory_Call) RunAndReturn(run func(ctx context.Context, arg []*BulkInsertQuestHistoryParams) (sql.Result, error)) *MockIDAO_BulkInsertQuestHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // BulkInsertSkillHistory provides a mock function for the type MockIDAO
-func (_mock *MockIDAO) BulkInsertSkillHistory(ctx context.Context, arg []BulkInsertSkillHistoryParams) (sql.Result, error) {
+func (_mock *MockIDAO) BulkInsertSkillHistory(ctx context.Context, arg []*BulkInsertSkillHistoryParams) (sql.Result, error) {
 	ret := _mock.Called(ctx, arg)
 
 	if len(ret) == 0 {
@@ -321,17 +321,17 @@ func (_mock *MockIDAO) BulkInsertSkillHistory(ctx context.Context, arg []BulkIns
 
 	var r0 sql.Result
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertSkillHistoryParams) (sql.Result, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkInsertSkillHistoryParams) (sql.Result, error)); ok {
 		return returnFunc(ctx, arg)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkInsertSkillHistoryParams) sql.Result); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkInsertSkillHistoryParams) sql.Result); ok {
 		r0 = returnFunc(ctx, arg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(sql.Result)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []BulkInsertSkillHistoryParams) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []*BulkInsertSkillHistoryParams) error); ok {
 		r1 = returnFunc(ctx, arg)
 	} else {
 		r1 = ret.Error(1)
@@ -346,20 +346,20 @@ type MockIDAO_BulkInsertSkillHistory_Call struct {
 
 // BulkInsertSkillHistory is a helper method to define mock.On call
 //   - ctx context.Context
-//   - arg []BulkInsertSkillHistoryParams
+//   - arg []*BulkInsertSkillHistoryParams
 func (_e *MockIDAO_Expecter) BulkInsertSkillHistory(ctx interface{}, arg interface{}) *MockIDAO_BulkInsertSkillHistory_Call {
 	return &MockIDAO_BulkInsertSkillHistory_Call{Call: _e.mock.On("BulkInsertSkillHistory", ctx, arg)}
 }
 
-func (_c *MockIDAO_BulkInsertSkillHistory_Call) Run(run func(ctx context.Context, arg []BulkInsertSkillHistoryParams)) *MockIDAO_BulkInsertSkillHistory_Call {
+func (_c *MockIDAO_BulkInsertSkillHistory_Call) Run(run func(ctx context.Context, arg []*BulkInsertSkillHistoryParams)) *MockIDAO_BulkInsertSkillHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []BulkInsertSkillHistoryParams
+		var arg1 []*BulkInsertSkillHistoryParams
 		if args[1] != nil {
-			arg1 = args[1].([]BulkInsertSkillHistoryParams)
+			arg1 = args[1].([]*BulkInsertSkillHistoryParams)
 		}
 		run(
 			arg0,
@@ -374,7 +374,7 @@ func (_c *MockIDAO_BulkInsertSkillHistory_Call) Return(result sql.Result, err er
 	return _c
 }
 
-func (_c *MockIDAO_BulkInsertSkillHistory_Call) RunAndReturn(run func(ctx context.Context, arg []BulkInsertSkillHistoryParams) (sql.Result, error)) *MockIDAO_BulkInsertSkillHistory_Call {
+func (_c *MockIDAO_BulkInsertSkillHistory_Call) RunAndReturn(run func(ctx context.Context, arg []*BulkInsertSkillHistoryParams) (sql.Result, error)) *MockIDAO_BulkInsertSkillHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -652,7 +652,7 @@ func (_c *MockIDAO_BulkUpsertMaps_Call) RunAndReturn(run func(ctx context.Contex
 }
 
 // BulkUpsertQuests provides a mock function for the type MockIDAO
-func (_mock *MockIDAO) BulkUpsertQuests(ctx context.Context, arg []BulkUpsertQuestParams) (sql.Result, error) {
+func (_mock *MockIDAO) BulkUpsertQuests(ctx context.Context, arg []*BulkUpsertQuestParams) (sql.Result, error) {
 	ret := _mock.Called(ctx, arg)
 
 	if len(ret) == 0 {
@@ -661,17 +661,17 @@ func (_mock *MockIDAO) BulkUpsertQuests(ctx context.Context, arg []BulkUpsertQue
 
 	var r0 sql.Result
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkUpsertQuestParams) (sql.Result, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkUpsertQuestParams) (sql.Result, error)); ok {
 		return returnFunc(ctx, arg)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkUpsertQuestParams) sql.Result); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkUpsertQuestParams) sql.Result); ok {
 		r0 = returnFunc(ctx, arg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(sql.Result)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []BulkUpsertQuestParams) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []*BulkUpsertQuestParams) error); ok {
 		r1 = returnFunc(ctx, arg)
 	} else {
 		r1 = ret.Error(1)
@@ -686,20 +686,20 @@ type MockIDAO_BulkUpsertQuests_Call struct {
 
 // BulkUpsertQuests is a helper method to define mock.On call
 //   - ctx context.Context
-//   - arg []BulkUpsertQuestParams
+//   - arg []*BulkUpsertQuestParams
 func (_e *MockIDAO_Expecter) BulkUpsertQuests(ctx interface{}, arg interface{}) *MockIDAO_BulkUpsertQuests_Call {
 	return &MockIDAO_BulkUpsertQuests_Call{Call: _e.mock.On("BulkUpsertQuests", ctx, arg)}
 }
 
-func (_c *MockIDAO_BulkUpsertQuests_Call) Run(run func(ctx context.Context, arg []BulkUpsertQuestParams)) *MockIDAO_BulkUpsertQuests_Call {
+func (_c *MockIDAO_BulkUpsertQuests_Call) Run(run func(ctx context.Context, arg []*BulkUpsertQuestParams)) *MockIDAO_BulkUpsertQuests_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []BulkUpsertQuestParams
+		var arg1 []*BulkUpsertQuestParams
 		if args[1] != nil {
-			arg1 = args[1].([]BulkUpsertQuestParams)
+			arg1 = args[1].([]*BulkUpsertQuestParams)
 		}
 		run(
 			arg0,
@@ -714,13 +714,13 @@ func (_c *MockIDAO_BulkUpsertQuests_Call) Return(result sql.Result, err error) *
 	return _c
 }
 
-func (_c *MockIDAO_BulkUpsertQuests_Call) RunAndReturn(run func(ctx context.Context, arg []BulkUpsertQuestParams) (sql.Result, error)) *MockIDAO_BulkUpsertQuests_Call {
+func (_c *MockIDAO_BulkUpsertQuests_Call) RunAndReturn(run func(ctx context.Context, arg []*BulkUpsertQuestParams) (sql.Result, error)) *MockIDAO_BulkUpsertQuests_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // BulkUpsertSkills provides a mock function for the type MockIDAO
-func (_mock *MockIDAO) BulkUpsertSkills(ctx context.Context, arg []BulkUpsertSkillParams) (sql.Result, error) {
+func (_mock *MockIDAO) BulkUpsertSkills(ctx context.Context, arg []*BulkUpsertSkillParams) (sql.Result, error) {
 	ret := _mock.Called(ctx, arg)
 
 	if len(ret) == 0 {
@@ -729,17 +729,17 @@ func (_mock *MockIDAO) BulkUpsertSkills(ctx context.Context, arg []BulkUpsertSki
 
 	var r0 sql.Result
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkUpsertSkillParams) (sql.Result, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkUpsertSkillParams) (sql.Result, error)); ok {
 		return returnFunc(ctx, arg)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []BulkUpsertSkillParams) sql.Result); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*BulkUpsertSkillParams) sql.Result); ok {
 		r0 = returnFunc(ctx, arg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(sql.Result)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []BulkUpsertSkillParams) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []*BulkUpsertSkillParams) error); ok {
 		r1 = returnFunc(ctx, arg)
 	} else {
 		r1 = ret.Error(1)
@@ -754,20 +754,20 @@ type MockIDAO_BulkUpsertSkills_Call struct {
 
 // BulkUpsertSkills is a helper method to define mock.On call
 //   - ctx context.Context
-//   - arg []BulkUpsertSkillParams
+//   - arg []*BulkUpsertSkillParams
 func (_e *MockIDAO_Expecter) BulkUpsertSkills(ctx interface{}, arg interface{}) *MockIDAO_BulkUpsertSkills_Call {
 	return &MockIDAO_BulkUpsertSkills_Call{Call: _e.mock.On("BulkUpsertSkills", ctx, arg)}
 }
 
-func (_c *MockIDAO_BulkUpsertSkills_Call) Run(run func(ctx context.Context, arg []BulkUpsertSkillParams)) *MockIDAO_BulkUpsertSkills_Call {
+func (_c *MockIDAO_BulkUpsertSkills_Call) Run(run func(ctx context.Context, arg []*BulkUpsertSkillParams)) *MockIDAO_BulkUpsertSkills_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []BulkUpsertSkillParams
+		var arg1 []*BulkUpsertSkillParams
 		if args[1] != nil {
-			arg1 = args[1].([]BulkUpsertSkillParams)
+			arg1 = args[1].([]*BulkUpsertSkillParams)
 		}
 		run(
 			arg0,
@@ -782,7 +782,7 @@ func (_c *MockIDAO_BulkUpsertSkills_Call) Return(result sql.Result, err error) *
 	return _c
 }
 
-func (_c *MockIDAO_BulkUpsertSkills_Call) RunAndReturn(run func(ctx context.Context, arg []BulkUpsertSkillParams) (sql.Result, error)) *MockIDAO_BulkUpsertSkills_Call {
+func (_c *MockIDAO_BulkUpsertSkills_Call) RunAndReturn(run func(ctx context.Context, arg []*BulkUpsertSkillParams) (sql.Result, error)) *MockIDAO_BulkUpsertSkills_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3853,74 +3853,6 @@ func (_c *MockIDAO_UpsertMap_Call) Return(result sql.Result, err error) *MockIDA
 }
 
 func (_c *MockIDAO_UpsertMap_Call) RunAndReturn(run func(ctx context.Context, arg UpsertMapParams) (sql.Result, error)) *MockIDAO_UpsertMap_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UpsertQuest provides a mock function for the type MockIDAO
-func (_mock *MockIDAO) UpsertQuest(ctx context.Context, arg UpsertQuestParams) (sql.Result, error) {
-	ret := _mock.Called(ctx, arg)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpsertQuest")
-	}
-
-	var r0 sql.Result
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, UpsertQuestParams) (sql.Result, error)); ok {
-		return returnFunc(ctx, arg)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, UpsertQuestParams) sql.Result); ok {
-		r0 = returnFunc(ctx, arg)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(sql.Result)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, UpsertQuestParams) error); ok {
-		r1 = returnFunc(ctx, arg)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockIDAO_UpsertQuest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertQuest'
-type MockIDAO_UpsertQuest_Call struct {
-	*mock.Call
-}
-
-// UpsertQuest is a helper method to define mock.On call
-//   - ctx context.Context
-//   - arg UpsertQuestParams
-func (_e *MockIDAO_Expecter) UpsertQuest(ctx interface{}, arg interface{}) *MockIDAO_UpsertQuest_Call {
-	return &MockIDAO_UpsertQuest_Call{Call: _e.mock.On("UpsertQuest", ctx, arg)}
-}
-
-func (_c *MockIDAO_UpsertQuest_Call) Run(run func(ctx context.Context, arg UpsertQuestParams)) *MockIDAO_UpsertQuest_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 UpsertQuestParams
-		if args[1] != nil {
-			arg1 = args[1].(UpsertQuestParams)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIDAO_UpsertQuest_Call) Return(result sql.Result, err error) *MockIDAO_UpsertQuest_Call {
-	_c.Call.Return(result, err)
-	return _c
-}
-
-func (_c *MockIDAO_UpsertQuest_Call) RunAndReturn(run func(ctx context.Context, arg UpsertQuestParams) (sql.Result, error)) *MockIDAO_UpsertQuest_Call {
 	_c.Call.Return(run)
 	return _c
 }

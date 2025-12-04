@@ -316,14 +316,14 @@ func (q *Queries) GetQuestList(ctx context.Context, arg GetQuestListParams) ([]G
 }
 
 const getQuestsIdsInUpdate = `-- name: GetQuestsIdsInUpdate :many
-SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + `
+SELECT ` + "`" + `quest_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `quest_history` + "`" + `.` + "`" + `quest_id` + "`" + ` as ID
 FROM ` + "`" + `quest_history` + "`" + `
 WHERE ` + "`" + `quest_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
 `
 
 type GetQuestsIdsInUpdateRow struct {
 	HistoryID int32
-	QuestID   int32
+	ID        int32
 }
 
 func (q *Queries) GetQuestsIdsInUpdate(ctx context.Context, update string) ([]GetQuestsIdsInUpdateRow, error) {
@@ -335,7 +335,7 @@ func (q *Queries) GetQuestsIdsInUpdate(ctx context.Context, update string) ([]Ge
 	var items []GetQuestsIdsInUpdateRow
 	for rows.Next() {
 		var i GetQuestsIdsInUpdateRow
-		if err := rows.Scan(&i.HistoryID, &i.QuestID); err != nil {
+		if err := rows.Scan(&i.HistoryID, &i.ID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -347,22 +347,4 @@ func (q *Queries) GetQuestsIdsInUpdate(ctx context.Context, update string) ([]Ge
 		return nil, err
 	}
 	return items, nil
-}
-
-const upsertQuest = `-- name: UpsertQuest :execresult
-INSERT INTO ` + "`" + `quests` + "`" + ` (` + "`" + `quest_id` + "`" + `, ` + "`" + `latest_history_id` + "`" + `, ` + "`" + `deleted` + "`" + `)
-VALUES (?, ?, ?)
-ON DUPLICATE KEY UPDATE
-	latest_history_id = VALUES(latest_history_id),
-	deleted = VALUES(deleted)
-`
-
-type UpsertQuestParams struct {
-	QuestID         int32
-	LatestHistoryID int32
-	Deleted         bool
-}
-
-func (q *Queries) UpsertQuest(ctx context.Context, arg UpsertQuestParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, upsertQuest, arg.QuestID, arg.LatestHistoryID, arg.Deleted)
 }

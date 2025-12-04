@@ -23,7 +23,7 @@ func TestAddQuestsToHistory_Empty_NoOps(t *testing.T) {
 	repo := NewQuestRepository(mockDB)
 
 	var quests []domain.Quest
-	err := repo.AddQuestsToHistory(nil, "u1", &quests)
+	_, err := repo.AddToHistory(nil, "u1", quests)
 
 	require.NoError(t, err)
 	mockDB.Dao.AssertExpectations(t)
@@ -32,7 +32,6 @@ func TestAddQuestsToHistory_Empty_NoOps(t *testing.T) {
 func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
-
 	repo.BulkSize = 2
 
 	// build 3 quests to force 2 batches (2 + 1)
@@ -43,20 +42,20 @@ func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 
 	// Expect two bulk inserts (slices of 2 and 1)
 	mockDB.Dao.
-		On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []dao.BulkInsertQuestHistoryParams) bool { return len(arg) == 2 })).
+		On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkInsertQuestHistoryParams) bool { return len(arg) == 2 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 	mockDB.Dao.
-		On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []dao.BulkInsertQuestHistoryParams) bool { return len(arg) == 1 })).
+		On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkInsertQuestHistoryParams) bool { return len(arg) == 1 })).
 		Return(mockResult{id: 0}, nil).
 		Once()
 
 	// The repository will read ids for the update and upsert only those present in quests
 	// It will later only Upsert the ones that are part of the current update
 	ids := make([]dao.GetQuestsIdsInUpdateRow, 0, 3)
-	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 10, QuestID: 1})
-	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 20, QuestID: 2})
-	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 30, QuestID: 3})
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 10, ID: 1})
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 20, ID: 2})
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 30, ID: 3})
 	mockDB.Dao.
 		On("GetQuestsIdsInUpdate", mock.Anything, "u1").
 		Return(ids, nil).
@@ -64,7 +63,7 @@ func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 
 	// We only upsert the ones that are part of the current bulk (1 and 2 / then 3)
 	mockDB.Dao.
-		On("BulkUpsertQuests", mock.Anything, mock.MatchedBy(func(arg []dao.BulkUpsertQuestParams) bool {
+		On("BulkUpsertQuests", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkUpsertQuestParams) bool {
 			if len(arg) != 2 {
 				return false
 			}
@@ -75,7 +74,7 @@ func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 		Once()
 
 	mockDB.Dao.
-		On("BulkUpsertQuests", mock.Anything, mock.MatchedBy(func(arg []dao.BulkUpsertQuestParams) bool {
+		On("BulkUpsertQuests", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkUpsertQuestParams) bool {
 			if len(arg) != 1 {
 				return false
 			}
@@ -85,7 +84,7 @@ func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 		Return(mockResult{id: 0}, nil).
 		Once()
 
-	err := repo.AddQuestsToHistory(nil, "u1", &quests)
+	_, err := repo.AddToHistory(nil, "u1", quests)
 	require.NoError(t, err)
 	mockDB.Dao.AssertExpectations(t)
 }
@@ -93,19 +92,37 @@ func TestAddQuestsToHistory_Batching_And_Upsert(t *testing.T) {
 func TestAddDeletedQuest_InsertsHistory_And_UpsertsDeleted(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
-	q := &domain.Quest{QuestID: 42, FileVersion: 2}
-	mockDB.Dao.On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []dao.BulkInsertQuestHistoryParams) bool {
+	q := domain.Quest{QuestID: 42, FileVersion: 2, Deleted: true}
+	mockDB.Dao.On("BulkInsertQuestHistory", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkInsertQuestHistoryParams) bool {
 		return len(arg) == 1 && arg[0].QuestID == q.QuestID && arg[0].FileVersion == q.FileVersion
 	})).Return(mockResult{id: 1234}, nil).Once()
 
-	mockDB.Dao.On("UpsertQuest", mock.Anything, dao.UpsertQuestParams{
-		QuestID:         42,
-		LatestHistoryID: 1234,
-		Deleted:         true,
-	}).Return(mockResult{id: 0}, nil).Once()
+	// The repository will read ids for the update and upsert only those present in quests
+	// It will later only Upsert the ones that are part of the current update
+	ids := make([]dao.GetQuestsIdsInUpdateRow, 0, 3)
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 10, ID: 1})
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 20, ID: 2})
+	ids = append(ids, dao.GetQuestsIdsInUpdateRow{HistoryID: 30, ID: 42})
+	mockDB.Dao.
+		On("GetQuestsIdsInUpdate", mock.Anything, "upd").
+		Return(ids, nil).
+		Once()
 
-	err := repo.AddDeletedQuest(nil, "upd", q)
+	// We only upsert the ones that are part of the current bulk (1 and 2 / then 3)
+	mockDB.Dao.
+		On("BulkUpsertQuests", mock.Anything, mock.MatchedBy(func(arg []*dao.BulkUpsertQuestParams) bool {
+			if len(arg) != 1 {
+				return false
+			}
+
+			return arg[0].QuestID == 42 && arg[0].HistoryID == 30
+		})).
+		Return(mockResult{id: 0}, nil).
+		Once()
+
+	_, err := repo.AddToHistory(nil, "upd", []domain.Quest{q})
 	require.NoError(t, err)
 	mockDB.Dao.AssertExpectations(t)
 }
@@ -113,6 +130,7 @@ func TestAddDeletedQuest_InsertsHistory_And_UpsertsDeleted(t *testing.T) {
 func TestCountChangesInUpdate(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
 	mockDB.Dao.On("CountChangedQuestsInUpdate", mock.Anything, "u").Return(int64(7), nil).Once()
 
@@ -126,6 +144,7 @@ func TestCountChangesInUpdate(t *testing.T) {
 func TestGetChangesInUpdate_NoRows_ReturnsEmpty(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
 	mockDB.Dao.On("GetChangedQuests", mock.Anything, dao.GetChangedQuestsParams{Update: "u", Offset: 0, Limit: 10}).
 		Return(nil, sql.ErrNoRows).Once()
@@ -140,6 +159,7 @@ func TestGetChangesInUpdate_NoRows_ReturnsEmpty(t *testing.T) {
 func TestGetQuestHistory_NoRows_ReturnsEmpty(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
 	mockDB.Dao.On("GetQuestHistory", mock.Anything, dao.GetQuestHistoryParams{QuestID: 99, Offset: 0, Limit: 5}).
 		Return(nil, sql.ErrNoRows).Once()
@@ -153,6 +173,7 @@ func TestGetQuestHistory_NoRows_ReturnsEmpty(t *testing.T) {
 func TestGetQuests_ErrorIsIgnored_ReturnsEmpty(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
 	mockDB.Dao.On("GetQuestList", mock.Anything, dao.GetQuestListParams{Offset: 0, Limit: 3}).
 		Return(nil, errors.New("db error")).Once()
@@ -166,6 +187,7 @@ func TestGetQuests_ErrorIsIgnored_ReturnsEmpty(t *testing.T) {
 func TestCountQuests_CallsCountItems(t *testing.T) {
 	mockDB := database.NewMockDatabase(t)
 	repo := NewQuestRepository(mockDB)
+	repo.BulkSize = 2
 
 	// Note: repository.CountQuests currently calls CountItems (not CountQuests)
 	mockDB.Dao.On("CountItems", mock.Anything).Return(int64(123), nil).Once()

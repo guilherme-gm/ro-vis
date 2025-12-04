@@ -60,7 +60,6 @@ type Querier interface {
 	UpsertItem(ctx context.Context, arg UpsertItemParams) (sql.Result, error)
 	UpsertLatestUpdate(ctx context.Context, arg UpsertLatestUpdateParams) error
 	UpsertMap(ctx context.Context, arg UpsertMapParams) (sql.Result, error)
-	UpsertQuest(ctx context.Context, arg UpsertQuestParams) (sql.Result, error)
 }
 
 var _ Querier = (*Queries)(nil)

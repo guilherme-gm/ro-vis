@@ -26,6 +26,41 @@ type Quest struct {
 	Deleted           bool
 }
 
+func NewQuest(questId int32, fileVersion int32) Quest {
+	return Quest{
+		QuestID:     questId,
+		FileVersion: fileVersion,
+	}
+}
+
+func (q Quest) GetId() int32 {
+	return q.QuestID
+}
+
+func (q *Quest) SetId(id int32) {
+	q.QuestID = id
+}
+
+func (q Quest) GetHistoryId() NullableInt32 {
+	return q.HistoryID
+}
+
+func (q *Quest) SetHistoryId(id NullableInt32) {
+	q.HistoryID = id
+}
+
+func (q *Quest) SetPreviousHistoryId(id NullableInt32) {
+	q.PreviousHistoryID = id
+}
+
+func (q *Quest) SetFileVersion(version int32) {
+	q.FileVersion = version
+}
+
+func (q Quest) IsDeleted() bool {
+	return q.Deleted
+}
+
 func (q *Quest) Equals(otherQuest Quest) bool {
 	// FileVersion is not checked, if the file has changed but the quest is the same, we don't care.
 	if len(q.RewardItemList) != len(otherQuest.RewardItemList) {

@@ -11,4 +11,5 @@ type QuestParser interface {
 	HasFiles(update *domain.Update) bool
 	GetRelevantFiles() []*regexp.Regexp
 	Parse(basePath string, update *domain.Update) []domain.Quest
+	FileVersion() int32
 }

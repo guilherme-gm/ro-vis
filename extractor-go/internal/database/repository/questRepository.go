@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
@@ -11,150 +10,50 @@ import (
 )
 
 type QuestRepository struct {
-	DB       database.IDatabase
-	BulkSize int
+	HistoryBaseRepository[
+		domain.Quest,
+		dao.BulkInsertQuestHistoryParams,
+		*dao.BulkInsertQuestHistoryParams,
+		*dao.BulkUpsertQuestParams,
+	]
 }
 
 // NewQuestRepository creates a new QuestRepository instance
 func NewQuestRepository(db database.IDatabase) *QuestRepository {
-	return &QuestRepository{
-		DB:       db,
-		BulkSize: 500,
+	repo := &QuestRepository{
+		HistoryBaseRepository: HistoryBaseRepository[
+			domain.Quest,
+			dao.BulkInsertQuestHistoryParams,
+			*dao.BulkInsertQuestHistoryParams,
+			*dao.BulkUpsertQuestParams,
+		]{
+			DB:       db,
+			BulkSize: 500,
+		},
 	}
+	repo.getCurrentData = repo.getCurrentDataFn
+	repo.bulkInsertHistory = repo.bulkInsertQuestHistoryFn
+	repo.bulkUpsertRecords = repo.bulkUpsertQuestFn
+	repo.getIdsInUpdate = repo.getIdsInUpdateFn
+	repo.newBulkParamEntry = func() *dao.BulkInsertQuestHistoryParams { return &dao.BulkInsertQuestHistoryParams{} }
+	repo.newRecordParam = func() *dao.BulkUpsertQuestParams { return &dao.BulkUpsertQuestParams{} }
+	return repo
 }
 
-func (r *QuestRepository) GetCurrentQuests(tx *sql.Tx) (*[]domain.Quest, error) {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.GetCurrentQuests(context.Background())
-	if err == sql.ErrNoRows {
-		return &[]domain.Quest{}, nil
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	quests := make([]domain.Quest, len(res))
-	for idx, qmodel := range res {
-		quests[idx] = qmodel.ToDomain()
-	}
-
-	return &quests, nil
+func (r *QuestRepository) getCurrentDataFn(dao dao.IDAO, ctx context.Context) ([]domain.Quest, error) {
+	return toDomainSlice(dao.GetCurrentQuests(ctx))
 }
 
-func (r *QuestRepository) addQuestsToHistory_sub(tx *sql.Tx, update string, newHistories *[]domain.Quest) error {
-	queries := r.DB.GetDAO(tx)
-	bulkParams := []dao.BulkInsertQuestHistoryParams{}
-	updatedIdMap := make(map[int32]bool, len((*newHistories)))
-	for _, it := range *newHistories {
-		updatedIdMap[it.QuestID] = true
-		var rewardItemListJson string
-		if len(it.RewardItemList) > 0 {
-			jsonBytes, _ := json.Marshal(it.RewardItemList)
-			rewardItemListJson = string(jsonBytes)
-		}
-		bulkParams = append(bulkParams, dao.BulkInsertQuestHistoryParams{
-			PreviousHistoryID: sql.NullInt32(it.PreviousHistoryID),
-			QuestID:           it.QuestID,
-			FileVersion:       it.FileVersion,
-			Update:            update,
-			Title:             sql.NullString(it.Title),
-			Description:       sql.NullString(it.Description),
-			Summary:           sql.NullString(it.Summary),
-			OldImage:          sql.NullString(it.OldImage),
-			IconName:          sql.NullString(it.IconName),
-			NpcSpr:            sql.NullString(it.NpcSpr),
-			NpcNavi:           sql.NullString(it.NpcNavi),
-			NpcPosX:           sql.NullInt32(it.NpcPosX),
-			NpcPosY:           sql.NullInt32(it.NpcPosY),
-			RewardExp:         sql.NullString(it.RewardEXP),
-			RewardJexp:        sql.NullString(it.RewardJEXP),
-			RewardItemList:    sql.NullString{String: rewardItemListJson, Valid: len(it.RewardItemList) > 0},
-			CoolTimeQuest:     sql.NullInt32(it.CoolTimeQuest),
-		})
-	}
-
-	_, err := queries.BulkInsertQuestHistory(context.Background(), bulkParams)
-	if err != nil {
-		return err
-	}
-
-	res, err := queries.GetQuestsIdsInUpdate(context.Background(), update)
-	if err != nil {
-		return err
-	}
-
-	upsertParams := []dao.BulkUpsertQuestParams{}
-	for _, id := range res {
-		if _, ok := updatedIdMap[id.QuestID]; !ok {
-			continue
-		}
-
-		upsertParams = append(upsertParams, dao.BulkUpsertQuestParams{
-			QuestID:   id.QuestID,
-			HistoryID: id.HistoryID,
-			Deleted:   false,
-		})
-	}
-
-	_, err = queries.BulkUpsertQuests(context.Background(), upsertParams)
-	if err != nil {
-		return err
-	}
-
-	return err
+func (r *QuestRepository) bulkInsertQuestHistoryFn(dao dao.IDAO, arg []*dao.BulkInsertQuestHistoryParams) (sql.Result, error) {
+	return dao.BulkInsertQuestHistory(context.Background(), arg)
 }
 
-func (r *QuestRepository) AddQuestsToHistory(tx *sql.Tx, update string, newHistories *[]domain.Quest) error {
-	if len(*newHistories) == 0 {
-		return nil
-	}
-
-	steps := (len(*newHistories) / r.BulkSize)
-
-	i := 0
-	for ; i < steps; i++ {
-		slice := (*newHistories)[i*r.BulkSize : (i+1)*r.BulkSize]
-		if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
-			return err
-		}
-	}
-
-	slice := (*newHistories)[i*r.BulkSize : len(*newHistories)]
-	if err := r.addQuestsToHistory_sub(tx, update, &slice); err != nil {
-		return err
-	}
-
-	return nil
+func (r *QuestRepository) bulkUpsertQuestFn(dao dao.IDAO, arg []*dao.BulkUpsertQuestParams) (sql.Result, error) {
+	return dao.BulkUpsertQuests(context.Background(), arg)
 }
 
-func (r *QuestRepository) AddDeletedQuest(tx *sql.Tx, update string, quest *domain.Quest) error {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.BulkInsertQuestHistory(context.Background(), []dao.BulkInsertQuestHistoryParams{{
-		PreviousHistoryID: sql.NullInt32(quest.HistoryID),
-		QuestID:           quest.QuestID,
-		FileVersion:       quest.FileVersion,
-		Update:            update,
-	}})
-
-	if err != nil {
-		return err
-	}
-
-	historyId, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	quest.HistoryID = dao.ToNullableInt32(int32(historyId))
-
-	_, err = queries.UpsertQuest(context.Background(), dao.UpsertQuestParams{
-		QuestID:         quest.QuestID,
-		LatestHistoryID: quest.HistoryID.Int32,
-		Deleted:         true,
-	})
-
-	return err
+func (r *QuestRepository) getIdsInUpdateFn(dao dao.IDAO, update string) ([]IdHistory, error) {
+	return toIdHistorySlice(dao.GetQuestsIdsInUpdate(context.Background(), update))
 }
 
 func (r *QuestRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {

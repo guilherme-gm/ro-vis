@@ -62,3 +62,7 @@ func (p QuestV4Parser) Parse(basePath string, update *domain.Update) []domain.Qu
 
 	return quests
 }
+
+func (p QuestV4Parser) FileVersion() int32 {
+	return 4
+}
