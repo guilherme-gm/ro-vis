@@ -79,7 +79,7 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	for _, fileQuest := range fileQuests {
 		idExists[fileQuest.QuestID] = true
 		existingQuest, exists := questUpdater.GetForRead(fileQuest.QuestID)
-		if !exists || existingQuest.Equals(fileQuest) {
+		if !exists || !existingQuest.Equals(fileQuest) {
 			updatedQuest := questUpdater.GetForEdit(fileQuest.QuestID)
 
 			// Patch new object
@@ -100,7 +100,7 @@ func (l *QuestLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Updat
 	}
 
 	for _, quest := range questUpdater.CurrentValues {
-		if _, exists := idExists[quest.QuestID]; !exists {
+		if _, exists := idExists[quest.QuestID]; !exists && !quest.Deleted {
 			// Mark for deletion
 			deletedQuest := questUpdater.GetForEdit(quest.QuestID)
 			temp := *deletedQuest

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
@@ -145,16 +144,11 @@ func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) addToHistor
 
 func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) AddToHistory(tx *sql.Tx, update string, newItems []T) (AddToHistoryResult, error) {
 	if len(newItems) == 0 {
-		fmt.Println(" nothing to add to history")
 		return AddToHistoryResult{}, nil
 	}
 
-	fmt.Println("bulk size: ", r.BulkSize)
-	fmt.Println("new items: ", len(newItems))
-
 	finalResult := AddToHistoryResult{}
 	steps := (len(newItems) / r.BulkSize)
-	fmt.Println("steps: ", steps)
 
 	i := 0
 	for ; i < steps; i++ {
@@ -169,7 +163,6 @@ func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) AddToHistor
 	}
 
 	slice := newItems[i*r.BulkSize:]
-	fmt.Println("slice: ", slice)
 	res, err := r.addToHistory_sub(tx, update, slice)
 	if err != nil {
 		return AddToHistoryResult{}, err
