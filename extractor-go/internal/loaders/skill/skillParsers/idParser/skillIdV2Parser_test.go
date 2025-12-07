@@ -10,7 +10,7 @@ import (
 func TestSkillIdV2Parser(t *testing.T) {
 	parser := NewSkillIdV2Parser()
 
-	result := parser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV2.lua"))
+	result := parser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV3.lua"))
 
 	assert.GreaterOrEqual(t, len(result), 1, "Expected at least one result, got none")
 

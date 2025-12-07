@@ -13,7 +13,7 @@ import (
 func TestSkillDescriptV4Parser(t *testing.T) {
 	// Get needed data from other parsers
 	skillIdParser := idParser.NewSkillIdV2Parser()
-	skillIdTable := skillIdParser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV2.lua"))
+	skillIdTable := skillIdParser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV3.lua"))
 
 	// Actual test
 	parser := NewSkillDescriptV4Parser().(*SkillDescriptV4Parser)

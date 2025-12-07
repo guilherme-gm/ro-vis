@@ -22,7 +22,7 @@ func TestSkillInfoV2Parser(t *testing.T) {
 	}
 
 	skillIdParser := idParser.NewSkillIdV2Parser()
-	skillIdTable := skillIdParser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV2.lua"))
+	skillIdTable := skillIdParser.ParseFile(testfiles.GetFilePath("rostructs/SkillIDV3.lua"))
 
 	// Actual test
 	parser := NewSkillInfoV2Parser().(*SkillInfoV2Parser)
