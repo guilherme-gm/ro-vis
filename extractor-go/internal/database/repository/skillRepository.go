@@ -44,6 +44,9 @@ func NewSkillRepository(db database.IDatabase) *SkillRepository {
 	repo.bulkInsertHistory = repo.bulkInsertSkillHistoryFn
 	repo.bulkUpsertRecords = repo.bulkUpsertSkillFn
 	repo.getIdsInUpdate = repo.getIdsInUpdateFn
+
+	repo.countChangesInUpdate = repo.countChangesInUpdateFn
+
 	repo.newBulkParamEntry = func() *dao.BulkInsertSkillHistoryParams { return &dao.BulkInsertSkillHistoryParams{} }
 	repo.newRecordParam = func() *dao.BulkUpsertSkillParams { return &dao.BulkUpsertSkillParams{} }
 	return repo
@@ -125,6 +128,10 @@ func (r *SkillRepository) bulkUpsertSkillFn(dao dao.IDAO, arg []*dao.BulkUpsertS
 
 func (r *SkillRepository) getIdsInUpdateFn(dao dao.IDAO, update string) ([]IdHistory, error) {
 	return toIdHistorySlice(dao.GetSkillsIdsInUpdate(context.Background(), update))
+}
+
+func (r *SkillRepository) countChangesInUpdateFn(dao dao.IDAO, update string) (int64, error) {
+	return dao.CountChangedSkillsInUpdate(context.Background(), update)
 }
 
 // func (r *SkillRepository) insertSkill_sub(tx *sql.Tx, update string, newSkills []*domain.Skill) (AddToHistoryResult, error) {
@@ -290,15 +297,15 @@ func (r *SkillRepository) GetSkillHistory(tx *sql.Tx, skillId int32, pagination 
 	return records, nil
 }
 
-func (r *SkillRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.CountChangedSkillsInUpdate(context.Background(), update)
-	if err != nil {
-		return 0, err
-	}
+// func (r *SkillRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+// 	queries := r.DB.GetDAO(tx)
+// 	res, err := queries.CountChangedSkillsInUpdate(context.Background(), update)
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	return int(res), nil
-}
+// 	return int(res), nil
+// }
 
 func (r *SkillRepository) GetChangesInUpdate(tx *sql.Tx, update string, pagination Pagination) ([]FromToRecord[domain.Skill], error) {
 	queries := r.DB.GetDAO(tx)

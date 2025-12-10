@@ -36,6 +36,9 @@ func NewItemRepository(db *database.Database) *ItemRepository {
 	repo.bulkInsertHistory = repo.bulkInsertItemHistoryFn
 	repo.bulkUpsertRecords = repo.bulkUpsertItemFn
 	repo.getIdsInUpdate = repo.getIdsInUpdateFn
+
+	repo.countChangesInUpdate = repo.countChangesInUpdateFn
+
 	repo.newBulkParamEntry = func() *dao.BulkInsertItemHistoryParams { return &dao.BulkInsertItemHistoryParams{} }
 	repo.newRecordParam = func() *dao.BulkUpsertItemParams { return &dao.BulkUpsertItemParams{} }
 
@@ -58,14 +61,8 @@ func (r *ItemRepository) getIdsInUpdateFn(dao dao.IDAO, update string) ([]IdHist
 	return toIdHistorySlice(dao.GetItemIdsInUpdate(context.Background(), update))
 }
 
-func (r *ItemRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.CountChangedItemsInUpdate(context.Background(), update)
-	if err != nil {
-		return 0, err
-	}
-
-	return int(res), nil
+func (r *ItemRepository) countChangesInUpdateFn(dao dao.IDAO, update string) (int64, error) {
+	return dao.CountChangedItemsInUpdate(context.Background(), update)
 }
 
 func (r *ItemRepository) sqlRecordToDomain(dbFrom dao.PreviousItemHistoryVw, dbTo dao.ItemHistory, lastUpdate sql.NullString) FromToRecord[domain.Item] {

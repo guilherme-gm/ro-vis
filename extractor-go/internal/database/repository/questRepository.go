@@ -35,6 +35,9 @@ func NewQuestRepository(db database.IDatabase) *QuestRepository {
 	repo.bulkInsertHistory = repo.bulkInsertQuestHistoryFn
 	repo.bulkUpsertRecords = repo.bulkUpsertQuestFn
 	repo.getIdsInUpdate = repo.getIdsInUpdateFn
+
+	repo.countChangesInUpdate = repo.countChangesInUpdateFn
+
 	repo.newBulkParamEntry = func() *dao.BulkInsertQuestHistoryParams { return &dao.BulkInsertQuestHistoryParams{} }
 	repo.newRecordParam = func() *dao.BulkUpsertQuestParams { return &dao.BulkUpsertQuestParams{} }
 	return repo
@@ -56,14 +59,8 @@ func (r *QuestRepository) getIdsInUpdateFn(dao dao.IDAO, update string) ([]IdHis
 	return toIdHistorySlice(dao.GetQuestsIdsInUpdate(context.Background(), update))
 }
 
-func (r *QuestRepository) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
-	queries := r.DB.GetDAO(tx)
-	res, err := queries.CountChangedQuestsInUpdate(context.Background(), update)
-	if err != nil {
-		return 0, err
-	}
-
-	return int(res), nil
+func (r *QuestRepository) countChangesInUpdateFn(dao dao.IDAO, update string) (int64, error) {
+	return dao.CountChangedQuestsInUpdate(context.Background(), update)
 }
 
 func (r *QuestRepository) sqlRecordToDomain(dbFrom dao.PreviousQuestHistoryVw, dbTo dao.QuestHistory, lastUpdate sql.NullString) FromToRecord[domain.Quest] {

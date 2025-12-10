@@ -79,6 +79,8 @@ type HistoryBaseRepository[
 	bulkInsertHistory func(dao dao.IDAO, arg []BkTypePtr) (sql.Result, error)
 	getIdsInUpdate    func(dao dao.IDAO, update string) ([]IdHistory, error)
 	bulkUpsertRecords func(dao dao.IDAO, arg []RecordTypePtr) (sql.Result, error)
+
+	countChangesInUpdate func(dao dao.IDAO, update string) (int64, error)
 	// factories to allocate concrete params for generics
 	newBulkParamEntry func() BkTypePtr
 	newRecordParam    func() RecordTypePtr
@@ -176,4 +178,13 @@ func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) AddToHistor
 	finalResult.DeletedCount += res.DeletedCount
 
 	return finalResult, nil
+}
+
+func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) CountChangesInUpdate(tx *sql.Tx, update string) (int, error) {
+	res, err := r.countChangesInUpdate(r.DB.GetDAO(tx), update)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
 }
