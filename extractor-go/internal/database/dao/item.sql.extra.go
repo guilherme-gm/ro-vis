@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -61,7 +62,7 @@ type BulkInsertItemHistoryParams struct {
 	MoveInfo                json.RawMessage
 }
 
-func (q *Queries) BulkInsertItemHistory(ctx context.Context, arg []BulkInsertItemHistoryParams) (sql.Result, error) {
+func (q *Queries) BulkInsertItemHistory(ctx context.Context, arg []*BulkInsertItemHistoryParams) (sql.Result, error) {
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -115,7 +116,8 @@ type BulkUpsertItemParams struct {
 	Deleted   bool
 }
 
-func (q *Queries) BulkUpsertItems(ctx context.Context, arg []BulkUpsertItemParams) (sql.Result, error) {
+func (q *Queries) BulkUpsertItems(ctx context.Context, arg []*BulkUpsertItemParams) (sql.Result, error) {
+	fmt.Println("Bulk Upsert ITems ", len(arg))
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}

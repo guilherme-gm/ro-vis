@@ -13,8 +13,8 @@ type IDAO interface {
 	BulkUpsertI18ns(ctx context.Context, arg []BulkUpsertI18nParams) (sql.Result, error)
 
 	// item.sql.extra.go
-	BulkInsertItemHistory(ctx context.Context, arg []BulkInsertItemHistoryParams) (sql.Result, error)
-	BulkUpsertItems(ctx context.Context, arg []BulkUpsertItemParams) (sql.Result, error)
+	BulkInsertItemHistory(ctx context.Context, arg []*BulkInsertItemHistoryParams) (sql.Result, error)
+	BulkUpsertItems(ctx context.Context, arg []*BulkUpsertItemParams) (sql.Result, error)
 
 	// maps.sql.extra.go
 	BulkInsertMapHistory(ctx context.Context, arg []BulkInsertMapHistoryParams) (sql.Result, error)

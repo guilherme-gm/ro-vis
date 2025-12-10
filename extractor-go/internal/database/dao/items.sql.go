@@ -297,14 +297,14 @@ func (q *Queries) GetItemHistory(ctx context.Context, arg GetItemHistoryParams) 
 }
 
 const getItemIdsInUpdate = `-- name: GetItemIdsInUpdate :many
-SELECT ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `item_history` + "`" + `.` + "`" + `item_id` + "`" + `
+SELECT ` + "`" + `item_history` + "`" + `.` + "`" + `history_id` + "`" + `, ` + "`" + `item_history` + "`" + `.` + "`" + `item_id` + "`" + ` as ID
 FROM ` + "`" + `item_history` + "`" + `
 WHERE ` + "`" + `item_history` + "`" + `.` + "`" + `update` + "`" + ` = ?
 `
 
 type GetItemIdsInUpdateRow struct {
 	HistoryID int32
-	ItemID    int32
+	ID        int32
 }
 
 func (q *Queries) GetItemIdsInUpdate(ctx context.Context, update string) ([]GetItemIdsInUpdateRow, error) {
@@ -316,7 +316,7 @@ func (q *Queries) GetItemIdsInUpdate(ctx context.Context, update string) ([]GetI
 	var items []GetItemIdsInUpdateRow
 	for rows.Next() {
 		var i GetItemIdsInUpdateRow
-		if err := rows.Scan(&i.HistoryID, &i.ItemID); err != nil {
+		if err := rows.Scan(&i.HistoryID, &i.ID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

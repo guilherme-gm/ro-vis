@@ -4,7 +4,7 @@ FROM `items`
 INNER JOIN `item_history` ON `items`.`latest_history_id` = `item_history`.`history_id`;
 
 -- name: GetItemIdsInUpdate :many
-SELECT `item_history`.`history_id`, `item_history`.`item_id`
+SELECT `item_history`.`history_id`, `item_history`.`item_id` as ID
 FROM `item_history`
 WHERE `item_history`.`update` = ?;
 

@@ -70,6 +70,34 @@ func NewItem(itemID int32, fileVersion int32) Item {
 	}
 }
 
+func (i Item) GetId() int32 {
+	return i.ItemID
+}
+
+func (i *Item) SetId(id int32) {
+	i.ItemID = id
+}
+
+func (i Item) GetHistoryId() NullableInt32 {
+	return i.HistoryID
+}
+
+func (i *Item) SetHistoryId(id NullableInt32) {
+	i.HistoryID = id
+}
+
+func (i *Item) SetPreviousHistoryId(id NullableInt32) {
+	i.PreviousHistoryID = id
+}
+
+func (i *Item) SetFileVersion(version int32) {
+	i.FileVersion = version
+}
+
+func (i Item) IsDeleted() bool {
+	return i.Deleted
+}
+
 func (i *Item) Equals(otherItem Item) bool {
 	// FileVersion is not checked, if the file has changed but the Item is the same, we don't care.
 	return (i.ItemID == otherItem.ItemID &&

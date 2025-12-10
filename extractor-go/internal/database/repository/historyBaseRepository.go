@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/database/dao"
@@ -111,12 +112,16 @@ func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) addToHistor
 	addResult := AddToHistoryResult{}
 	_, err := r.bulkInsertHistory(queries, bulkParams)
 	if err != nil {
-		return addResult, err
+		return addResult, fmt.Errorf("failed to bulk insert history, %w", err)
 	}
 
 	res, err := r.getIdsInUpdate(queries, update)
 	if err != nil {
-		return addResult, err
+		return addResult, fmt.Errorf("failed to fetch IDs in current update (\"%s\"). Error: %w", update, err)
+	}
+
+	if len(res) == 0 {
+		return addResult, fmt.Errorf("failed to fetch IDs in current update (\"%s\"): 0 results were returned -- this should never happen", update)
 	}
 
 	var upsertParams []RecordTypePtr
@@ -136,7 +141,7 @@ func (r *HistoryBaseRepository[T, BkType, BkTypePtr, RecordTypePtr]) addToHistor
 
 	_, err = r.bulkUpsertRecords(queries, upsertParams)
 	if err != nil {
-		return addResult, err
+		return addResult, fmt.Errorf("failed to upsert records: %w", err)
 	}
 
 	return addResult, nil

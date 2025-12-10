@@ -106,3 +106,7 @@ func (p ItemV4Parser) Parse(basePath string, update *domain.Update, existingDB m
 
 	return itemList
 }
+
+func (p ItemV4Parser) FileVersion() int32 {
+	return 4
+}

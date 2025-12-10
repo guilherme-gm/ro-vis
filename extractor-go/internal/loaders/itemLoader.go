@@ -69,60 +69,84 @@ func (l *ItemLoader) LoadPatch(tx *sql.Tx, basePath string, update domain.Update
 	}
 
 	fmt.Println("> Fetching current list...")
-	currentItems, err := l.repository.GetCurrentItems(tx)
+	currentItems, err := l.repository.GetCurrent(tx)
 	if err != nil {
 		panic(err)
 	}
 
-	itemMap := make(map[int32]*domain.Item)
-	idsToBeDeleted := make(map[int32]bool)
-	for _, q := range *currentItems {
-		itemMap[q.ItemID] = &q
+	updater := NewUpdater(currentItems, targetParser.FileVersion())
 
-		if !q.Deleted {
-			idsToBeDeleted[q.ItemID] = true
-		}
+	// ItemParser requires an input of itemMap due to partial file updates
+	// This could probably be solved by providing updater as parameter
+	// but I don't feel like refactoring every now...
+	itemMap := make(map[int32]*domain.Item)
+	for _, q := range currentItems {
+		itemMap[q.ItemID] = &q
 	}
 
 	fileItems := targetParser.Parse(basePath, &update, itemMap)
 
 	fmt.Println("> Diffing...")
 
-	var newItems []domain.Item
-	var updatedItems []domain.Item
-
+	idExists := make(map[int32]bool)
 	for _, fileItem := range fileItems {
-		delete(idsToBeDeleted, fileItem.ItemID)
-		existingItem := itemMap[fileItem.ItemID]
-		if existingItem == nil {
-			newItems = append(newItems, fileItem)
-			continue
+		idExists[fileItem.ItemID] = true
+		existingItem, exists := updater.GetForRead(fileItem.ItemID)
+		if !exists || !existingItem.Equals(fileItem) || existingItem.Deleted {
+			updatedItem := updater.GetForEdit(fileItem.ItemID)
+			updatedItem.Deleted = false
+
+			// Patch new object
+			updatedItem.IdentifiedName = fileItem.IdentifiedName
+			updatedItem.IdentifiedDescription = fileItem.IdentifiedDescription
+			updatedItem.IdentifiedSprite = fileItem.IdentifiedSprite
+			updatedItem.UnidentifiedName = fileItem.UnidentifiedName
+			updatedItem.UnidentifiedDescription = fileItem.UnidentifiedDescription
+			updatedItem.UnidentifiedSprite = fileItem.UnidentifiedSprite
+			updatedItem.SlotCount = fileItem.SlotCount
+			updatedItem.IsBook = fileItem.IsBook
+			updatedItem.CanUseBuyingStore = fileItem.CanUseBuyingStore
+			updatedItem.CardPrefix = fileItem.CardPrefix
+			updatedItem.CardIsPostfix = fileItem.CardIsPostfix
+			updatedItem.CardIllustration = fileItem.CardIllustration
+			updatedItem.ClassNum = fileItem.ClassNum
+			updatedItem.IsCostume = fileItem.IsCostume
+			updatedItem.EffectID = fileItem.EffectID
+			updatedItem.PackageID = fileItem.PackageID
+			updatedItem.MoveInfo = fileItem.MoveInfo
 		}
+	}
 
-		if !existingItem.Equals(fileItem) {
-			fileItem.PreviousHistoryID = existingItem.HistoryID
-			updatedItems = append(updatedItems, fileItem)
+	for _, item := range updater.CurrentValues {
+		if _, exists := idExists[item.ItemID]; !exists && !item.Deleted {
+			// Mark for deletion
+			deletedItem := updater.GetForEdit(item.ItemID)
+			temp := *deletedItem
+
+			*deletedItem = domain.NewItem(item.ItemID, temp.FileVersion)
+			deletedItem.PreviousHistoryID = temp.PreviousHistoryID
+			deletedItem.Deleted = true
 		}
 	}
 
-	fmt.Printf("> Saving new records... (%d records to save)\n", len(newItems))
-	err = l.repository.AddItemsToHistory(tx, update.Name(), &newItems)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("> Updating records... (%d records to update)\n", len(updatedItems))
-	err = l.repository.AddItemsToHistory(tx, update.Name(), &updatedItems)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("> Deleting records... (%d records to delete)\n", len(idsToBeDeleted))
-	for deletedId := range idsToBeDeleted {
-		err := l.repository.AddDeletedItem(tx, update.Name(), itemMap[deletedId])
+	if len(updater.ValuesToInsert) > 0 {
+		fmt.Printf("> Saving new records... (%d records to save)\n", len(updater.ValuesToInsert))
+		res, err := l.repository.AddToHistory(tx, update.Name(), updater.ValuesToInsert)
 		if err != nil {
 			panic(err)
 		}
+
+		fmt.Println("\tResult: ", res)
+	}
+
+	if len(updater.ValuesToUpdate) > 0 {
+		fmt.Printf("> Updating records... (%d records to update)\n", len(updater.ValuesToUpdate))
+		res, err := l.repository.AddToHistory(tx, update.Name(), updater.ValuesToUpdate)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("\tResult: ", res)
 	}
 }
 

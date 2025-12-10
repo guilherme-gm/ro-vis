@@ -1,12 +1,13 @@
 package dao
 
 import (
+	"database/sql"
 	"encoding/json"
 
 	"github.com/guilherme-gm/ro-vis/extractor/internal/domain"
 )
 
-func (i *GetCurrentItemsRow) ToDomain() domain.Item {
+func (i GetCurrentItemsRow) ToDomain() domain.Item {
 	var moveInfo domain.ItemMoveInfo
 	if i.MoveInfo != nil {
 		if err := json.Unmarshal(i.MoveInfo, &moveInfo); err != nil {
@@ -104,4 +105,40 @@ func (i *PreviousItemHistoryVw) ToDomain() domain.Item {
 		PackageID:               i.PackageID.Int32,
 		MoveInfo:                moveInfo,
 	}
+}
+
+func (q *BulkInsertItemHistoryParams) FillFromDomain(item *domain.Item, update string) {
+	var moveInfoJson []byte
+	if item.MoveInfo != (domain.ItemMoveInfo{}) {
+		moveInfoJson, _ = json.Marshal(item.MoveInfo)
+	}
+
+	q.Update = update
+	q.FileVersion = item.FileVersion
+
+	q.PreviousHistoryID = sql.NullInt32(item.PreviousHistoryID)
+	q.ItemID = item.ItemID
+	q.IdentifiedName = sql.NullString(item.IdentifiedName)
+	q.IdentifiedDescription = sql.NullString(item.IdentifiedDescription)
+	q.IdentifiedSprite = sql.NullString(item.IdentifiedSprite)
+	q.UnidentifiedName = sql.NullString(item.UnidentifiedName)
+	q.UnidentifiedDescription = sql.NullString(item.UnidentifiedDescription)
+	q.UnidentifiedSprite = sql.NullString(item.UnidentifiedSprite)
+	q.SlotCount = int8(item.SlotCount)
+	q.IsBook = item.IsBook
+	q.CanUseBuyingStore = item.CanUseBuyingStore
+	q.CardPrefix = sql.NullString(item.CardPrefix)
+	q.CardIsPostfix = item.CardIsPostfix
+	q.CardIllustration = sql.NullString(item.CardIllustration)
+	q.ClassNum = sql.NullInt32(item.ClassNum)
+	q.IsCostume = item.IsCostume
+	q.EffectID = item.EffectID
+	q.PackageID = item.PackageID
+	q.MoveInfo = moveInfoJson
+}
+
+func (q *BulkUpsertItemParams) Fill(id int32, historyId int32, deleted bool) {
+	q.ItemID = id
+	q.HistoryID = historyId
+	q.Deleted = deleted
 }
