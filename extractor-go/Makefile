@@ -13,7 +13,14 @@ miner:
 	CGO_ENABLED=1 GOARCH=386 go run -tags luaa cmd/miner/miner.go
 
 test-extractor:
-	CGO_ENABLED=1 GOARCH=386 go test -tags luaa -v ./...
+	CGO_ENABLED=1 GOARCH=386 gotestdox -tags luaa -v ./...
+
+# make path="github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill" test-extractor-folder
+test-extractor-folder:
+	CGO_ENABLED=1 GOARCH=386 gotestdox -tags luaa -count=1 -v $(path)
+
+update-mocks:
+	mockery
 
 # Applies database migrations
 migrate:
