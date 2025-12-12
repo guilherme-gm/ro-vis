@@ -40,6 +40,10 @@ func (p SkillDescriptV4Parser) ParseFile(filePath string, skillIdTable map[strin
 
 	var skills []rostructs.SkillDescript
 	decoder := decoders.NewLuaDecoder(stringReencoder)
+
+	// Those IDs are borked when loading from the DB, because it conflicts with real constants, but we need them during load because LATAM depends on it
+	skillIdTable["SC_STARTMARK"] = 2284 // same as SC_FATALMENACE
+
 	decoder.CreateIntTable("SKID", skillIdTable)
 
 	result := decoder.DecodeLuaTable(filePath, "SKILL_DESCRIPT", &skills)
