@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -117,7 +116,6 @@ type BulkUpsertItemParams struct {
 }
 
 func (q *Queries) BulkUpsertItems(ctx context.Context, arg []*BulkUpsertItemParams) (sql.Result, error) {
-	fmt.Println("Bulk Upsert ITems ", len(arg))
 	if len(arg) == 0 {
 		return nil, sql.ErrNoRows
 	}
