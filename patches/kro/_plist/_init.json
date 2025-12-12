@@ -62,6 +62,36 @@
 				"name": "data\\num2itemresnametable.txt",
 				"size": 9999,
 				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\jobinheritlist.lub",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\skilldescript.lub",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\skillid.lub",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\skillinfo_f.lub",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\skillinfolist.lub",
+				"size": 9999,
+				"hash": "dummy"
+			},
+			{
+				"name": "data\\luafiles514\\lua files\\skillinfoz\\skilltreeview.lub",
+				"size": 9999,
+				"hash": "dummy"
 			}
 		]
 	}
