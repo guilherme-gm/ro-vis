@@ -15,6 +15,7 @@ import (
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/i18n"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/mapData"
+	"github.com/guilherme-gm/ro-vis/extractor/internal/loaders/skill"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/patchDownloader"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/patchfile"
 	"github.com/guilherme-gm/ro-vis/extractor/internal/ro/patchfile/grf"
@@ -254,6 +255,7 @@ func processPatches(server *server.Server) {
 	processPatchesForLoader(server, loaders.NewQuestLoader(server), updates)
 	processPatchesForLoader(server, i18n.NewI18nLoader(server), updates)
 	processPatchesForLoader(server, mapData.NewMapLoader(server), updates)
+	processPatchesForLoader(server, skill.NewSkillLoader(server), updates)
 }
 
 func runMiningCycle() error {
