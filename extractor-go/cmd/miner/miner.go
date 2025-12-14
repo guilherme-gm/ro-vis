@@ -125,6 +125,9 @@ func downloadPatches(currentServer *server.Server) {
 					newPatch.Files = append(newPatch.Files, file.FileName)
 				}
 			}
+		} else if strings.HasSuffix(strings.ToLower(patch.Name), ".gef") || strings.HasSuffix(strings.ToLower(patch.Name), ".gsf") {
+			fmt.Println("Encrypted/new format patch found -- skipping it.")
+			newPatch.Status = domain.PatchStatusSkipped
 		} else {
 			// @TODO: Add some kind of alert for this
 			fmt.Printf("Unsupported patch format: %s\n", patch.Name)
